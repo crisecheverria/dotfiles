@@ -30,6 +30,9 @@ set number relativenumber list listchars=tab:-->,trail:~,nbsp:␣
 set undofile undodir=expand('$HOME/.vim/undo/')
 set viminfofile=$HOME/.vim/.viminfo wildignorecase path+=**
 set wildoptions=pum pumheight=50
+# Fix redraw timeout exceeded error for typescript files
+set re=0
+
 if executable('clang-format')
     autocmd FileType c,cpp,objc,objcpp
     \ | nnoremap <buffer> <leader>fmt :update<CR>:silent !clang-format -i %:p<CR>:e!<CR>
@@ -97,3 +100,11 @@ imap <M-\> <Plug>(copilot-suggest)
 imap <M-]> <Plug>(copilot-next)
 imap <M-[> <Plug>(copilot-previous)
 autocmd BufWritePost *.py !python3 %
+#### Easy No plugin ESlint integration (need to find out how to navigate errors)
+autocmd FileType javascript,typescript set errorformat=\<text\>:\ line\ %l\\,\ col\ %c\\,\ %m
+# Format current buffer with ESlint
+nnoremap <silent> <leader>lf :%!eslint_d --stdin --fix-to-stdout<cr> 
+nnoremap <silent> <leader>ll :cexpr system('eslint_d --stdin --format compact', bufnr())<cr>:silent cclose<cr>:cc1<cr>
+command! Cnext try | cnext | catch | cfirst | catch | endtry
+nnoremap <silent> <leader>le :Cnext<cr>
+#### End of ESlint integration
