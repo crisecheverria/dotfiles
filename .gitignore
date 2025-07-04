@@ -1,0 +1,15 @@
+# Exclude shell configuration files
+.zshrc
+.bashrc
+*zshrc*
+*bashrc*
+
+# Exclude git configuration
+.gitconfig
+*gitconfig*
+
+# System files
+.DS_Store
+*.swp
+*.swo
+*~
