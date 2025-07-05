@@ -1,12 +1,14 @@
 plugins:
   flake8:
-    enabled: true
+    enabled: false
     maxLineLength: 100
   pylint:
-    enabled: true
+    enabled: false
     args: ["--max-line-length=100"]
   mypy:
-    enabled: true
+    enabled: false
   black:
-    enabled: true
+    enabled: false
     line_length: 100
+  pylsp_mypy:
+    enabled: false
