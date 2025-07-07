@@ -30,6 +30,11 @@ set number relativenumber list listchars=tab:-->,trail:~,nbsp:␣
 set undofile undodir=expand('$HOME/.vim/undo/')
 set viminfofile=$HOME/.vim/.viminfo wildignorecase path+=**
 set wildoptions=pum pumheight=50
+set wildignore+=*/__pycache__/*,*.pyc,*.pyo
+set wildignore+=*/venv/*,*/env/*,*/.venv/*,*/.env/*
+set wildignore+=*/site-packages/*,*/_internal/*
+set wildignore+=*.egg-info/*,*/build/*,*/dist/*
+set wildignore+=*/node_modules/*,*/.git/*
 # Fix redraw timeout exceeded error for typescript files
 set re=0
 
@@ -108,3 +113,6 @@ nnoremap <silent> <leader>ll :cexpr system('eslint_d --stdin --format compact', 
 command! Cnext try | cnext | catch | cfirst | catch | endtry
 nnoremap <silent> <leader>le :Cnext<cr>
 #### End of ESlint integration
+# Interactive ripgrep with input prompt
+command! -nargs=+ Rg :silent! grep <args> . | copen | redraw!
+nnoremap <leader>rg :Rg<Space>
