@@ -8,6 +8,9 @@
 .gitconfig
 *gitconfig*
 
+# Raycast configurations
+.config/raycast/
+
 # System files
 .DS_Store
 *.swp
