@@ -11,6 +11,17 @@
 # Raycast configurations
 .config/raycast/
 
+# GitHub Copilot configuration (contains tokens)
+.config/github-copilot/
+
+# Application configurations
+.config/configstore/
+.config/exercism/
+.config/iterm2/
+.config/git/
+.config/gatsby/
+.config/nvim.bak
+
 # System files
 .DS_Store
 *.swp
