@@ -25,6 +25,7 @@
 .config/fish/
 .config/pylsp/
 .config/uv/
+.config/atuin
 
 # System files
 .DS_Store
