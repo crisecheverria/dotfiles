@@ -21,6 +21,10 @@
 .config/git/
 .config/gatsby/
 .config/nvim.bak
+.config/coc/
+.config/fish/
+.config/pylsp/
+.config/uv/
 
 # System files
 .DS_Store
