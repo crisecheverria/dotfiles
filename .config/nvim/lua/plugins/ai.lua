@@ -11,21 +11,23 @@ return {
         model = "http://localhost:11434/api/generate", -- Ollama endpoint
         model_params = { model = "deepseek-r1:7b" }, -- Custom System Prompt Model
         window = { width = 0.5, height = 0.4 }, -- Optional UI tweaks
-        keymaps = {
-          -- Add leader_key + cc for opening chat
-          ["<leader>cc"] = {
-            callback = function()
-              vim.cmd("CodeCompanionChat")
-            end,
-            description = "Open CodeCompanion Chat",
+        display = {
+          action_palette = {
+            width = 95,
+            height = 10,
+          },
+          chat = {
+            window = {
+              layout = "vertical", -- float|vertical|horizontal|buffer
+            },
           },
         },
         adapters = {
           copilot = function()
-            return require('codecompanion.adapters').extend('copilot', {
+            return require("codecompanion.adapters").extend("copilot", {
               schema = {
                 model = {
-                  default = 'gpt-4o',
+                  default = "gpt-4o",
                 },
               },
             })
@@ -67,6 +69,9 @@ return {
           },
         },
       })
+
+      -- Set up keymaps
+      vim.keymap.set("n", "<leader>ct", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Chat" })
     end,
   },
 }
