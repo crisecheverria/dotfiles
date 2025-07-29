@@ -1,3 +1,4 @@
+-- Most of it got it from https://github.com/SylvanFranklin/.config/blob/main/nvim/init.lua
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.signcolumn = "yes"
@@ -18,14 +19,6 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
 })
 
-vim.api.nvim_create_autocmd('LspAttach', {
-	callback = function(ev)
-		local client = vim.lsp.get_client_by_id(ev.data.client_id)
-		if client:supports_method('textDocument/completion') then
-			vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
-		end
-	end,
-})
 vim.cmd("set completeopt+=noselect")
 
 -- Plugins setup
@@ -37,13 +30,61 @@ require "nvim-treesitter.configs".setup({
 	highlight = { enable = true }
 })
 
-vim.lsp.enable({ "lua_ls", "vtsls", "gopls", "pylsp", "eslint" })
-vim.keymap.set('n', '<leader>lf', vim.lsp.buf.format) -- Format buffer
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition)     -- Go to definition
-vim.keymap.set('n', '<leader>f', ":Pick files<CR>")     -- Mini.pick Find File
-vim.keymap.set('n', '<leader>h', ":Pick help<CR>")     -- Documentation
-vim.keymap.set('n', '<leader>e', ":Oil<CR>")
-
 vim.cmd("colorscheme vague")
 -- Remove statusline background color
 vim.cmd(":hi statusline guibg=NONE")
+
+local map = vim.keymap.set
+map('n', '<leader>lf', vim.lsp.buf.format) -- Format buffer
+map('n', '<leader>f', ":Pick files<CR>")   -- Mini.pick Find File
+map('n', '<leader>H', ":Pick help<CR>")    -- Documentation
+map('n', '<leader>e', ":Oil<CR>")
+
+-- Got it from https://erock-git-dotfiles.pgs.sh/tree/main/item/dot_config/nvim/init.lua.html
+local opts = { silent = true }
+local augroup = vim.api.nvim_create_augroup("erock.cfg", { clear = true })
+local autocmd = vim.api.nvim_create_autocmd
+
+local function setup_lsp()
+	map("n", "<leader>x", vim.diagnostic.open_float, opts)
+	map("n", "<leader>q", vim.diagnostic.setloclist, opts)
+
+	local cfg = vim.lsp.enable
+	cfg("cssls") -- npm i -g vscode-langservers-extracted
+	cfg("gopls")
+	cfg("html")
+	cfg("jsonls")
+	cfg("pylsp")
+	cfg("eslint")
+	cfg("ts_ls") -- npm i -g typescript typescript-language-server
+	cfg("lua_ls") -- os package mgr: lua-language-server
+
+	local chars = {} -- trigger autocompletion on EVERY keypress
+	for i = 32, 126 do
+		table.insert(chars, string.char(i))
+	end
+
+	autocmd("LspAttach", {
+		group = augroup,
+		callback = function(args)
+			local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+			if client:supports_method("textDocument/implementation") then
+				local bufopts = { noremap = true, silent = true, buffer = args.buf }
+				map("n", "<leader>d", vim.lsp.buf.definition, bufopts)
+				map("n", "<leader>D", vim.lsp.buf.type_definition, bufopts)
+				map("n", "<leader>h", vim.lsp.buf.hover, bufopts)
+				map("n", "<leader>r", vim.lsp.buf.references, bufopts)
+				map("n", "<leader>i", vim.lsp.buf.implementation, bufopts)
+				map("i", "<C-k>", vim.lsp.completion.get, bufopts) -- open completion menu manually
+			end
+
+			if client:supports_method("textDocument/completion") then
+				client.server_capabilities.completionProvider.triggerCharacters = chars
+				vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+			end
+		end,
+	})
+end
+
+setup_lsp()
+-- End
