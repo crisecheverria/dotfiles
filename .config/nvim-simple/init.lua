@@ -121,10 +121,22 @@ local function setup_lsp()
 							local completion_item = completed_item.user_data.nvim and
 							    completed_item.user_data.nvim.lsp and
 							    completed_item.user_data.nvim.lsp.completion_item
-							if completion_item and completion_item.additionalTextEdits then
-								vim.lsp.util.apply_text_edits(
-									completion_item.additionalTextEdits, args.buf,
-									client.offset_encoding or "utf-16")
+							if completion_item then
+								-- Only use completion resolve for vtsls, let other LSPs handle autoimports normally
+								if client.name == "vtsls" then
+									client.request("completionItem/resolve", completion_item, function(err, resolved_item)
+										if not err and resolved_item and resolved_item.additionalTextEdits then
+											vim.lsp.util.apply_text_edits(
+												resolved_item.additionalTextEdits, args.buf,
+												client.offset_encoding or "utf-16")
+										end
+									end, args.buf)
+								elseif completion_item.additionalTextEdits then
+									-- For other LSPs, apply additionalTextEdits directly if they exist
+									vim.lsp.util.apply_text_edits(
+										completion_item.additionalTextEdits, args.buf,
+										client.offset_encoding or "utf-16")
+								end
 							end
 						end
 					end,
