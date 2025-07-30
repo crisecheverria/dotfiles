@@ -81,7 +81,7 @@ local function setup_lsp()
 	cfg("jsonls")
 	cfg("pylsp")
 	cfg("eslint")
-	cfg("ts_ls") -- npm i -g typescript typescript-language-server
+	cfg("vtsls") -- npm i -g @vtsls/language-server
 	cfg("lua_ls") -- os package mgr: lua-language-server
 
 	local chars = {} -- trigger autocompletion on EVERY keypress
@@ -100,12 +100,35 @@ local function setup_lsp()
 				map("n", "<leader>h", vim.lsp.buf.hover, bufopts)
 				map("n", "<leader>r", vim.lsp.buf.references, bufopts)
 				map("n", "<leader>i", vim.lsp.buf.implementation, bufopts)
+				map("n", "<leader>ca", vim.lsp.buf.code_action, bufopts) -- code actions for imports
 				map("i", "<C-k>", vim.lsp.completion.get, bufopts) -- open completion menu manually
 			end
 
 			if client:supports_method("textDocument/completion") then
 				client.server_capabilities.completionProvider.triggerCharacters = chars
-				vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+				-- Enable completion resolve for auto-imports
+				client.server_capabilities.completionProvider.resolveProvider = true
+				vim.lsp.completion.enable(true, client.id, args.buf,
+					{ autotrigger = true })
+
+				-- Handle completion resolve for auto-imports on selection
+				autocmd("CompleteDone", {
+					group = augroup,
+					buffer = args.buf,
+					callback = function()
+						local completed_item = vim.v.completed_item
+						if completed_item and completed_item.user_data then
+							local completion_item = completed_item.user_data.nvim and
+							    completed_item.user_data.nvim.lsp and
+							    completed_item.user_data.nvim.lsp.completion_item
+							if completion_item and completion_item.additionalTextEdits then
+								vim.lsp.util.apply_text_edits(
+									completion_item.additionalTextEdits, args.buf,
+									client.offset_encoding or "utf-16")
+							end
+						end
+					end,
+				})
 			end
 		end,
 	})
