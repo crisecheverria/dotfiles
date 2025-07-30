@@ -26,6 +26,8 @@
 .config/pylsp/
 .config/uv/
 .config/atuin
+.config/opencode
+.config/zed
 
 # System files
 .DS_Store
