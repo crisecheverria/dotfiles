@@ -40,6 +40,31 @@ map('n', '<leader>f', ":Pick files<CR>")   -- Mini.pick Find File
 map('n', '<leader>H', ":Pick help<CR>")    -- Documentation
 map('n', '<leader>e', ":Oil<CR>")
 
+-- Ripgrep with quickfix list
+vim.api.nvim_create_user_command("Rg", function(opts)
+	local query = opts.args
+	local escaped_query = vim.fn.shellescape(query)
+	local results = vim.fn.systemlist("rg --vimgrep " .. escaped_query)
+
+	local qf_list = {}
+	for _, line in ipairs(results) do
+		local file, lnum, col, text = line:match("([^:]+):(%d+):(%d+):(.*)")
+		if file then
+			table.insert(qf_list, {
+				filename = file,
+				lnum = tonumber(lnum),
+				col = tonumber(col),
+				text = text:gsub("^%s+", "")
+			})
+		end
+	end
+
+	vim.fn.setqflist(qf_list, "r")
+	vim.cmd("copen")
+end, { nargs = 1 })
+
+map('n', '<leader>g', ":Rg ") -- Ripgrep search
+
 -- Got it from https://erock-git-dotfiles.pgs.sh/tree/main/item/dot_config/nvim/init.lua.html
 local opts = { silent = true }
 local augroup = vim.api.nvim_create_augroup("erock.cfg", { clear = true })
@@ -88,3 +113,11 @@ end
 
 setup_lsp()
 -- End
+
+-- Autoformat on save (:w)
+autocmd("BufWritePre", {
+	group = augroup,
+	callback = function()
+		vim.lsp.buf.format({ async = false })
+	end,
+})
