@@ -12,11 +12,14 @@ vim.o.clipboard = "unnamedplus"
 -- Neovim own plugin manager
 vim.pack.add({
 	{ src = "https://github.com/vague2k/vague.nvim" }, -- Colorscheme
+	{ src = 'https://github.com/nvim-lua/plenary.nvim' }, -- Required by many plugins (codecompanion)
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/echasnovski/mini.pick" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
 	{ src = "https://github.com/chomosuke/typst-preview.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+	{ src = "https://github.com/github/copilot.vim" },
+	{ src = 'https://github.com/olimorris/codecompanion.nvim' },
 })
 
 vim.cmd("set completeopt+=noselect")
@@ -29,6 +32,7 @@ require "nvim-treesitter.configs".setup({
 	ensure_installed = { "go", "python", "typescript", "javascript" },
 	highlight = { enable = true }
 })
+require "codecompanion".setup()
 
 vim.cmd("colorscheme vague")
 -- Remove statusline background color
@@ -38,32 +42,17 @@ local map = vim.keymap.set
 map('n', '<leader>lf', vim.lsp.buf.format) -- Format buffer
 map('n', '<leader>f', ":Pick files<CR>")   -- Mini.pick Find File
 map('n', '<leader>H', ":Pick help<CR>")    -- Documentation
+map('n', '<leader>g', ":Pick grep_live<CR>")
+map('n', '<leader><leader>', ":Pick buffers<CR>")
 map('n', '<leader>e', ":Oil<CR>")
 
--- Ripgrep with quickfix list
-vim.api.nvim_create_user_command("Rg", function(opts)
-	local query = opts.args
-	local escaped_query = vim.fn.shellescape(query)
-	local results = vim.fn.systemlist("rg --vimgrep " .. escaped_query)
+-- CodeCompanion keymaps
+map({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
+map({ "n", "v" }, "<leader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
+map("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
 
-	local qf_list = {}
-	for _, line in ipairs(results) do
-		local file, lnum, col, text = line:match("([^:]+):(%d+):(%d+):(.*)")
-		if file then
-			table.insert(qf_list, {
-				filename = file,
-				lnum = tonumber(lnum),
-				col = tonumber(col),
-				text = text:gsub("^%s+", "")
-			})
-		end
-	end
-
-	vim.fn.setqflist(qf_list, "r")
-	vim.cmd("copen")
-end, { nargs = 1 })
-
-map('n', '<leader>g', ":Rg ") -- Ripgrep search
+-- Expand 'cc' into 'CodeCompanion' in the command line
+vim.cmd([[cab cc CodeCompanion]])
 
 -- Got it from https://erock-git-dotfiles.pgs.sh/tree/main/item/dot_config/nvim/init.lua.html
 local opts = { silent = true }
@@ -124,17 +113,23 @@ local function setup_lsp()
 							if completion_item then
 								-- Only use completion resolve for vtsls, let other LSPs handle autoimports normally
 								if client.name == "vtsls" then
-									client.request("completionItem/resolve", completion_item, function(err, resolved_item)
-										if not err and resolved_item and resolved_item.additionalTextEdits then
-											vim.lsp.util.apply_text_edits(
-												resolved_item.additionalTextEdits, args.buf,
-												client.offset_encoding or "utf-16")
-										end
-									end, args.buf)
+									client.request("completionItem/resolve",
+										completion_item,
+										function(err, resolved_item)
+											if not err and resolved_item and resolved_item.additionalTextEdits then
+												vim.lsp.util
+												    .apply_text_edits(
+													    resolved_item.additionalTextEdits,
+													    args.buf,
+													    client.offset_encoding or
+													    "utf-16")
+											end
+										end, args.buf)
 								elseif completion_item.additionalTextEdits then
 									-- For other LSPs, apply additionalTextEdits directly if they exist
 									vim.lsp.util.apply_text_edits(
-										completion_item.additionalTextEdits, args.buf,
+										completion_item.additionalTextEdits,
+										args.buf,
 										client.offset_encoding or "utf-16")
 								end
 							end
