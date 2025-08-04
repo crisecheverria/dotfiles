@@ -1,7 +1,6 @@
 require('config.globals')
 require('config.options')
 require('config.keymaps')
-require('config.lsp')
 require('config.autocmd')
 require('plugins.colorscheme')
 require('plugins.lsp')
@@ -9,3 +8,4 @@ require('plugins.ai')
 require('plugins.mini')
 require('plugins.treesitter')
 require('plugins.typst')
+

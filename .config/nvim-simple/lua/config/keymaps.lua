@@ -5,6 +5,7 @@ map('n', '<leader>H', ":Pick help<CR>")    -- Documentation
 map('n', '<leader>g', ":Pick grep_live<CR>")
 map('n', '<leader><leader>', ":Pick buffers<CR>")
 
+local opts = { silent = true }
 map("n", "<leader>x", vim.diagnostic.open_float, opts)
 map("n", "<leader>q", vim.diagnostic.setloclist, opts)
 
