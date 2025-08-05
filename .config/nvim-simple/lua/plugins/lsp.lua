@@ -18,6 +18,17 @@ local function setup_lsp()
 	cfg("vtsls") -- npm i -g @vtsls/language-erver
 	cfg("lua_ls") -- os package mgr: lua-language-server
 
+	-- Disable vim undefined warnings
+	vim.lsp.config("lua_ls", {
+		settings = {
+			Lua = {
+				workspace = {
+					library = vim.api.nvim_get_runtime_file("", true),
+				},
+			},
+		},
+	})
+
 	local chars = {} -- trigger autocompletion on EVERY keypress
 	for i = 32, 126 do
 		table.insert(chars, string.char(i))
