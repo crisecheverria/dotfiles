@@ -12,7 +12,7 @@ This repository contains configuration files for various applications and tools,
   - **neovim** - LazyVim configuration
   - **ghostty** - Terminal configuration
   - **yabai** - Window manager
-  - **rmux** - Terminal Multiplexer
+  - **tmux** - Terminal Multiplexer
 
 - **`.vimrc`** - Vim configuration file
 
