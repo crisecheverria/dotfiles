@@ -1,4 +1,88 @@
-# 💤 LazyVim
+# Neovim Configuration
 
-A starter template for [LazyVim](https://github.com/LazyVim/LazyVim).
-Refer to the [documentation](https://lazyvim.github.io/installation) to get started.
+A minimal Neovim configuration using native Neovim package management (`vim.pack.add`) without Mason or Lazy plugin manager.
+
+## Structure
+
+```
+~/.config/nvim/
+├── init.lua                 # Main configuration entry point
+├── lua/
+│   ├── config/
+│   │   ├── globals.lua      # Global settings and leader key
+│   │   ├── options.lua      # Editor options and settings
+│   │   ├── keymaps.lua      # Key mappings
+│   │   └── autocmd.lua      # Auto commands
+│   └── plugins/
+│       ├── colorscheme.lua  # Color scheme configuration
+│       ├── lsp.lua          # LSP configuration
+│       ├── ai.lua           # AI tools (CodeCompanion, Copilot)
+│       ├── mini.lua         # Mini.pick for file navigation
+│       ├── treesitter.lua   # Syntax highlighting
+│       └── typst.lua        # Typst document support
+└── README.md                # This file
+```
+
+## Plugin Management
+
+This configuration uses Neovim's native package management with `vim.pack.add()`. No external plugin managers required.
+
+### Installed Plugins
+
+- **vague.nvim** - Color scheme with transparency support
+- **nvim-lspconfig** - LSP configuration
+- **mini.pick** - Fuzzy finder for files, buffers, and grep
+- **codecompanion.nvim** - AI coding assistant (Having few issues now, but works)
+- **copilot.vim** - GitHub Copilot integration  
+- **nvim-treesitter** - Syntax highlighting and parsing
+- **typst-preview.nvim** - Typst document preview
+- **plenary.nvim** - Utility library for other plugins
+
+## Key Features
+
+### LSP Support
+- Built-in LSP configuration for multiple languages:
+  - CSS (`cssls`)
+  - Go (`gopls`) 
+  - HTML (`html`)
+  - JSON (`jsonls`)
+  - Python (`pylsp`)
+  - JavaScript/TypeScript (`vtsls`, `eslint`)
+  - Lua (`lua_ls`)
+
+### Key Mappings
+- Leader key: `<Space>`
+- `<leader>lf` - Format buffer
+- `<leader>f` - Find files
+- `<leader>H` - Search help
+- `<leader>g` - Live grep
+- `<leader><leader>` - Switch buffers
+- `<leader>e` - Open file explorer
+- `<leader>t` - Open terminal in current directory
+- `<leader>tc` - Open terminal and run Claude Code
+- `<C-a>` - CodeCompanion actions
+- `<leader>a` - Toggle CodeCompanion chat
+
+### Auto Commands
+- **Auto-format on save** - Automatically formats code when saving
+- **Highlight on yank** - Briefly highlights yanked text
+
+### Editor Options
+- Line numbers with relative numbering
+- Sign column always visible
+- Text wrapping enabled
+- 2-space tab width
+- No swap files
+- Rounded window borders
+- System clipboard integration
+
+## Philosophy
+
+This configuration embraces Neovim's native capabilities:
+- Uses built-in LSP client instead of external wrappers
+- Leverages `vim.pack.add()` for plugin management
+- Minimal dependencies and fast startup
+- Clean, readable Lua configuration
+- No complex plugin manager setup or lock files
+
+The goal is a functional, fast, and maintainable Neovim setup that showcases modern Neovim features without external complexity.
