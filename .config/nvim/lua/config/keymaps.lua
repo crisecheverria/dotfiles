@@ -7,8 +7,7 @@ map('n', '<leader><leader>', ":Pick buffers<CR>")
 map('n', '<leader>e', ":Ex<CR>")           -- Open Explorer
 
 local opts = { silent = true }
-map("n", "<leader>x", vim.diagnostic.open_float, opts)
-map("n", "<leader>q", vim.diagnostic.setloclist, opts)
+map("n", "<leader>x", vim.diagnostic.setloclist, opts)
 
 -- Terminal keymaps
 map("n", "<leader>t", function()
@@ -19,6 +18,8 @@ map("n", "<leader>t", function()
   vim.cmd("terminal")
   vim.cmd("startinsert")
 end, { noremap = true, silent = true })
+
+-- Run claude code in terminal
 map("n", "<leader>tc", function()
   local buf_dir = vim.fn.expand("%:p:h")
   if buf_dir and buf_dir ~= "" then
@@ -33,3 +34,9 @@ end, { noremap = true, silent = true }) -- Run claude code
 map({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
 map({ "n", "v" }, "<leader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
 map("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
+
+-- Copy relative path of open buffer
+map("n", "<leader>cp", function()
+  vim.fn.setreg("+", vim.fn.expand("%"))
+  print("Copied relative path: " .. vim.fn.expand("%"))
+end, { desc = "Copy relative file path" })

@@ -4,4 +4,4 @@ require "vague".setup({ transparent = true })
 
 vim.cmd("colorscheme vague")
 -- Remove statusline background color
-vim.cmd(":hi statusline guibg=NONE")
+-- vim.cmd(":hi statusline guibg=NONE")

@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-A minimal Neovim configuration using native Neovim package management (`vim.pack.add`) without Mason or Lazy plugin manager.
+A minimal Neovim configuration using native Neovim package management (`vim.pack.add`).
 
 ## Structure
 
@@ -41,14 +41,7 @@ This configuration uses Neovim's native package management with `vim.pack.add()`
 ## Key Features
 
 ### LSP Support
-- Built-in LSP configuration for multiple languages:
-  - CSS (`cssls`)
-  - Go (`gopls`) 
-  - HTML (`html`)
-  - JSON (`jsonls`)
-  - Python (`pylsp`)
-  - JavaScript/TypeScript (`vtsls`, `eslint`)
-  - Lua (`lua_ls`)
+- Built-in LSP configuration for  using Mason
 
 ### Key Mappings
 - Leader key: `<Space>`
