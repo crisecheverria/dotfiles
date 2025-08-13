@@ -37,5 +37,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.lsp.completion.get()
       end)
     end
+    -- Set up buffer-local keymaps for LSP
+    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_definition) then
+      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = ev.buf, desc = 'Go to Definition' })
+    end
   end,
 })
