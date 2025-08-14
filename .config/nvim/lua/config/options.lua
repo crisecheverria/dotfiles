@@ -3,7 +3,6 @@ vim.o.number = true
 vim.o.relativenumber = true
 -- Keep sign column always visible
 vim.o.signcolumn = "yes"
-
 -- Cursorline
 vim.o.cursorline = true
 -- Show whitespace characters

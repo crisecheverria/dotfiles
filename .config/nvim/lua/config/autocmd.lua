@@ -45,7 +45,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- Activate nvim-treesitter
-
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'go', 'javascript', 'typescrypt', 'python', 'rust', 'lua', 'html' },
   callback = function()
