@@ -1,39 +1,34 @@
 local map = vim.keymap.set
-map('n', '<leader>lf', vim.lsp.buf.format) -- Format buffer
-map('n', '<leader>f', ":Pick files<CR>")   -- Mini.pick Find File
-map('n', '<leader>H', ":Pick help<CR>")    -- Documentation
-map('n', '<leader>g', ":Pick grep_live<CR>")
-map('n', '<leader><leader>', ":Pick buffers<CR>")
-map('n', '<leader>e', ":Ex<CR>")           -- Open Explorer
-
-local opts = { silent = true }
-map("n", "<leader>x", vim.diagnostic.setloclist, opts)
+map('n', '<leader>lf', vim.lsp.buf.format, { desc = "Format Buffer", silent = true }) -- Format buffer
+map('n', '<leader>f', ":Pick files<CR>", { desc = "Find File", silent = true })       -- Mini.pick Find File
+map('n', '<leader>H', ":Pick help<CR>", { desc = "Help", silent = true })             -- Documentation
+map('n', '<leader>g', ":Pick grep_live<CR>", { desc = "Grep", silent = true })
+map('n', '<leader>r', ":Rg ", { desc = "Rip Grep" })
+map('n', '<leader>sw', function()
+  local word = vim.fn.expand('<cword>')
+  vim.cmd('Rg ' .. word)
+end, { desc = "Rip Grep current word", silent = true })
+map('n', '<leader><leader>', ":Pick buffers<CR>", { desc = "Buffers", silent = true })
+map('n', '<leader>e', ":Ex<CR>", { desc = "File Explorer", silent = true })       -- Open Explorer
+map('n', '<leader>v', ":vsplit<CR>", { desc = "Vertical Split", silent = true })  -- Vertical split
+map('n', '<leader>h', ":split<CR>", { desc = "Horizontal Split", silent = true }) -- Horizontal split
+map('n', '<leader>w', ":w<CR>", { desc = "Save", silent = true })                 -- Save file
+map('n', '<leader>q', ":q<CR>", { desc = "Quit", silent = true })                 -- Quit
+map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
+map("n", "<leader>pu", '<cmd>lua vim.pack.update()<CR>')                          -- Update plugins
 
 -- Terminal keymaps
 map("n", "<leader>t", function()
-  local buf_dir = vim.fn.expand("%:p:h")
-  if buf_dir and buf_dir ~= "" then
-    vim.cmd("lcd " .. buf_dir)
-  end
   vim.cmd("terminal")
   vim.cmd("startinsert")
-end, { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "Open Terminal" }) -- Open terminal
 
 -- Run claude code in terminal
 map("n", "<leader>tc", function()
-  local buf_dir = vim.fn.expand("%:p:h")
-  if buf_dir and buf_dir ~= "" then
-    vim.cmd("lcd " .. buf_dir)
-  end
   vim.cmd("terminal")
   vim.cmd("startinsert")
   vim.api.nvim_feedkeys("claude\n", "t", false)
-end, { noremap = true, silent = true }) -- Run claude code
-
--- CodeCompanion keymaps
-map({ "n", "v" }, "<C-a>", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
-map({ "n", "v" }, "<leader>a", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
-map("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "Open Claude" }) -- Run claude code
 
 -- Copy relative path of open buffer
 map("n", "<leader>cp", function()
