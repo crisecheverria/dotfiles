@@ -2,6 +2,9 @@
 
 A minimal Neovim configuration using native Neovim package management (`vim.pack.add`).
 
+## Requirements
+- Neovim >0.11
+
 ## Structure
 
 ```
@@ -19,7 +22,11 @@ A minimal Neovim configuration using native Neovim package management (`vim.pack
 │       ├── ai.lua           # AI tools (CodeCompanion, Copilot)
 │       ├── mini.lua         # Mini.pick for file navigation
 │       ├── treesitter.lua   # Syntax highlighting
-│       └── typst.lua        # Typst document support
+│       ├── typst.lua        # Typst document support
+│       ├── blink.lua        # Blink autocompletion configuration
+│       ├── git.lua          # Git integration (Fugitive, Gitsigns)
+│       ├── showkeys.lua     # Show pressed keys configuration
+│       └── surround.lua     # Vim-surround configuration
 └── README.md                # This file
 ```
 
@@ -37,6 +44,11 @@ This configuration uses Neovim's native package management with `vim.pack.add()`
 - **nvim-treesitter** - Syntax highlighting and parsing
 - **typst-preview.nvim** - Typst document preview
 - **plenary.nvim** - Utility library for other plugins
+- **blink.cmp** - Fast autocompletion engine with LSP support
+- **vim-fugitive** - Git integration for Vim
+- **gitsigns.nvim** - Git signs in the sign column
+- **showkeys** - Display pressed keys on screen
+- **vim-surround** - Easily change surrounding characters
 
 ## Key Features
 
@@ -72,7 +84,6 @@ This configuration uses Neovim's native package management with `vim.pack.add()`
 ## Philosophy
 
 This configuration embraces Neovim's native capabilities:
-- Uses built-in LSP client instead of external wrappers
 - Leverages `vim.pack.add()` for plugin management
 - Minimal dependencies and fast startup
 - Clean, readable Lua configuration

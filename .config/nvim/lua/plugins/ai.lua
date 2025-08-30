@@ -5,7 +5,7 @@ vim.pack.add({
   { src = "https://github.com/github/copilot.vim" },
 })
 
-require('codecompanion').setup({
+require "codecompanion".setup({
   extensions = {
     mcphub = {
       callback = "mcphub.extensions.codecompanion",

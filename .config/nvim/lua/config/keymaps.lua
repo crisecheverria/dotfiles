@@ -1,8 +1,8 @@
 local map = vim.keymap.set
-map('n', '<leader>lf', "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true }) -- Format buffer
+map('n', '<leader>lf', "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true })
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go to Definition", silent = true })
-map('n', '<leader>f', ":Pick files<CR>", { desc = "Find File", silent = true })                        -- Mini.pick Find File
-map('n', '<leader>H', ":Pick help<CR>", { desc = "Help", silent = true })                              -- Documentation
+map('n', '<leader>f', ":Pick files<CR>", { desc = "Find File", silent = true })
+map('n', '<leader>H', ":Pick help<CR>", { desc = "Help", silent = true })
 map('n', '<leader>g', ":Pick grep_live<CR>", { desc = "Grep", silent = true })
 map('n', '<leader>r', ":Rg ", { desc = "Rip Grep" })
 map('n', '<leader>sw', function()
@@ -10,13 +10,14 @@ map('n', '<leader>sw', function()
   vim.cmd('Rg ' .. word)
 end, { desc = "Rip Grep current word", silent = true })
 map('n', '<leader><leader>', ":Pick buffers<CR>", { desc = "Buffers", silent = true })
-map('n', '<leader>e', ":Ex<CR>", { desc = "File Explorer", silent = true })       -- Open Explorer
-map('n', '<leader>v', ":vsplit<CR>", { desc = "Vertical Split", silent = true })  -- Vertical split
-map('n', '<leader>h', ":split<CR>", { desc = "Horizontal Split", silent = true }) -- Horizontal split
-map('n', '<leader>w', ":w<CR>", { desc = "Save", silent = true })                 -- Save file
-map('n', '<leader>q', ":q<CR>", { desc = "Quit", silent = true })                 -- Quit
+map('n', '<leader>e', ":Ex<CR>", { desc = "File Explorer", silent = true })
+map('n', '<leader>v', ":vsplit<CR>", { desc = "Vertical Split", silent = true })
+map('n', '<leader>h', ":split<CR>", { desc = "Horizontal Split", silent = true })
+map('n', '<leader>w', ":w<CR>", { desc = "Save", silent = true })
+map('n', '<leader>q', ":q<CR>", { desc = "Quit", silent = true })
 map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
-map("n", "<leader>pu", '<cmd>lua vim.pack.update()<CR>')                          -- Update plugins
+map("n", "<leader>pu", '<cmd>lua vim.pack.update()<CR>', { desc = "Update plugins", silent = true })
+map("i", "<leader>cc", ':Copilot disable<CR>', { desc = "Disable Copilot", silent = true })
 
 -- Terminal keymaps
 map("n", "<leader>t", function()
