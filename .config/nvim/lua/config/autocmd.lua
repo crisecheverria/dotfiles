@@ -27,22 +27,22 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- K (vim.lsp.buf.hover())
 --
 -- Also have native autocompletion with vim.lsp.completion.enable
-vim.api.nvim_create_autocmd('LspAttach', {
-  callback = function(ev)
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_completion) then
-      vim.opt.completeopt = { 'menu', 'menuone', 'noinsert', 'fuzzy', 'popup' }
-      vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
-      vim.keymap.set('i', '<C-Space>', function()
-        vim.lsp.completion.get()
-      end)
-    end
-    -- Set up buffer-local keymaps for LSP
-    if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_definition) then
-      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = ev.buf, desc = 'Go to Definition' })
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd('LspAttach', {
+--   callback = function(ev)
+--     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+--     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_completion) then
+--       vim.opt.completeopt = { 'menu', 'menuone', 'noinsert', 'fuzzy', 'popup' }
+--       vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+--       vim.keymap.set('i', '<C-Space>', function()
+--         vim.lsp.completion.get()
+--       end)
+--     end
+--     -- Set up buffer-local keymaps for LSP
+--     if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_definition) then
+--       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = ev.buf, desc = 'Go to Definition' })
+--     end
+--   end,
+-- })
 
 -- Activate nvim-treesitter
 vim.api.nvim_create_autocmd('FileType', {

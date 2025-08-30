@@ -1,7 +1,8 @@
 local map = vim.keymap.set
-map('n', '<leader>lf', vim.lsp.buf.format, { desc = "Format Buffer", silent = true }) -- Format buffer
-map('n', '<leader>f', ":Pick files<CR>", { desc = "Find File", silent = true })       -- Mini.pick Find File
-map('n', '<leader>H', ":Pick help<CR>", { desc = "Help", silent = true })             -- Documentation
+map('n', '<leader>lf', "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true }) -- Format buffer
+map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go to Definition", silent = true })
+map('n', '<leader>f', ":Pick files<CR>", { desc = "Find File", silent = true })                        -- Mini.pick Find File
+map('n', '<leader>H', ":Pick help<CR>", { desc = "Help", silent = true })                              -- Documentation
 map('n', '<leader>g', ":Pick grep_live<CR>", { desc = "Grep", silent = true })
 map('n', '<leader>r', ":Rg ", { desc = "Rip Grep" })
 map('n', '<leader>sw', function()
