@@ -17,7 +17,6 @@ map('n', '<leader>w', ":w<CR>", { desc = "Save", silent = true })
 map('n', '<leader>q', ":q<CR>", { desc = "Quit", silent = true })
 map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
 map("n", "<leader>pu", '<cmd>lua vim.pack.update()<CR>', { desc = "Update plugins", silent = true })
-map("i", "<leader>cc", ':Copilot disable<CR>', { desc = "Disable Copilot", silent = true })
 
 -- Terminal keymaps
 map("n", "<leader>t", function()
