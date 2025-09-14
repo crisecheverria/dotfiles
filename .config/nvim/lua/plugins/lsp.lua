@@ -13,18 +13,6 @@ require("mason-lspconfig").setup({
     "vtsls",
     "lua_ls",
   },
-  automatic_installation = true,
-})
-
--- Configure pyright for Python
-vim.lsp.config("pyright", {
-  settings = {
-    python = {
-      formatting = {
-        provider = "black"
-      }
-    }
-  }
 })
 
 -- Disable vim undefined warnings
