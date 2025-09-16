@@ -3,7 +3,7 @@
 A minimal Neovim configuration using native Neovim package management (`vim.pack.add`).
 
 ## Requirements
-- Neovim >0.11
+- Neovim >0.12
 
 ## Structure
 
