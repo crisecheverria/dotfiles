@@ -1,34 +1,28 @@
 -- Options
 vim.g.mapleader = " "
 vim.g.netrw_banner = 0
-
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.cursorline = true
-
 vim.o.tabstop = 2
 vim.o.clipboard = "unnamedplus"
 
--- keymaps
-local map = vim.keymap.set
-map("n", "<leader>f", ":FzfLua files<CR>", { desc = "Find files" })
-map("n", "<leader>g", ":FzfLua grep<CR>", { desc = "Grep" })
-map("n", "<leader>w", ":w<CR>", { desc = "Save" })
-map("n", "<leader>q", ":q<CR>", { desc = "Quit" })
-
 -- Plugins
-vim.pack.add({ "https://github.com/ibhagwan/fzf-lua" })
-vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
-vim.pack.add({ "https://github.com/mason-org/mason.nvim" })
-vim.pack.add({ "https://github.com/mason-org/mason-lspconfig.nvim" })
-vim.pack.add({ { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("^1") } })
-vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
+vim.pack.add({
+	{ src = "https://github.com/ibhagwan/fzf-lua" },
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
+	{ src = "https://github.com/stevearc/conform.nvim" },
+	{ src = "https://github.com/vague2k/vague.nvim" },
+	{ src = "https://github.com/folke/tokyonight.nvim.git" },
+})
+vim.pack.add({ { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("~1") } })
 
 require("mason").setup()
 require("mason-lspconfig").setup({
 	ensure_installed = {
 		"lua_ls",
-		"vtsls",
 	},
 })
 require("blink.cmp").setup({
@@ -87,6 +81,9 @@ require("conform").setup({
 		lsp_format = "fallback",
 	},
 })
+require("tokyonight").setup({ transparent = true, styles = { sidebars = "transparent", floats = "transparent" } })
+--vim.cmd("colorscheme tokyonight")
+vim.cmd("colorscheme vague")
 
 vim.lsp.config("lua_ls", {
 	settings = {
@@ -106,7 +103,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		require("conform").format({ bufnr = args.buf })
 	end,
 })
-
 -- Highlight when yanking
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
@@ -115,3 +111,10 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
+
+-- Keymaps
+local map = vim.keymap.set
+map("n", "<leader>f", ":FzfLua files<CR>", { desc = "Find Files" })
+map("n", "<leader>g", ":FzfLua grep<CR>", { desc = "Find Files" })
+map("n", "<leader>w", ":w<CR>", { desc = "Save" })
+map("n", "<leader>q", ":q<CR>", { desc = "Quit" })
