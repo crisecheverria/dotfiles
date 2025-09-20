@@ -16,8 +16,8 @@ vim.pack.add({
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/vague2k/vague.nvim" },
 	{ src = "https://github.com/folke/tokyonight.nvim.git" },
+	{ src = "https://github.com/saghen/blink.cmp", version = vim.version.range("~1") },
 })
-vim.pack.add({ { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("~1") } })
 
 require("mason").setup()
 require("mason-lspconfig").setup({
