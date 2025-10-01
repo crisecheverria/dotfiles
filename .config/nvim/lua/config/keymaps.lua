@@ -36,11 +36,32 @@ map("n", "<leader>cp", function()
 	print("Copied relative path: " .. vim.fn.expand("%"))
 end, { desc = "Copy relative file path" })
 
--- Specific task keymaps
-map("n", "<leader>ns", function()
-	require("overseer").run_template({ name = "npm start" })
-end, { desc = "npm start" })
+-- Use ESC to exit terminal mode
+map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true })
 
-map("n", "<leader>nb", function()
-	require("overseer").run_template({ name = "npm build" })
-end, { desc = "npm build" })
+-- Sidekick plugin keymaps
+map({ "n", "x", "i", "t" }, "<tab>", function()
+	if not require("sidekick").nes_jump_or_apply() then
+		return "<Tab>" -- fallback to normal tab
+	end
+end, { desc = "Goto/Apply Next Edit Suggestion" })
+
+map({ "n", "v" }, "<c-s>", function()
+	require("sidekick.cli").toggle({ focus = true })
+end, { desc = "Sidekick Toggle" })
+
+map({ "n", "v" }, "<leader>aa", function()
+	require("sidekick.cli").toggle({ focus = true })
+end, { desc = "Sidekick Toggle CLI" })
+
+map({ "n", "v" }, "<leader>ac", function()
+	require("sidekick.cli").toggle({ name = "claude", focus = true })
+end, { desc = "Sidekick Claude Toggle" })
+
+map({ "n", "v" }, "<leader>ag", function()
+	require("sidekick.cli").toggle({ name = "grok", focus = true })
+end, { desc = "Sidekick Grok Toggle" })
+
+map({ "n", "v" }, "<leader>ap", function()
+	require("sidekick.cli").select_prompt()
+end, { desc = "Sidekick Select Prompt" })
