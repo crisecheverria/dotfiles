@@ -21,6 +21,7 @@ set clipboard=unnamedplus     " Use system clipboard
 set hidden                    " Allow switching buffers without saving
 set mouse=a                   " Enable mouse support
 set autoread
+set re=0                     " Fix redrawing issues
 
 set background=dark
 " Use truecolor if available
@@ -29,6 +30,11 @@ if has('termguicolors')
 endif
 " Disable background-color erase to prevent white gaps on first draw
 set t_ut=
+
+" Cursor shape: thin bar in insert mode, block in normal mode
+let &t_SI = "\e[6 q"  " steady bar in insert
+let &t_SR = "\e[4 q"  " steady underline in replace
+let &t_EI = "\e[2 q"  " steady block in normal
 
 " Sessions
 " --- Session behavior (workspace resume when no args) ---
@@ -53,8 +59,7 @@ Plug 'yggdroot/indentline'
 Plug 'jiangmiao/auto-pairs'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'dense-analysis/ale'
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'skywind3000/gutentags_plus'
+Plug 'machakann/vim-highlightedyank'
 
 " Navigation
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -65,6 +70,7 @@ Plug 'vim-airline/vim-airline'
 
 " Git
 Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-fugitive'
 
 "Start Screen
 Plug 'mhinz/vim-startify'
@@ -108,6 +114,9 @@ set clipboard=unnamedplus
 " Copilot will prompt you to authenticate on first use
 " Accept suggestions with Tab or Ctrl+]
 
+" ---- Highlight on yank ----
+let g:highlightedyank_highlight_duration = 150
+
 " ---- Better Grep ----
 " Better grep: ripgrep into quickfix
 set grepprg=rg\ --vimgrep
@@ -115,8 +124,24 @@ command! -nargs=* Rg silent grep! <args> | copen
 
 " ---- Ale setup ----
 let g:ale_fix_on_save = 1
-let g:ale_linters = {'python': ['ruff']}        " or ['pylint'] if you prefer
-let g:ale_fixers  = {'python': ['isort', 'black']}
+let g:ale_linters = {
+\   'python': ['ruff'],
+\   'javascript': ['eslint'],
+\   'typescript': ['eslint'],
+\}
+let g:ale_fixers  = {
+\   'python': ['isort', 'black'],
+\   'javascript': ['prettier', 'biome'],
+\   'javascriptreact': ['prettier'],
+\   'typescript': ['prettier'],
+\   'typescriptreact': ['prettier'],
+\   'css': ['prettier'],
+\   'scss': ['prettier'],
+\   'html': ['prettier'],
+\   'json': ['prettier'],
+\   'yaml': ['prettier'],
+\   'markdown': ['prettier'],
+\}
 
 " Make ALE use your venv if activated
 let g:ale_python_black_executable = 'black'
@@ -159,6 +184,12 @@ nnoremap <leader>/ :Rg <C-r><C-w><CR>   " grep word under cursor
 " Previous suggestion: Alt+[
 " Trigger Copilot: <leader>cp
 nnoremap <leader>cp :Copilot<CR>
+
+" Always paste from yank register (immune to deletions/Copilot)
+nnoremap p "0p
+nnoremap P "0P
+vnoremap p "0p
+vnoremap P "0P
 
 " GUI Switcher (SWITCHES TO SUBLIME, SWITCH EXECUTIBLE FOR DIFFERENT GUI EDITOR)
 command! GUI write | execute '!subl --wait ' . shellescape(expand('%:p'))
@@ -216,6 +247,60 @@ inoremap <silent><expr> <TAB>
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm(): "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 inoremap <silent><expr> <c-@> coc#refresh()
+
+" GoTo code navigation
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Show diagnostics
+nmap <silent> <leader>x :CocDiagnostics<CR>
+
+" Show documentation
+nnoremap <silent> K :call ShowDocumentation()<CR>
+
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+
+" Run tests for current file
+nnoremap <leader>t :call RunCurrentTest()<CR>
+
+function! RunCurrentTest()
+  let l:file = expand('%:p')
+  let l:root = FindGitRoot()
+  let l:rel = l:root !=# '' ? substitute(l:file, l:root . '/', '', '') : l:file
+  " Remove packages/ prefix for monorepo structure
+  let l:rel = substitute(l:rel, '^packages/', '', '')
+
+  if l:file =~# '\.test\.\(ts\|tsx\|js\|jsx\)$' || l:file =~# '__tests__'
+    execute '!npm run test -- ' . shellescape(l:rel)
+  elseif l:file =~# '\.spec\.\(ts\|tsx\|js\|jsx\)$'
+    execute '!npm run test -- ' . shellescape(l:rel)
+  elseif l:file =~# '_test\.py$' || l:file =~# 'test_.*\.py$'
+    execute '!pytest ' . shellescape(l:file)
+  elseif l:file =~# '_test\.go$'
+    execute '!go test ' . shellescape(expand('%:h'))
+  else
+    echo 'Not a test file'
+  endif
+endfunction
+
+function! FindGitRoot()
+  let l:path = expand('%:p:h')
+  while l:path !=# '/' && l:path !=# ''
+    if isdirectory(l:path . '/.git')
+      return l:path
+    endif
+    let l:path = fnamemodify(l:path, ':h')
+  endwhile
+  return ''
+endfunction
 
 " =============================================================================================
 " TaskPaper Per File ToDo (new, remove if you don't care about TODO lists)
