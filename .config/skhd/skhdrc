@@ -6,3 +6,39 @@ ctrl - k : yabai -m window --focus north
 ctrl - l : yabai -m window --focus east
 ctrl - h : yabai -m window --focus west
 
+# Change split direction
+shift + cmd - e : yabai -m window --toggle split
+
+# Rotate layout clockwise
+shift + cmd - r : yabai -m space --rotate 90
+
+# Flip layout along y-axis
+shift + cmd - y : yabai -m space --mirror y-axis
+
+# Flip layout along x-axis
+shift + cmd - x : yabai -m space --mirror x-axis
+
+# Toggle window fullscreen
+shift + cmd - f : yabai -m window --toggle zoom-fullscreen
+
+# Toggle window native fullscreen
+shift + cmd - d : yabai -m window --toggle native-fullscreen
+
+# Toggle window float
+shift + cmd - t : yabai -m window --toggle float --grid 4:4:1:1:2:2
+
+# Swap windows
+shift + cmd - j : yabai -m window --swap south
+shift + cmd - k : yabai -m window --swap north
+shift + cmd - h : yabai -m window --swap west
+shift + cmd - l : yabai -m window --swap east
+
+# Balance all windows
+shift + cmd - b : yabai -m space --balance
+
+# Resize windows
+ctrl + cmd - h : yabai -m window --resize left:-50:0 || yabai -m window --resize right:-50:0
+ctrl + cmd - j : yabai -m window --resize bottom:0:50 || yabai -m window --resize top:0:50
+ctrl + cmd - k : yabai -m window --resize top:0:-50 || yabai -m window --resize bottom:0:-50
+ctrl + cmd - l : yabai -m window --resize right:50:0 || yabai -m window --resize left:50:0
+

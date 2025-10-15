@@ -120,7 +120,8 @@ let g:highlightedyank_highlight_duration = 150
 " ---- Better Grep ----
 " Better grep: ripgrep into quickfix
 set grepprg=rg\ --vimgrep
-command! -nargs=* Rg silent grep! <args> | copen
+" Note: Custom :Rg command commented out to use FZF's interactive :Rg instead
+" command! -nargs=* Rg silent grep! <args> | copen
 
 " ---- Ale setup ----
 let g:ale_fix_on_save = 1
@@ -167,15 +168,17 @@ let g:tagbar_autoclose   = 0
 
 " NERDTree
 nnoremap <leader>n :NERDTreeToggle<CR>
-nnoremap <leader>f :Files<CR>
-
 " Tagbar
 nmap <F8> :TagbarToggle<CR>
 
 " Fast openers (swap to your taste)
+" FZF File/Buffer/Grep
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>g :Rg<CR>
 nnoremap <C-p> :Files<CR>
 nnoremap <leader><leader> :Buffers<CR>
-nnoremap <leader>/ :Rg <C-r><C-w><CR>   " grep word under cursor
+" grep word under cursor
+nnoremap <leader>/ :Rg <C-r><C-w><CR>
 
 " Copilot Keybindings
 " Accept suggestion: Tab (default)
@@ -184,12 +187,6 @@ nnoremap <leader>/ :Rg <C-r><C-w><CR>   " grep word under cursor
 " Previous suggestion: Alt+[
 " Trigger Copilot: <leader>cp
 nnoremap <leader>cp :Copilot<CR>
-
-" Always paste from yank register (immune to deletions/Copilot)
-nnoremap p "0p
-nnoremap P "0P
-vnoremap p "0p
-vnoremap P "0P
 
 " GUI Switcher (SWITCHES TO SUBLIME, SWITCH EXECUTIBLE FOR DIFFERENT GUI EDITOR)
 command! GUI write | execute '!subl --wait ' . shellescape(expand('%:p'))
