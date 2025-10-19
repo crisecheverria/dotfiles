@@ -17,11 +17,12 @@ set tabstop=4                 " Tabs are 4 spaces
 set shiftwidth=4              " Indent by 4 spaces
 set expandtab                 " Use spaces instead of tabs
 set autoindent                " Auto-indent new lines
-set clipboard=unnamedplus     " Use system clipboard
+set clipboard=unnamed         " Use system clipboard (macOS uses * register)
 set hidden                    " Allow switching buffers without saving
 set mouse=a                   " Enable mouse support
 set autoread
 set re=0                     " Fix redrawing issues
+set swapfile=0               " Disable swap files
 
 set background=dark
 " Use truecolor if available
@@ -108,7 +109,7 @@ if has('wsl')
   \ 'cache_enabled': 0,
   \ }
 endif
-set clipboard=unnamedplus
+set clipboard=unnamed
 
 " ---- Copilot setup ----
 " Copilot will prompt you to authenticate on first use
@@ -187,6 +188,10 @@ nnoremap <leader>/ :Rg <C-r><C-w><CR>
 " Previous suggestion: Alt+[
 " Trigger Copilot: <leader>cp
 nnoremap <leader>cp :Copilot<CR>
+
+" Diff Navigation
+nnoremap <leader>dn ]c
+nnoremap <leader>dp [c
 
 " GUI Switcher (SWITCHES TO SUBLIME, SWITCH EXECUTIBLE FOR DIFFERENT GUI EDITOR)
 command! GUI write | execute '!subl --wait ' . shellescape(expand('%:p'))

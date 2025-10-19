@@ -13,15 +13,23 @@ map("n", "<leader>e", ":Ex<CR>", { desc = "File Explorer", silent = true })
 map("n", "<leader>v", ":vsplit<CR>", { desc = "Vertical Split", silent = true })
 map("n", "<leader>h", ":split<CR>", { desc = "Horizontal Split", silent = true })
 map("n", "<leader>w", ":w<CR>", { desc = "Save", silent = true })
-map("n", "<leader>q", ":q<CR>", { desc = "Quit", silent = true })
+map("n", "<leader>q", ":bd<CR>", { desc = "Close Buffer", silent = true })
 map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
 map("n", "<leader>pu", "<cmd>lua vim.pack.update()<CR>", { desc = "Update plugins", silent = true })
 
+-- vim-test keymaps
+map("n", "<leader>tn", ":TestNearest<CR>", { desc = "Test Nearest", silent = true })
+map("n", "<leader>tf", ":TestFile<CR>", { desc = "Test File", silent = true })
+map("n", "<leader>ts", ":TestSuite<CR>", { desc = "Test Suite", silent = true })
+map("n", "<leader>tl", ":TestLast<CR>", { desc = "Test Last", silent = true })
+map("n", "<leader>tv", ":TestVisit<CR>", { desc = "Test Visit", silent = true })
+
 -- Terminal keymaps
-map("n", "<leader>t", function()
+map("n", "<leader>t", ":TestFile<CR>", { desc = "Run Test File", silent = true })
+map("n", "<leader>to", function()
 	vim.cmd("terminal")
 	vim.cmd("startinsert")
-end, { noremap = true, silent = true, desc = "Open Terminal" }) -- Open terminal
+end, { noremap = true, silent = true, desc = "Open Terminal" })
 
 -- Run claude code in terminal
 map("n", "<leader>tc", function()

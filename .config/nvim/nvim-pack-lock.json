@@ -1,0 +1,39 @@
+{
+  "plugins": {
+    "blink.cmp": {
+      "version": "1.0.0 - 2.0.0"
+    },
+    "codecompanion.nvim": [],
+    "conform.nvim": [],
+    "copilot.vim": [],
+    "diffview.nvim": [],
+    "fzf-lua": [],
+    "gitsigns.nvim": [],
+    "lualine.nvim": [],
+    "mason-lspconfig.nvim": [],
+    "mason.nvim": [],
+    "matteblack.nvim": {
+      "rev": "a8a039f",
+      "src": "https://github.com/tahayvr/matteblack.nvim"
+    },
+    "mcphub.nvim": [],
+    "noice.nvim": [],
+    "nui.nvim": [],
+    "nvim-lspconfig": [],
+    "nvim-notify": [],
+    "nvim-web-devicons": [],
+    "plenary.nvim": [],
+    "present.nvim": [],
+    "showkeys": [],
+    "sidekick.nvim": [],
+    "techbase.nvim": [],
+    "tokyonight.nvim": [],
+    "vague.nvim": [],
+    "vim-fugitive": [],
+    "vim-surround": [],
+    "vim-test": {
+      "rev": "2c264d2",
+      "src": "https://github.com/vim-test/vim-test"
+    }
+  }
+}

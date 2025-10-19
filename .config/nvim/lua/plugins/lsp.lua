@@ -40,6 +40,16 @@ vim.lsp.config("rust_analyzer", {
 	},
 })
 
+-- Enable LSP servers automatically
+vim.lsp.enable({
+	"gopls",
+	"pyright",
+	"eslint",
+	"vtsls",
+	"lua_ls",
+	"rust_analyzer",
+})
+
 -- Diagnostics configuration
 vim.diagnostic.config({
 	virtual_lines = {
