@@ -24,6 +24,10 @@ map("n", "<leader>ts", ":TestSuite<CR>", { desc = "Test Suite", silent = true })
 map("n", "<leader>tl", ":TestLast<CR>", { desc = "Test Last", silent = true })
 map("n", "<leader>tv", ":TestVisit<CR>", { desc = "Test Visit", silent = true })
 
+-- Git keymaps
+map("n", "<leader>dn", "]c", { desc = "Next diff", silent = true })
+map("n", "<leader>dp", "[c", { desc = "Previous diff", silent = true })
+
 -- Terminal keymaps
 map("n", "<leader>t", ":TestFile<CR>", { desc = "Run Test File", silent = true })
 map("n", "<leader>to", function()

@@ -683,3 +683,23 @@ function! s:_sqg_on() abort
   " auto-restore after a short delay (if Vim didn't exit)
   call timer_start(250, {-> execute('let &eventignore=get(t:, "_sqg_ei", "") | silent! unlet t:_sqg_ei | silent! unlet g:smart_quitting')})
 endfunction
+
+" =============================================================================================
+" .idevimrc setup for IdeaVim (if detected)
+" =============================================================================================
+if has('ide')
+  " mappings and options that exist only in IdeaVim
+  map <leader>f <Action>(GotoFile)
+  map <leader>g <Action>(FindInPath)
+  map <leader>b <Action>(Switcher)
+
+  if &ide =~? 'intellij idea'
+    if &ide =~? 'community'
+      " some mappings and options for IntelliJ IDEA Community Edition
+    elseif &ide =~? 'ultimate'
+      " some mappings and options for IntelliJ IDEA Ultimate Edition
+    endif
+  elseif &ide =~? 'pycharm'
+    " PyCharm specific mappings and options
+  endif
+endif

@@ -13,6 +13,7 @@ require("mason-lspconfig").setup({
 		"vtsls",
 		"lua_ls",
 		"rust_analyzer",
+		"stylua",
 	},
 })
 
@@ -48,6 +49,7 @@ vim.lsp.enable({
 	"vtsls",
 	"lua_ls",
 	"rust_analyzer",
+	"stylua",
 })
 
 -- Diagnostics configuration

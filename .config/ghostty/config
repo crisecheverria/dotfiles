@@ -4,10 +4,12 @@ font-family = "MesloLGS Nerd Font Mono"
 # font-style = Regular
 font-size = 19
 # font-thicken = true
-theme = "tokyonight"
+theme = "Gruvbox Dark Hard"
 
-custom-shader = shaders/cursor_smear_fade.glsl
-custom-shader = shaders/cursor_blaze_no_trail.glsl
+# custom-shader = shaders/cursor_smear_fade.glsl
+# custom-shader = shaders/cursor_blaze_no_trail.glsl
+custom-shader = shaders/more-shaders/cursor_warp.glsl
+custom-shader = shaders/more-shaders/ripple_rectangle_cursor.glsl
 
 #keybind = ctrl+d=new_split:right
 
