@@ -19,10 +19,8 @@ A minimal Neovim configuration using native Neovim package management (`vim.pack
 │   └── plugins/
 │       ├── colorscheme.lua  # Color scheme configuration
 │       ├── lsp.lua          # LSP configuration
-│       ├── ai.lua           # AI tools (CodeCompanion, Copilot)
 │       ├── mini.lua         # Mini.pick for file navigation
 │       ├── treesitter.lua   # Syntax highlighting
-│       ├── typst.lua        # Typst document support
 │       ├── blink.lua        # Blink autocompletion configuration
 │       ├── git.lua          # Git integration (Fugitive, Gitsigns)
 │       ├── showkeys.lua     # Show pressed keys configuration
@@ -33,22 +31,6 @@ A minimal Neovim configuration using native Neovim package management (`vim.pack
 ## Plugin Management
 
 This configuration uses Neovim's native package management with `vim.pack.add()`. No external plugin managers required.
-
-### Installed Plugins
-
-- **vague.nvim** - Color scheme with transparency support
-- **nvim-lspconfig** - LSP configuration
-- **mini.pick** - Fuzzy finder for files, buffers, and grep
-- **codecompanion.nvim** - AI coding assistant (Having few issues now, but works)
-- **copilot.vim** - GitHub Copilot integration  
-- **nvim-treesitter** - Syntax highlighting and parsing
-- **typst-preview.nvim** - Typst document preview
-- **plenary.nvim** - Utility library for other plugins
-- **blink.cmp** - Fast autocompletion engine with LSP support
-- **vim-fugitive** - Git integration for Vim
-- **gitsigns.nvim** - Git signs in the sign column
-- **showkeys** - Display pressed keys on screen
-- **vim-surround** - Easily change surrounding characters
 
 ## Key Features
 
