@@ -1,1 +1,1 @@
-vim.pack.add({ "https://github.com/chomosuke/typst-preview.nvim" })
+vim.pack.add({ "https://github.com/chomosuke/typst-preview.nvim" }, { load = true })

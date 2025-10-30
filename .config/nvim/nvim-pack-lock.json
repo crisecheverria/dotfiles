@@ -9,6 +9,14 @@
     "diffview.nvim": [],
     "fzf-lua": [],
     "gitsigns.nvim": [],
+    "gruvbox-material": {
+      "rev": "834dbf2",
+      "src": "https://github.com/sainnhe/gruvbox-material"
+    },
+    "gruvbox.nvim": {
+      "rev": "5e0a460",
+      "src": "https://github.com/ellisonleao/gruvbox.nvim"
+    },
     "lualine.nvim": [],
     "mason-lspconfig.nvim": [],
     "mason.nvim": [],
@@ -19,8 +27,13 @@
     "mcphub.nvim": [],
     "noice.nvim": [],
     "nui.nvim": [],
+    "nvim-autopairs": {
+      "rev": "7a2c97c",
+      "src": "https://github.com/windwp/nvim-autopairs"
+    },
     "nvim-lspconfig": [],
     "nvim-notify": [],
+    "nvim-treesitter": [],
     "nvim-web-devicons": [],
     "plenary.nvim": [],
     "present.nvim": [],
@@ -28,6 +41,7 @@
     "sidekick.nvim": [],
     "techbase.nvim": [],
     "tokyonight.nvim": [],
+    "typst-preview.nvim": [],
     "vague.nvim": [],
     "vim-fugitive": [],
     "vim-surround": [],
