@@ -1,4 +1,6 @@
 local map = vim.keymap.set
+-- clear search highlights with <Esc>
+map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 map("n", "<leader>lf", "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true })
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go to Definition", silent = true })
 map("n", "<leader>f", ":FzfLua files<CR>", { desc = "Find File", silent = true })
@@ -35,12 +37,22 @@ map("n", "<leader>to", function()
 	vim.cmd("startinsert")
 end, { noremap = true, silent = true, desc = "Open Terminal" })
 
--- Run claude code in terminal
-map("n", "<leader>tc", function()
-	vim.cmd("terminal")
-	vim.cmd("startinsert")
-	vim.api.nvim_feedkeys("claude\n", "t", false)
-end, { noremap = true, silent = true, desc = "Open Claude" }) -- Run claude code
+-- Run npm build with notification on completion
+map("n", "<leader>tb", function()
+	vim.notify("Starting build...", vim.log.levels.INFO, { title = "npm build" })
+
+	vim.fn.jobstart("npm run build", {
+		on_exit = function(_, exit_code)
+			if exit_code == 0 then
+				vim.notify("Build succeeded!", vim.log.levels.INFO, { title = "npm build" })
+			else
+				vim.notify("Build failed with code " .. exit_code, vim.log.levels.ERROR, { title = "npm build" })
+			end
+		end,
+		stdout_buffered = true,
+		stderr_buffered = true,
+	})
+end, { noremap = true, silent = true, desc = "Build with notification" })
 
 -- Copy relative path of open buffer
 map("n", "<leader>cp", function()
@@ -48,24 +60,58 @@ map("n", "<leader>cp", function()
 	print("Copied relative path: " .. vim.fn.expand("%"))
 end, { desc = "Copy relative file path" })
 
+-- Clipboard keymaps (paste from system clipboard)
+map("n", "p", '"+p', { noremap = true, desc = "Paste from system clipboard" })
+map("n", "P", '"+P', { noremap = true, desc = "Paste before from system clipboard" })
+map("x", "p", '"+p', { noremap = true, desc = "Paste from system clipboard" })
+
 -- Use ESC to exit terminal mode
 map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true })
 
--- Sidekick plugin keymaps
+-- Sidekick plugin keymaps (official + custom)
+
+-- Core Navigation
 map({ "n", "x", "i", "t" }, "<tab>", function()
 	if not require("sidekick").nes_jump_or_apply() then
 		return "<Tab>" -- fallback to normal tab
 	end
 end, { desc = "Goto/Apply Next Edit Suggestion" })
 
-map({ "n", "v" }, "<c-s>", function()
-	require("sidekick.cli").toggle({ focus = true })
-end, { desc = "Sidekick Toggle" })
-
-map({ "n", "v" }, "<leader>aa", function()
+map({ "n", "t", "i", "v" }, "<C-.>", function()
 	require("sidekick.cli").toggle({ focus = true })
 end, { desc = "Sidekick Toggle CLI" })
 
+-- CLI Tool Controls
+map({ "n", "v" }, "<leader>aa", function()
+	require("sidekick.cli").toggle({ focus = true })
+end, { desc = "Sidekick Open/Toggle CLI" })
+
+map({ "n", "v" }, "<leader>as", function()
+	require("sidekick.cli").select()
+end, { desc = "Sidekick Select CLI Tool" })
+
+map({ "n", "v" }, "<leader>ad", function()
+	require("sidekick.cli").detach()
+end, { desc = "Sidekick Detach/Close Session" })
+
+map({ "n", "v" }, "<leader>ap", function()
+	require("sidekick.cli").prompt()
+end, { desc = "Sidekick Select Prompt/Context" })
+
+-- Context Sending
+map({ "n", "v" }, "<leader>at", function()
+	require("sidekick.cli").send()
+end, { desc = "Sidekick Send Selection/Context" })
+
+map({ "n", "v" }, "<leader>af", function()
+	require("sidekick.cli").send_file()
+end, { desc = "Sidekick Send File" })
+
+map("v", "<leader>av", function()
+	require("sidekick.cli").send_visual()
+end, { desc = "Sidekick Send Visual Selection" })
+
+-- Custom: specific CLI toggles
 map({ "n", "v" }, "<leader>ac", function()
 	require("sidekick.cli").toggle({ name = "claude", focus = true })
 end, { desc = "Sidekick Claude Toggle" })
@@ -73,7 +119,3 @@ end, { desc = "Sidekick Claude Toggle" })
 map({ "n", "v" }, "<leader>ag", function()
 	require("sidekick.cli").toggle({ name = "grok", focus = true })
 end, { desc = "Sidekick Grok Toggle" })
-
-map({ "n", "v" }, "<leader>ap", function()
-	require("sidekick.cli").select_prompt()
-end, { desc = "Sidekick Select Prompt" })

@@ -30,3 +30,5 @@ vim.o.splitbelow = true
 vim.o.clipboard = "unnamedplus"
 -- Save undo history
 vim.o.undofile = true
+-- Disable paging on startup
+vim.o.more = false
