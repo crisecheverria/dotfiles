@@ -22,7 +22,7 @@ set hidden                    " Allow switching buffers without saving
 set mouse=a                   " Enable mouse support
 set autoread
 set re=0                     " Fix redrawing issues
-set swapfile=0               " Disable swap files
+set noswapfile               " Disable swap files
 
 set background=dark
 " Use truecolor if available
@@ -65,7 +65,7 @@ Plug 'machakann/vim-highlightedyank'
 " Navigation
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'preservim/nerdtree'
+" Plug 'preservim/nerdtree'
 Plug 'preservim/tagbar'
 Plug 'vim-airline/vim-airline'
 
@@ -130,6 +130,7 @@ let g:ale_linters = {
 \   'python': ['ruff'],
 \   'javascript': ['eslint'],
 \   'typescript': ['eslint'],
+\   'sh': ['shellcheck'],
 \}
 let g:ale_fixers  = {
 \   'python': ['isort', 'black'],
@@ -143,6 +144,7 @@ let g:ale_fixers  = {
 \   'json': ['prettier'],
 \   'yaml': ['prettier'],
 \   'markdown': ['prettier'],
+\   'sh': ['shfmt'],
 \}
 
 " Make ALE use your venv if activated
@@ -157,18 +159,21 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
 
 " ---- NERDTree settings ----
-let g:NERDTreeWinPos = 'left'
-let g:NERDTreeWinSize = 40
+" let g:NERDTreeWinPos = 'left'
+" let g:NERDTreeWinSize = 40
 " Side-bar QoL
-let g:NERDTreeQuitOnOpen = 1
+" let g:NERDTreeQuitOnOpen = 1
 let g:tagbar_autoclose   = 0
+
+" ---- Netrw settings ----
+let g:netrw_banner = 0
 
 " =============================================================================================
 " General Keybindings
 " =============================================================================================
 
-" NERDTree
-nnoremap <leader>n :NERDTreeToggle<CR>
+" File Explorer (netrw)
+nnoremap <leader>e :Ex<CR>
 " Tagbar
 nmap <F8> :TagbarToggle<CR>
 
@@ -181,13 +186,20 @@ nnoremap <leader><leader> :Buffers<CR>
 " grep word under cursor
 nnoremap <leader>/ :Rg <C-r><C-w><CR>
 
+" Clear search highlighting
+nnoremap <silent> <Esc> :noh<CR>
+
+" Terminal mode: escape with Ctrl+O (Esc conflicts with Ghostty)
+tnoremap <C-o> <C-\><C-n>
+
 " Copilot Keybindings
 " Accept suggestion: Tab (default)
 " Dismiss suggestion: Ctrl+]
 " Next suggestion: Alt+]
 " Previous suggestion: Alt+[
-" Trigger Copilot: <leader>cp
-nnoremap <leader>cp :Copilot<CR>
+
+" Copy current buffer path to clipboard
+nnoremap <leader>cp :let @+ = expand('%:p')<CR>:echo 'Copied: ' . expand('%:p')<CR>
 
 " Diff Navigation
 nnoremap <leader>dn ]c
@@ -223,9 +235,9 @@ nnoremap <expr> <C-Left>  winnr('$') > 1 ? '<C-w>h' :'h'
 nnoremap <expr> <C-Right> winnr('$') > 1 ? '<C-w>l' : 'l'
 
 
-" Easy Movement Between Buffers (Leader + q, Leader + e | OR | C-S-Left, C-S-Right)
-nnoremap <leader>q  :bprevious<CR>
-nnoremap <leader>e :bnext<CR>
+" Easy Movement Between Buffers (Leader + b, Leader + n | OR | C-S-Left, C-S-Right)
+nnoremap <leader>b  :bprevious<CR>
+nnoremap <leader>n :bnext<CR>
 " Normal mode — smart buffer hop with fallback to default key behavior
 nnoremap <expr> <C-S-Left>  :winnr('$') > 1 ? ':bprevious<CR>' : 'h'
 nnoremap <expr> <C-S-Right>  :winnr('$') > 1 ? ':bnext<CR>' : 'l'
@@ -513,10 +525,10 @@ function! s:ensure_sidebars(opt_ft_scope) abort
   if a:opt_ft_scope !=# '' && &filetype !=# a:opt_ft_scope | return | endif
 
   " NERDTree once per tab
-  if exists(':NERDTree') == 2 && !<SID>tab_has_ft('nerdtree')
-    silent! execute 'vertical NERDTree'
-    noautocmd wincmd p
-  endif
+  " if exists(':NERDTree') == 2 && !<SID>tab_has_ft('nerdtree')
+  "   silent! execute 'vertical NERDTree'
+  "   noautocmd wincmd p
+  " endif
 
   " Tagbar once per tab (no-op if unsupported)
   if exists(':TagbarOpen') == 2 && !<SID>tab_has_ft('tagbar')
@@ -536,83 +548,83 @@ augroup END
 " =============================================================================================
 
 " ---- Smart :bd: switch to another buffer first, then delete the old one ----
-function! s:is_real_file_buf(b) abort
-  return a:b > 0
-        \ && buflisted(a:b)
-        \ && bufname(a:b) !=# ''
-        \ && getbufvar(a:b,'&buftype') ==# ''
-        \ && index(['nerdtree','tagbar','help','qf','terminal'], getbufvar(a:b,'&filetype')) < 0
-endfunction
+" function! s:is_real_file_buf(b) abort
+"   return a:b > 0
+"         \ && buflisted(a:b)
+"         \ && bufname(a:b) !=# ''
+"         \ && getbufvar(a:b,'&buftype') ==# ''
+"         \ && index(['nerdtree','tagbar','help','qf','terminal'], getbufvar(a:b,'&filetype')) < 0
+" endfunction
 
-function! s:SmartBdeleteSwitch(bang) abort
-  let l:cur = bufnr('%')
-  let l:tgt = -1
-  if bufnr('#') > 0 && bufnr('#') != l:cur && <SID>is_real_file_buf(bufnr('#'))
-    let l:tgt = bufnr('#')
-  else
-    for l:info in getbufinfo({'buflisted':1})
-      if l:info.bufnr != l:cur && <SID>is_real_file_buf(l:info.bufnr)
-        let l:tgt = l:info.bufnr | break
-      endif
-    endfor
-  endif
-  if l:tgt == -1 | enew | let l:tgt = bufnr('%') | else | execute 'buffer' l:tgt | endif
-  execute 'bdelete' . a:bang . ' ' . l:cur
-endfunction
+" function! s:SmartBdeleteSwitch(bang) abort
+"   let l:cur = bufnr('%')
+"   let l:tgt = -1
+"   if bufnr('#') > 0 && bufnr('#') != l:cur && <SID>is_real_file_buf(bufnr('#'))
+"     let l:tgt = bufnr('#')
+"   else
+"     for l:info in getbufinfo({'buflisted':1})
+"       if l:info.bufnr != l:cur && <SID>is_real_file_buf(l:info.bufnr)
+"         let l:tgt = l:info.bufnr | break
+"       endif
+"     endfor
+"   endif
+"   if l:tgt == -1 | enew | let l:tgt = bufnr('%') | else | execute 'buffer' l:tgt | endif
+"   execute 'bdelete' . a:bang . ' ' . l:cur
+" endfunction
 
-command! -bang BDSwitch call <SID>SmartBdeleteSwitch(<q-bang>)
-cnoreabbrev <expr> bd (getcmdtype()==':' && getcmdline() =~# '^\s*bd\%(\s*!\)\?\s*$')
-      \ ? (getcmdline() =~# '!\s*$' ? 'BDSwitch!' : 'BDSwitch')
-      \ : 'bd'
+" command! -bang BDSwitch call <SID>SmartBdeleteSwitch(<q-bang>)
+" cnoreabbrev <expr> bd (getcmdtype()==':' && getcmdline() =~# '^\s*bd\%(\s*!\)\?\s*$')
+"       \ ? (getcmdline() =~# '!\s*$' ? 'BDSwitch!' : 'BDSwitch')
+"       \ : 'bd'
 
-function! s:real_file_buf_count_all() abort
-  let l:n = 0
-  for l:info in getbufinfo({'buflisted': 1})
-    if <SID>is_real_file_buf(l:info.bufnr)
-      let l:n += 1
-    endif
-  endfor
-  return l:n
-endfunction
+" function! s:real_file_buf_count_all() abort
+"   let l:n = 0
+"   for l:info in getbufinfo({'buflisted': 1})
+"     if <SID>is_real_file_buf(l:info.bufnr)
+"       let l:n += 1
+"     endif
+"   endfor
+"   return l:n
+" endfunction
 
-" --- :q that calls :bd when more than one real file buffer exists, else quit-all ---
-function! s:SmartConditionalQuit(bang) abort
-  if <SID>real_file_buf_count_all() > 1
-    " More than one real buffer → switch-first-then-delete
-    execute 'BDSwitch' . a:bang
-  else
-    " One or zero → leave cleanly (mute autocommands to avoid E1312 noise)
-    execute 'noautocmd qa' . a:bang
-  endif
-endfunction
+" " --- :q that calls :bd when more than one real file buffer exists, else quit-all ---
+" function! s:SmartConditionalQuit(bang) abort
+"   if <SID>real_file_buf_count_all() > 1
+"     " More than one real buffer → switch-first-then-delete
+"     execute 'BDSwitch' . a:bang
+"   else
+"     " One or zero → leave cleanly (mute autocommands to avoid E1312 noise)
+"     execute 'noautocmd qa' . a:bang
+"   endif
+" endfunction
 
-command! -bang SmartCQuit call <SID>SmartConditionalQuit(<q-bang>)
+" command! -bang SmartCQuit call <SID>SmartConditionalQuit(<q-bang>)
 
-" --- :wq that calls :w and then BDSwitch (smart buffer close) when more than one real file buffer exists, else write-quit-all ---
-function! s:SmartConditionalWriteQuit(bang) abort
-  if <SID>real_file_buf_count_all() > 1
-    " Write current buffer, then switch+delete current buffer
-    execute 'write' . a:bang
-    execute 'BDSwitch' . a:bang
-  else
-    " One or zero real buffers → write-all & quit-all (muted to avoid noisy autocmds)
-    execute 'noautocmd wqa' . a:bang
-  endif
-endfunction
+" " --- :wq that calls :w and then BDSwitch (smart buffer close) when more than one real file buffer exists, else write-quit-all ---
+" function! s:SmartConditionalWriteQuit(bang) abort
+"   if <SID>real_file_buf_count_all() > 1
+"     " Write current buffer, then switch+delete current buffer
+"     execute 'write' . a:bang
+"     execute 'BDSwitch' . a:bang
+"   else
+"     " One or zero real buffers → write-all & quit-all (muted to avoid noisy autocmds)
+"     execute 'noautocmd wqa' . a:bang
+"   endif
+" endfunction
 
-command! -bang SmartCWQ call <SID>SmartConditionalWriteQuit(<q-bang>)
+" command! -bang SmartCWQ call <SID>SmartConditionalWriteQuit(<q-bang>)
 
-" Only rewrite an exact :q / :q! to our smart quitter (preserve !)
-cnoreabbrev <expr> q
-      \ (getcmdtype() == ':' && getcmdline() =~# '^\s*q\%(\s*!\)\?\s*$')
-      \ ? (getcmdline() =~# '!\s*$' ? 'SmartCQuit!' : 'SmartCQuit')
-      \ : 'q'
+" " Only rewrite an exact :q / :q! to our smart quitter (preserve !)
+" cnoreabbrev <expr> q
+"       \ (getcmdtype() == ':' && getcmdline() =~# '^\s*q\%(\s*!\)\?\s*$')
+"       \ ? (getcmdline() =~# '!\s*$' ? 'SmartCQuit!' : 'SmartCQuit')
+"       \ : 'q'
 
-" Only rewrite exact :wq / :wq! (preserve !)
-cnoreabbrev <expr> wq
-      \ (getcmdtype()==':' && getcmdline() =~# '^\s*wq\%(\s*!\)\?\s*$')
-      \ ? (getcmdline() =~# '!\s*$' ? 'SmartCWQ!' : 'SmartCWQ')
-      \ : 'wq'
+" " Only rewrite exact :wq / :wq! (preserve !)
+" cnoreabbrev <expr> wq
+"       \ (getcmdtype()==':' && getcmdline() =~# '^\s*wq\%(\s*!\)\?\s*$')
+"       \ ? (getcmdline() =~# '!\s*$' ? 'SmartCWQ!' : 'SmartCWQ')
+"       \ : 'wq'
 
 " =============================================================================================
 " Persistence Logic (View, Session, Undo stay the same on restart)
