@@ -120,9 +120,9 @@ let g:highlightedyank_highlight_duration = 150
 
 " ---- Better Grep ----
 " Better grep: ripgrep into quickfix
-set grepprg=rg\ --vimgrep
+set grepprg=rg\ --vimgrep\ --smart-case
 " Note: Custom :Rg command commented out to use FZF's interactive :Rg instead
-" command! -nargs=* Rg silent grep! <args> | copen
+command! -nargs=+ Grep silent grep! <args> | copen
 
 " ---- Ale setup ----
 let g:ale_fix_on_save = 1
@@ -192,6 +192,9 @@ nnoremap <silent> <Esc> :noh<CR>
 " Terminal mode: escape with Ctrl+O (Esc conflicts with Ghostty)
 tnoremap <C-o> <C-\><C-n>
 
+" Fugitive Git Grep for word under cursor
+nnoremap <leader>sw :Grep <C-r><C-w><CR>
+
 " Copilot Keybindings
 " Accept suggestion: Tab (default)
 " Dismiss suggestion: Ctrl+]
@@ -220,9 +223,9 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 " Equalize splits when the terminal resizes
 autocmd VimResized * wincmd =
 
-" Resize splits quickly (Alt + arrows)
-nnoremap <A-Left>  :vertical resize -5<CR>
-nnoremap <A-Right> :vertical resize +5<CR>
+" Resize splits quickly (Ctrl+w + < or >) and (Alt+Up or Down)
+nnoremap <C-w>< :vertical resize -5<CR>
+nnoremap <C-w>> :vertical resize +5<CR>
 nnoremap <A-Up>    :resize +3<CR>
 nnoremap <A-Down>  :resize -3<CR>
 
@@ -239,8 +242,8 @@ nnoremap <expr> <C-Right> winnr('$') > 1 ? '<C-w>l' : 'l'
 nnoremap <leader>b  :bprevious<CR>
 nnoremap <leader>n :bnext<CR>
 " Normal mode — smart buffer hop with fallback to default key behavior
-nnoremap <expr> <C-S-Left>  :winnr('$') > 1 ? ':bprevious<CR>' : 'h'
-nnoremap <expr> <C-S-Right>  :winnr('$') > 1 ? ':bnext<CR>' : 'l'
+nnoremap <expr> <C-S-Left>  winnr('$') > 1 ? ':bprevious<CR>' : 'h'
+nnoremap <expr> <C-S-Right>  winnr('$') > 1 ? ':bnext<CR>' : 'l'
 
 " =============================================================================================
 " COC Setup
@@ -429,17 +432,7 @@ nnoremap <leader>tt :call <SID>TP_Toggle()<CR>
 " =============================================================================================
 
 " Helper: nearest project file (reuse if you already defined it)
-if !exists('*<SID>TP_ProjectFile')
-  function! s:TP_ProjectFile() abort
-    let d = expand('%:p:h')
-    while 1
-      if filereadable(d.'/'.g:tp_project_file) | return d.'/'.g:tp_project_file | endif
-      let p = fnamemodify(d, ':h')
-      if p ==# d | return d.'/'.g:tp_project_file | endif
-      let d = p
-    endwhile
-  endfunction
-endif
+" [Removed - duplicate of definition above at line 328]
 
 " Append lines to a file, inserting a blank line if the file is nonempty
 function! s:TP_AppendLines(filepath, lines) abort

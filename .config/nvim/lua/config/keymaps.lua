@@ -71,11 +71,11 @@ map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true 
 -- Sidekick plugin keymaps (official + custom)
 
 -- Core Navigation
-map({ "n", "x", "i", "t" }, "<tab>", function()
-	if not require("sidekick").nes_jump_or_apply() then
-		return "<Tab>" -- fallback to normal tab
-	end
-end, { desc = "Goto/Apply Next Edit Suggestion" })
+-- map({ "n", "x", "i", "t" }, "<tab>", function()
+-- 	if not require("sidekick").nes_jump_or_apply() then
+-- 		return "<Tab>" -- fallback to normal tab
+-- 	end
+-- end, { desc = "Goto/Apply Next Edit Suggestion" })
 
 map({ "n", "t", "i", "v" }, "<C-.>", function()
 	require("sidekick.cli").toggle({ focus = true })
@@ -119,3 +119,93 @@ end, { desc = "Sidekick Claude Toggle" })
 map({ "n", "v" }, "<leader>ag", function()
 	require("sidekick.cli").toggle({ name = "grok", focus = true })
 end, { desc = "Sidekick Grok Toggle" })
+
+-- Spring Boot / Java specific keymaps (only active for Java files)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "java",
+	callback = function()
+		local opts = { buffer = true, silent = true }
+
+		-- Java testing with nvim-java
+		map("n", "<leader>jt", function()
+			require("java").test.run_current_method()
+		end, vim.tbl_extend("force", opts, { desc = "Test Current Method" }))
+
+		map("n", "<leader>jc", function()
+			require("java").test.run_current_class()
+		end, vim.tbl_extend("force", opts, { desc = "Test Current Class" }))
+
+		map("n", "<leader>js", function()
+			require("java").test.run_current_suite()
+		end, vim.tbl_extend("force", opts, { desc = "Test Suite" }))
+
+		-- Java refactoring
+		map("n", "<leader>rf", function()
+			require("java").refactor.extract_method()
+		end, vim.tbl_extend("force", opts, { desc = "Extract Method" }))
+
+		map("n", "<leader>rv", function()
+			require("java").refactor.extract_variable()
+		end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
+
+		-- Maven/Gradle commands
+		map("n", "<leader>mb", function()
+			vim.notify("Starting Maven build...", vim.log.levels.INFO, { title = "Maven" })
+			vim.fn.jobstart("./mvnw compile", {
+				cwd = vim.fn.getcwd(),
+				on_exit = function(_, exit_code)
+					if exit_code == 0 then
+						vim.notify("Maven build succeeded!", vim.log.levels.INFO, { title = "Maven" })
+					else
+						vim.notify(
+							"Maven build failed with code " .. exit_code,
+							vim.log.levels.ERROR,
+							{ title = "Maven" }
+						)
+					end
+				end,
+			})
+		end, vim.tbl_extend("force", opts, { desc = "Maven Build" }))
+
+		map("n", "<leader>mr", function()
+			vim.notify("Starting Spring Boot application...", vim.log.levels.INFO, { title = "Spring Boot" })
+			vim.fn.jobstart("./mvnw spring-boot:run", {
+				cwd = vim.fn.getcwd(),
+				on_stdout = function(_, data)
+					if data then
+						for _, line in ipairs(data) do
+							if line:match("Started.*Application") then
+								vim.notify(
+									"Spring Boot application started!",
+									vim.log.levels.INFO,
+									{ title = "Spring Boot" }
+								)
+							end
+						end
+					end
+				end,
+			})
+		end, vim.tbl_extend("force", opts, { desc = "Maven Spring Boot Run" }))
+
+		map("n", "<leader>mt", function()
+			vim.notify("Running Maven tests...", vim.log.levels.INFO, { title = "Maven Test" })
+			vim.fn.jobstart("./mvnw test", {
+				cwd = vim.fn.getcwd(),
+				on_exit = function(_, exit_code)
+					if exit_code == 0 then
+						vim.notify("All tests passed!", vim.log.levels.INFO, { title = "Maven Test" })
+					else
+						vim.notify(
+							"Tests failed with code " .. exit_code,
+							vim.log.levels.ERROR,
+							{ title = "Maven Test" }
+						)
+					end
+				end,
+			})
+		end, vim.tbl_extend("force", opts, { desc = "Maven Test" }))
+	end,
+})
+
+-- Add a keymap for Zen Mode (zen-mode.nvim)
+map("n", "<leader>zm", ":ZenMode<CR>", { desc = "Toggle Zen Mode", silent = true })

@@ -14,6 +14,8 @@ require("mason-lspconfig").setup({
 		"lua_ls",
 		"rust_analyzer",
 		"stylua",
+		"bashls",
+		"sqlls",
 	},
 })
 
@@ -50,6 +52,8 @@ vim.lsp.enable({
 	"lua_ls",
 	"rust_analyzer",
 	"stylua",
+	"bashls",
+	"sqlls",
 })
 
 -- Diagnostics configuration

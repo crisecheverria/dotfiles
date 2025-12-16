@@ -29,13 +29,66 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Ripgrep with quickfix list
+-- Usage: :Rg <pattern> [path] [flags...]
+-- Examples:
+--   :Rg searchTerm                          " search in current directory
+--   :Rg searchTerm src/                     " search in src/ folder
+--   :Rg searchTerm . -i                     " case-insensitive search
+--   :Rg searchTerm . -g "*.lua"             " search only .lua files
+--   :Rg searchTerm src/ -t lua              " search lua file types in src/
+--   :Rg searchTerm . -i -g "*.{js,ts}"      " multiple flags
 vim.api.nvim_create_user_command("Rg", function(opts)
-	local query = opts.args
-	local escaped_query = vim.fn.shellescape(query)
-	local results = vim.fn.system("rg --vimgrep " .. escaped_query)
-	vim.fn.setqflist({}, " ", { title = "Ripgrep Search", lines = vim.fn.split(results, "\n") })
+	local args = opts.fargs
+	if #args == 0 then
+		vim.notify("Rg: pattern required", vim.log.levels.ERROR)
+		return
+	end
+
+	local pattern = args[1]
+	local path = "."
+	local extra_flags = {}
+
+	-- Parse arguments: if arg doesn't start with -, treat it as path
+	for i = 2, #args do
+		if args[i]:match("^%-") then
+			-- This is a flag, add remaining args as flags
+			for j = i, #args do
+				table.insert(extra_flags, args[j])
+			end
+			break
+		else
+			-- Assume this is the path argument
+			path = args[i]
+		end
+	end
+
+	-- Build the ripgrep command
+	local cmd_parts = { "rg", "--vimgrep" }
+
+	-- Add extra flags
+	for _, flag in ipairs(extra_flags) do
+		table.insert(cmd_parts, flag)
+	end
+
+	-- Add pattern and path
+	table.insert(cmd_parts, vim.fn.shellescape(pattern))
+	table.insert(cmd_parts, vim.fn.shellescape(path))
+
+	local cmd = table.concat(cmd_parts, " ")
+	local results = vim.fn.system(cmd)
+
+	-- Check for errors
+	if vim.v.shell_error ~= 0 and results:match("^rg:") then
+		vim.notify("Rg error: " .. results, vim.log.levels.ERROR)
+		return
+	end
+
+	vim.fn.setqflist({}, " ", {
+		title = "Ripgrep: " .. pattern .. " in " .. path,
+		lines = vim.fn.split(results, "\n")
+	})
 	vim.cmd("copen")
-end, { nargs = 1 })
+end, { nargs = "+", complete = "file" })
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "netrw",
