@@ -1,9 +1,11 @@
 vim.pack.add({
-  { src = "https://github.com/saghen/blink.cmp", version = vim.version.range("^1") },
+  { src = "https://github.com/saghen/blink.cmp", version = "v1.8.0" },
 })
 
 require('blink.cmp').setup({
-  fuzzy = { implementation = 'prefer_rust_with_warning' },
+  fuzzy = { 
+    implementation = "lua"
+  },
   signature = { enabled = true },
   keymap = {
     preset = "default",

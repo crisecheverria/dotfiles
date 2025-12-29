@@ -85,10 +85,16 @@ vim.api.nvim_create_user_command("Rg", function(opts)
 
 	vim.fn.setqflist({}, " ", {
 		title = "Ripgrep: " .. pattern .. " in " .. path,
-		lines = vim.fn.split(results, "\n")
+		lines = vim.fn.split(results, "\n"),
 	})
 	vim.cmd("copen")
 end, { nargs = "+", complete = "file" })
+
+-- Command to show intro screen
+vim.api.nvim_create_user_command("Intro", function()
+	vim.cmd("enew")
+	vim.cmd("intro")
+end, { desc = "Show Neovim intro screen" })
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "netrw",
@@ -109,30 +115,11 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Run npm run complete on file save
--- vim.api.nvim_create_autocmd("BufWritePost", {
---   pattern = "*",
---   callback = function()
---     local filepath = vim.fn.expand("%:p")
---     if filepath == "" then
---       return
---     end
---
---     vim.notify("Running complete on " .. vim.fn.expand("%"), vim.log.levels.INFO, { title = "npm complete" })
---
---     vim.fn.jobstart("npm run complete " .. vim.fn.shellescape(filepath), {
---       on_exit = function(_, exit_code)
---         if exit_code == 0 then
---           vim.schedule(function()
---             vim.cmd("edit")
---             vim.notify("Complete succeeded! Buffer reloaded.", vim.log.levels.INFO, { title = "npm complete" })
---           end)
---         else
---           vim.notify("Complete failed with code " .. exit_code, vim.log.levels.ERROR, { title = "npm complete" })
---         end
---       end,
---       stdout_buffered = true,
---       stderr_buffered = true,
---     })
---   end,
--- })
+-- Ensure intro screen is enabled by removing 'I' flag from shortmess
+vim.opt.shortmess:remove("I")
+
+-- Command to open current file in Google Chrome
+vim.api.nvim_create_user_command("Chrome", function()
+	local filepath = vim.fn.expand("%:p")
+	vim.cmd('!open -a "Google Chrome" ' .. vim.fn.shellescape(filepath))
+end, {})

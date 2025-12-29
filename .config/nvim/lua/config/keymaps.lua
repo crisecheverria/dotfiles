@@ -1,4 +1,9 @@
 local map = vim.keymap.set
+
+-- Better navigation for wrapped lines
+map("n", "j", "gj", { noremap = true, desc = "Move down by visual line" })
+map("n", "k", "gk", { noremap = true, desc = "Move up by visual line" })
+
 -- clear search highlights with <Esc>
 map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 map("n", "<leader>lf", "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true })
@@ -12,12 +17,16 @@ map("n", "<leader>sw", function()
 end, { desc = "Rip Grep current word", silent = true })
 map("n", "<leader><leader>", ":FzfLua buffers<CR>", { desc = "Buffers", silent = true })
 map("n", "<leader>e", ":Ex<CR>", { desc = "File Explorer", silent = true })
-map("n", "<leader>v", ":vsplit<CR>", { desc = "Vertical Split", silent = true })
-map("n", "<leader>h", ":split<CR>", { desc = "Horizontal Split", silent = true })
+map("n", "<leader>vs", ":vsplit<CR>", { desc = "Vertical Split", silent = true })
+map("n", "<leader>hs", ":split<CR>", { desc = "Horizontal Split", silent = true })
 map("n", "<leader>w", ":w<CR>", { desc = "Save", silent = true })
 map("n", "<leader>q", ":bd<CR>", { desc = "Close Buffer", silent = true })
+map("n", "<leader>n", ":bnext<CR>", { desc = "Next Buffer", silent = true })
+map("n", "<leader>b", ":bprevious<CR>", { desc = "Previous Buffer", silent = true })
 map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
-map("n", "<leader>pu", "<cmd>lua vim.pack.update()<CR>", { desc = "Update plugins", silent = true })
+map("n", "<leader>pu", function()
+	vim.cmd("terminal " .. vim.fn.stdpath("config") .. "/update_plugins.sh")
+end, { desc = "Update plugins", silent = true })
 
 -- vim-test keymaps
 map("n", "<leader>tn", ":TestNearest<CR>", { desc = "Test Nearest", silent = true })
@@ -60,22 +69,18 @@ map("n", "<leader>cp", function()
 	print("Copied relative path: " .. vim.fn.expand("%"))
 end, { desc = "Copy relative file path" })
 
--- Clipboard keymaps (paste from system clipboard)
-map("n", "p", '"+p', { noremap = true, desc = "Paste from system clipboard" })
-map("n", "P", '"+P', { noremap = true, desc = "Paste before from system clipboard" })
-map("x", "p", '"+p', { noremap = true, desc = "Paste from system clipboard" })
-
 -- Use ESC to exit terminal mode
 map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true })
 
 -- Sidekick plugin keymaps (official + custom)
 
 -- Core Navigation
--- map({ "n", "x", "i", "t" }, "<tab>", function()
--- 	if not require("sidekick").nes_jump_or_apply() then
--- 		return "<Tab>" -- fallback to normal tab
--- 	end
--- end, { desc = "Goto/Apply Next Edit Suggestion" })
+map({ "n", "x", "i" }, "<tab>", function()
+	-- if there is a next edit, jump to it, otherwise apply it if any
+	if not require("sidekick").nes_jump_or_apply() then
+		return "<Tab>" -- fallback to normal tab
+	end
+end, { desc = "Goto/Apply Next Edit Suggestion" })
 
 map({ "n", "t", "i", "v" }, "<C-.>", function()
 	require("sidekick.cli").toggle({ focus = true })
