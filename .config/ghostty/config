@@ -1,7 +1,7 @@
 macos-titlebar-style = hidden
 font-family = "MesloLGS Nerd Font Mono"
 # font-style = Regular
-font-size = 19
+font-size = 14
 # font-thicken = true
 theme = "Gruvbox Dark Hard"
 
@@ -20,5 +20,5 @@ background-opacity = 1
 window-decoration = true
 
 mouse-hide-while-typing = true
-
+background-blur = macos-glass-regular
 
