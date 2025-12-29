@@ -118,8 +118,17 @@ vim.api.nvim_create_autocmd("FileType", {
 -- Ensure intro screen is enabled by removing 'I' flag from shortmess
 vim.opt.shortmess:remove("I")
 
--- Command to open current file in Google Chrome
-vim.api.nvim_create_user_command("Chrome", function()
-	local filepath = vim.fn.expand("%:p")
+-- Command to open file in Google Chrome
+-- Usage: :Chrome [filename]
+-- If no filename provided, opens current file
+vim.api.nvim_create_user_command("Chrome", function(opts)
+	local filepath
+	if opts.args and opts.args ~= "" then
+		-- Use provided filename, expand to absolute path if relative
+		filepath = vim.fn.fnamemodify(opts.args, ":p")
+	else
+		-- Use current file if no argument provided
+		filepath = vim.fn.expand("%:p")
+	end
 	vim.cmd('!open -a "Google Chrome" ' .. vim.fn.shellescape(filepath))
-end, {})
+end, { nargs = "?", complete = "file" })
