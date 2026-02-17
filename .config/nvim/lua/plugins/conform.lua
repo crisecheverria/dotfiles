@@ -11,6 +11,8 @@ require("conform").setup({
 		typescript = { "prettierd", "prettier", stop_after_first = true },
 		typescriptreact = { "prettierd", "prettier", stop_after_first = true },
 		go = { "goimports", "gofmt" },
+		cpp = { "clang-format" },
+		clang = { "clang-format" },
 	},
 	format_on_save = {
 		-- These options will be passed to conform.format()

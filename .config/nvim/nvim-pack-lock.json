@@ -58,6 +58,14 @@
       "rev": "a8a039f5d6189b28d76fa0221e64965efec7e996",
       "src": "https://github.com/tahayvr/matteblack.nvim"
     },
+    "neo-tree.nvim": {
+      "rev": "6a25d4e36edefc28a60556b5f65ecddeebcd5821",
+      "src": "https://github.com/nvim-neo-tree/neo-tree.nvim"
+    },
+    "neogit": {
+      "rev": "df323856553d4c5e5c41117606c63f628b24a3b0",
+      "src": "https://github.com/NeogitOrg/neogit"
+    },
     "noice.nvim": {
       "rev": "7bfd942445fb63089b59f97ca487d605e715f155",
       "sha_target": "7bfd942445fb63089b59f97ca487d605e715f155",
@@ -101,6 +109,10 @@
       "sha_target": "7f0f40e9c5b7eab5096d8bec6ac04251c6e81468",
       "src": "git@github.com:nvim-java/nvim-java-test"
     },
+    "nvim-lint": {
+      "rev": "ca6ea12daf0a4d92dc24c5c9ae22a1f0418ade37",
+      "src": "https://github.com/mfussenegger/nvim-lint"
+    },
     "nvim-lspconfig": {
       "rev": "c4f67bf85b01a57e3c130352c0a0e453ab8cd5b9",
       "src": "https://github.com/neovim/nvim-lspconfig"
@@ -125,8 +137,7 @@
     },
     "plenary.nvim": {
       "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
-      "sha_target": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
-      "src": "git@github.com:nvim-lua/plenary.nvim"
+      "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "present.nvim": {
       "rev": "f3568b604b3b1c91b736acac838bb3f6a68f4144",

@@ -16,6 +16,25 @@ require("mason-lspconfig").setup({
 		"stylua",
 		"bashls",
 		"sqlls",
+		"clangd",
+	},
+})
+
+-- Go LSP configuration
+vim.lsp.config("gopls", {
+	settings = {
+		gopls = {
+			gofumpt = true,
+			analyses = {
+				unusedparams = true,
+				unusedwrite = true,
+				useany = true,
+				nilness = true,
+			},
+			staticcheck = true,
+			completeUnimported = true,
+			usePlaceholders = true,
+		},
 	},
 })
 
@@ -36,7 +55,8 @@ vim.lsp.config("rust_analyzer", {
 			cargo = {
 				allFeatures = true,
 			},
-			checkOnSave = {
+			checkOnSave = true,
+			check = {
 				command = "clippy",
 			},
 		},
@@ -54,6 +74,7 @@ vim.lsp.enable({
 	"stylua",
 	"bashls",
 	"sqlls",
+	"clangd",
 })
 
 -- Diagnostics configuration

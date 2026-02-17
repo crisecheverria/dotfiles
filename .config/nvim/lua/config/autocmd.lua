@@ -19,12 +19,17 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "go", "javascript", "typescrypt", "python", "rust", "lua", "html" },
 	callback = function()
-		-- syntax highlighting, provided by Neovim
-		vim.treesitter.start()
-		-- folds, provided by Neovim
-		vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-		-- indentation, provided by nvim-treesitter
-		vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		-- Check if parser is available before starting treesitter
+		local lang = vim.bo.filetype
+		if vim.treesitter.language.get_lang(lang) then
+			local ok = pcall(vim.treesitter.start)
+			if ok then
+				-- folds, provided by Neovim
+				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				-- indentation, provided by nvim-treesitter
+				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end
+		end
 	end,
 })
 
@@ -71,23 +76,26 @@ vim.api.nvim_create_user_command("Rg", function(opts)
 	end
 
 	-- Add pattern and path
-	table.insert(cmd_parts, vim.fn.shellescape(pattern))
-	table.insert(cmd_parts, vim.fn.shellescape(path))
+	table.insert(cmd_parts, pattern)
+	table.insert(cmd_parts, path)
 
-	local cmd = table.concat(cmd_parts, " ")
-	local results = vim.fn.system(cmd)
+	vim.notify("Rg: searching...", vim.log.levels.INFO)
 
-	-- Check for errors
-	if vim.v.shell_error ~= 0 and results:match("^rg:") then
-		vim.notify("Rg error: " .. results, vim.log.levels.ERROR)
-		return
-	end
+	vim.system(cmd_parts, { text = true }, function(obj)
+		vim.schedule(function()
+			if obj.code ~= 0 and obj.stderr and obj.stderr:match("^rg:") then
+				vim.notify("Rg error: " .. obj.stderr, vim.log.levels.ERROR)
+				return
+			end
 
-	vim.fn.setqflist({}, " ", {
-		title = "Ripgrep: " .. pattern .. " in " .. path,
-		lines = vim.fn.split(results, "\n"),
-	})
-	vim.cmd("copen")
+			local results = obj.stdout or ""
+			vim.fn.setqflist({}, " ", {
+				title = "Ripgrep: " .. pattern .. " in " .. path,
+				lines = vim.fn.split(results, "\n"),
+			})
+			vim.cmd("copen")
+		end)
+	end)
 end, { nargs = "+", complete = "file" })
 
 -- Command to show intro screen

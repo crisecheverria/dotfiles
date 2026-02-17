@@ -9,7 +9,7 @@ map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 map("n", "<leader>lf", "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true })
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go to Definition", silent = true })
 map("n", "<leader>f", ":FzfLua files<CR>", { desc = "Find File", silent = true })
-map("n", "<leader>g", ":FzfLua grep<CR>", { desc = "Grep", silent = true })
+map("n", "<leader>g", ":FzfLua live_grep<CR>", { desc = "Grep", silent = true })
 map("n", "<leader>r", ":Rg ", { desc = "Rip Grep" })
 map("n", "<leader>sw", function()
 	local word = vim.fn.expand("<cword>")
@@ -214,3 +214,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- Add a keymap for Zen Mode (zen-mode.nvim)
 map("n", "<leader>zm", ":ZenMode<CR>", { desc = "Toggle Zen Mode", silent = true })
+
+-- neogit keymaps
+map("n", "<leader>gg", ":Neogit<CR>", { desc = "Open Neogit", silent = true })
+map("n", "<leader>gs", ":Neogit<CR>", { desc = "Open Neogit Status", silent = true })
