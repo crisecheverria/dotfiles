@@ -22,3 +22,6 @@ window-decoration = true
 mouse-hide-while-typing = true
 background-blur = macos-glass-regular
 
+# Notifications for Claude Code
+desktop-notifications = true
+

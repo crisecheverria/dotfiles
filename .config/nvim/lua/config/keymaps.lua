@@ -67,10 +67,10 @@ map("n", "<leader>cp", function()
 end, { desc = "Copy relative file path" })
 
 -- Resize splits
-map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height", silent = true })
-map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height", silent = true })
-map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width", silent = true })
-map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width", silent = true })
+map("n", "<C-w><", ":vertical resize -5<CR>", { desc = "Decrease width", silent = true })
+map("n", "<C-w>>", ":vertical resize +5<CR>", { desc = "Increase width", silent = true })
+map("n", "<C-w>+", ":resize +3<CR>", { desc = "Increase height", silent = true })
+map("n", "<C-w>-", ":resize -3<CR>", { desc = "Decrease height", silent = true })
 
 -- Use ESC to exit terminal mode
 map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true })
