@@ -17,16 +17,13 @@ map("n", "<leader>sw", function()
 end, { desc = "Rip Grep current word", silent = true })
 map("n", "<leader><leader>", ":FzfLua buffers<CR>", { desc = "Buffers", silent = true })
 map("n", "<leader>e", ":Ex<CR>", { desc = "File Explorer", silent = true })
-map("n", "<leader>vs", ":vsplit<CR>", { desc = "Vertical Split", silent = true })
-map("n", "<leader>hs", ":split<CR>", { desc = "Horizontal Split", silent = true })
+map("n", "<leader>v", ":vsplit<CR>", { desc = "Vertical Split", silent = true })
+map("n", "<leader>h", ":split<CR>", { desc = "Horizontal Split", silent = true })
 map("n", "<leader>w", ":w<CR>", { desc = "Save", silent = true })
 map("n", "<leader>q", ":bd<CR>", { desc = "Close Buffer", silent = true })
 map("n", "<leader>n", ":bnext<CR>", { desc = "Next Buffer", silent = true })
 map("n", "<leader>b", ":bprevious<CR>", { desc = "Previous Buffer", silent = true })
 map("n", "<leader>x", vim.diagnostic.setloclist, { desc = "Diagnostics", silent = true })
-map("n", "<leader>pu", function()
-	vim.cmd("terminal " .. vim.fn.stdpath("config") .. "/update_plugins.sh")
-end, { desc = "Update plugins", silent = true })
 
 -- vim-test keymaps
 map("n", "<leader>tn", ":TestNearest<CR>", { desc = "Test Nearest", silent = true })
@@ -68,6 +65,12 @@ map("n", "<leader>cp", function()
 	vim.fn.setreg("+", vim.fn.expand("%"))
 	print("Copied relative path: " .. vim.fn.expand("%"))
 end, { desc = "Copy relative file path" })
+
+-- Resize splits
+map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height", silent = true })
+map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height", silent = true })
+map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width", silent = true })
+map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width", silent = true })
 
 -- Use ESC to exit terminal mode
 map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode", noremap = true })
@@ -218,3 +221,7 @@ map("n", "<leader>zm", ":ZenMode<CR>", { desc = "Toggle Zen Mode", silent = true
 -- neogit keymaps
 map("n", "<leader>gg", ":Neogit<CR>", { desc = "Open Neogit", silent = true })
 map("n", "<leader>gs", ":Neogit<CR>", { desc = "Open Neogit Status", silent = true })
+
+map("n", "<leader>pu", function()
+	vim.pack.update()
+end, { desc = "Update Plugins (vim.pack)", silent = true })

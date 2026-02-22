@@ -5,9 +5,9 @@
       "src": "https://github.com/sourcegraph/amp.nvim"
     },
     "blink.cmp": {
-      "rev": "b19413d214068f316c78978b08264ed1c41830ec",
+      "rev": "fb59cdefc31cb043bb49af5a6dacdca9476c2b38",
       "src": "https://github.com/saghen/blink.cmp",
-      "version": "'v1.8.0'"
+      "version": "'v1.9.1'"
     },
     "conform.nvim": {
       "rev": "41715945edf518ca73a9bd63ab6cdc23dd5c7b33",
@@ -154,6 +154,10 @@
     "skifree.nvim": {
       "rev": "565ba7d5dfa29a67027434906c40f5bb06d0b8ae",
       "src": "https://github.com/piersolenski/skifree.nvim"
+    },
+    "solarized-osaka.nvim": {
+      "rev": "f0c2f0ba0bd56108d53c9bfae4bb28ff6c67bbdb",
+      "src": "https://github.com/craftzdog/solarized-osaka.nvim"
     },
     "techbase.nvim": {
       "rev": "3c908d83ca18d3b3f3cc108555e718aad10d3131",
