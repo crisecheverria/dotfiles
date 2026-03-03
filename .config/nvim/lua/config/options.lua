@@ -34,3 +34,7 @@ vim.o.undofile = true
 vim.o.more = false
 -- Ensure intro screen is enabled (remove 'I' flag from shortmess if present)
 vim.opt.shortmess:remove("I")
+-- Folding (Treesitter-based)
+vim.o.foldmethod = "expr"
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldlevel = 99

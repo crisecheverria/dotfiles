@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "VimTeacher": {
+      "rev": "1fd16735def449da558625deb24d8e75738d100d",
+      "src": "https://github.com/brentsec/VimTeacher"
+    },
     "amp.nvim": {
       "rev": "3b9ad5ef0328de1b35cc9bfa723a37db5daf9434",
       "src": "https://github.com/sourcegraph/amp.nvim"
@@ -36,6 +40,10 @@
     "gruvbox.nvim": {
       "rev": "5e0a460d8e0f7f669c158dedd5f9ae2bcac31437",
       "src": "https://github.com/ellisonleao/gruvbox.nvim"
+    },
+    "incline.nvim": {
+      "rev": "8b54c59bcb23366645ae10edca6edfb9d3a0853e",
+      "src": "https://github.com/b0o/incline.nvim"
     },
     "lua-async-await": {
       "rev": "652d94df34e97abe2d4a689edbc4270e7ead1a98",
@@ -166,6 +174,10 @@
     "tokyonight.nvim": {
       "rev": "5da1b76e64daf4c5d410f06bcb6b9cb640da7dfd",
       "src": "https://github.com/folke/tokyonight.nvim.git"
+    },
+    "ts-expand-hover.nvim": {
+      "rev": "9d3c46ae4ad874648bc881f26e33b38230a5c5f9",
+      "src": "https://github.com/nemanjamalesija/ts-expand-hover.nvim"
     },
     "vague.nvim": {
       "rev": "fcc283576764474ccfbbcca240797d5d7f4d8a78",
