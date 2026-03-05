@@ -4,6 +4,10 @@ vim.pack.add({
 	{ src = "https://github.com/folke/noice.nvim" },
 }, { load = true })
 
+require("notify").setup({
+	background_colour = "#000000",
+})
+
 require("noice").setup({
 	lsp = {
 		-- override markdown rendering so that **cmp** and other plugins use **Treesitter**
