@@ -13,6 +13,10 @@
       "src": "https://github.com/saghen/blink.cmp",
       "version": "'v1.9.1'"
     },
+    "claude-preview.nvim": {
+      "rev": "11e28a548f0e86fe2c6d84feae5f8aab7a418241",
+      "src": "https://github.com/Cannon07/claude-preview.nvim"
+    },
     "conform.nvim": {
       "rev": "41715945edf518ca73a9bd63ab6cdc23dd5c7b33",
       "src": "https://github.com/stevearc/conform.nvim"
@@ -29,6 +33,10 @@
       "rev": "9d579feab4d3035627150e5e9b6e8fbf5e814ef6",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
+    "gentleman-kanagawa-blur": {
+      "rev": "5970f8459dcfb55f28e69670005549e74b57b2fb",
+      "src": "https://github.com/rodolfo-arg/gentleman-kanagawa-blur"
+    },
     "gitsigns.nvim": {
       "rev": "5813e4878748805f1518cee7abb50fd7205a3a48",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
@@ -44,6 +52,14 @@
     "incline.nvim": {
       "rev": "8b54c59bcb23366645ae10edca6edfb9d3a0853e",
       "src": "https://github.com/b0o/incline.nvim"
+    },
+    "kanagawa.nvim": {
+      "rev": "aef7f5cec0a40dbe7f3304214850c472e2264b10",
+      "src": "https://github.com/rebelot/kanagawa.nvim"
+    },
+    "kanso.nvim": {
+      "rev": "1afbbb449aa0254823dbe1932e3cbb51886ff9fe",
+      "src": "https://github.com/webhooked/kanso.nvim"
     },
     "lua-async-await": {
       "rev": "652d94df34e97abe2d4a689edbc4270e7ead1a98",
@@ -82,6 +98,10 @@
     "nui.nvim": {
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
       "src": "https://github.com/MunifTanjim/nui.nvim"
+    },
+    "nvim": {
+      "rev": "c4d475e4b5684747cde9b3f849186af7837d4397",
+      "src": "https://github.com/catppuccin/nvim"
     },
     "nvim-autopairs": {
       "rev": "c2a0dd0d931d0fb07665e1fedb1ea688da3b80b4",
@@ -142,6 +162,10 @@
     "nvim-web-devicons": {
       "rev": "8dcb311b0c92d460fac00eac706abd43d94d68af",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
+    },
+    "oldworld.nvim": {
+      "rev": "4b7acaebd89129b46c8f702cc8c4ab36630f4abf",
+      "src": "https://github.com/Alan-TheGentleman/oldworld.nvim"
     },
     "plenary.nvim": {
       "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",

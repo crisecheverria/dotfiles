@@ -123,6 +123,62 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Async shell command runner
+-- Usage: :Run npm run build
+--        :Run cargo test
+--        :Run make
+vim.api.nvim_create_user_command("Run", function(opts)
+	local cmd = opts.args
+	vim.notify("Running: " .. cmd, vim.log.levels.INFO)
+
+	local stdout_lines = {}
+	local stderr_lines = {}
+
+	vim.fn.jobstart(cmd, {
+		shell = true,
+		stdout_buffered = true,
+		stderr_buffered = true,
+		on_stdout = function(_, data)
+			if data then
+				for _, line in ipairs(data) do
+					if line ~= "" then
+						table.insert(stdout_lines, line)
+					end
+				end
+			end
+		end,
+		on_stderr = function(_, data)
+			if data then
+				for _, line in ipairs(data) do
+					if line ~= "" then
+						table.insert(stderr_lines, line)
+					end
+				end
+			end
+		end,
+		on_exit = function(_, code)
+			vim.schedule(function()
+				if code == 0 then
+					vim.notify("Done: " .. cmd, vim.log.levels.INFO)
+				else
+					vim.notify("Failed (exit " .. code .. "): " .. cmd, vim.log.levels.ERROR)
+				end
+
+				-- Populate quickfix with output so you can review it
+				local qf_lines = {}
+				vim.list_extend(qf_lines, stderr_lines)
+				vim.list_extend(qf_lines, stdout_lines)
+				if #qf_lines > 0 then
+					vim.fn.setqflist({}, " ", {
+						title = cmd,
+						lines = qf_lines,
+					})
+				end
+			end)
+		end,
+	})
+end, { nargs = "+", desc = "Run shell command async with notification" })
+
 -- Ensure intro screen is enabled by removing 'I' flag from shortmess
 vim.opt.shortmess:remove("I")
 

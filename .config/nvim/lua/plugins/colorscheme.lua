@@ -9,19 +9,19 @@ vim.pack.add({
 }, { load = true })
 
 --require('techbase').setup({})
--- require("tokyonight").setup({ transparent = true, styles = { sidebars = "transparent", floats = "transparent" } })
+require("tokyonight").setup({ transparent = true, styles = { sidebars = "transparent", floats = "transparent" } })
 -- require "vague".setup({ transparent = true })
 -- require("matteblack").colorscheme()
--- require("gruvbox").setup({ contrast = "hard", transparent_mode = false })
+-- require("gruvbox").setup({ contrast = "hard", transparent_mode = true })
 -- vim.g.gruvbox_material_background = "hard"
--- vim.g.gruvbox_material_transparent_background = 0
-require("solarized-osaka").setup({ transparent = true })
+-- vim.g.gruvbox_material_transparent_background = 1
+-- require("solarized-osaka").setup({ transparent = true })
 --vim.cmd("colorscheme techbase")
 -- vim.cmd("colorscheme vague")
--- vim.cmd([[colorscheme tokyonight]])
+vim.cmd([[colorscheme tokyonight]])
 -- vim.cmd([[colorscheme matteblack]])
 -- vim.cmd("colorscheme gruvbox")
 -- vim.cmd("colorscheme gruvbox-material")
-vim.cmd([[colorscheme solarized-osaka]])
+-- vim.cmd([[colorscheme solarized-osaka]])
 -- Remove statusline background color
--- vim.cmd(":hi statusline guibg=NONE")
+vim.cmd(":hi statusline guibg=NONE")

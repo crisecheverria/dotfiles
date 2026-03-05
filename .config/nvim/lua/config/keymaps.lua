@@ -1,5 +1,8 @@
 local map = vim.keymap.set
 
+-- Scroll half-page down/up
+map("n", "<C-s>", "<C-d>", { noremap = true, desc = "Scroll down" })
+
 -- Better navigation for wrapped lines
 map("n", "j", "gj", { noremap = true, desc = "Move down by visual line" })
 map("n", "k", "gk", { noremap = true, desc = "Move up by visual line" })
@@ -225,3 +228,14 @@ map("n", "<leader>gs", ":Neogit<CR>", { desc = "Open Neogit Status", silent = tr
 map("n", "<leader>pu", function()
 	vim.pack.update()
 end, { desc = "Update Plugins (vim.pack)", silent = true })
+
+-- Restart Neovim config
+map("n", "<leader>,", "<cmd>source $MYVIMRC<CR>", { desc = "Restart Config", silent = true })
+
+-- Easy way to get back to normal mode from home row
+vim.keymap.set("i", "jj", "<Esc>") -- jj simulates ESC
+vim.keymap.set("i", "jk", "<Esc>")
+
+-- Move selected blocks around
+vim.keymap.set("x", "K", ":m '<-2<CR>gv=gv") -- Move current line up
+vim.keymap.set("x", "J", ":m '>+1<CR>gv=gv")
