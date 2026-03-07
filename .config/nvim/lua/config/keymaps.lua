@@ -10,7 +10,26 @@ map("n", "k", "gk", { noremap = true, desc = "Move up by visual line" })
 -- clear search highlights with <Esc>
 map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 map("n", "<leader>lf", "<cmd>lua vim.lsp.buf.format()<CR>", { desc = "Format Buffer", silent = true })
-map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "Go to Definition", silent = true })
+map("n", "gd", function()
+	local current_buf = vim.api.nvim_get_current_buf()
+	local client = vim.lsp.get_clients({ bufnr = 0 })[1]
+	if not client then
+		return
+	end
+	local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+	vim.lsp.buf_request(0, "textDocument/definition", params, function(err, result, ctx)
+		if err or not result or vim.tbl_isempty(result) then
+			return
+		end
+		local target = vim.islist(result) and result[1] or result
+		local uri = target.uri or target.targetUri
+		local target_buf = vim.uri_to_bufnr(uri)
+		if target_buf ~= current_buf then
+			vim.cmd("tab split")
+		end
+		vim.lsp.util.show_document(target, ctx.client_id, { focus = true })
+	end)
+end, { desc = "Go to Definition (new tab if different file)", silent = true })
 map("n", "<leader>f", ":FzfLua files<CR>", { desc = "Find File", silent = true })
 map("n", "<leader>g", ":FzfLua live_grep<CR>", { desc = "Grep", silent = true })
 map("n", "<leader>r", ":Rg ", { desc = "Rip Grep" })
@@ -235,6 +254,11 @@ map("n", "<leader>,", "<cmd>source $MYVIMRC<CR>", { desc = "Restart Config", sil
 -- Easy way to get back to normal mode from home row
 vim.keymap.set("i", "jj", "<Esc>") -- jj simulates ESC
 vim.keymap.set("i", "jk", "<Esc>")
+
+-- Tab navigation
+map("n", "<leader>]", ":tabnext<CR>", { desc = "Next Tab", silent = true })
+map("n", "<leader>[", ":tabprevious<CR>", { desc = "Previous Tab", silent = true })
+map("n", "<leader>tc", ":tabclose<CR>", { desc = "Close Tab", silent = true })
 
 -- Move selected blocks around
 vim.keymap.set("x", "K", ":m '<-2<CR>gv=gv") -- Move current line up

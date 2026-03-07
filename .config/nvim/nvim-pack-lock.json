@@ -29,6 +29,10 @@
       "rev": "4516612fe98ff56ae0415a259ff6361a89419b0a",
       "src": "https://github.com/sindrets/diffview.nvim"
     },
+    "doric-themes.nvim": {
+      "rev": "cff89b1b40f599fc0b151181c96fa31fdc82b993",
+      "src": "https://github.com/aymenhafeez/doric-themes.nvim"
+    },
     "fzf-lua": {
       "rev": "9d579feab4d3035627150e5e9b6e8fbf5e814ef6",
       "src": "https://github.com/ibhagwan/fzf-lua"

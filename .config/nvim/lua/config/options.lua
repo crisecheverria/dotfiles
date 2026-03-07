@@ -38,3 +38,23 @@ vim.opt.shortmess:remove("I")
 vim.o.foldmethod = "expr"
 vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.o.foldlevel = 99
+-- Tabline: show only filename
+vim.o.showtabline = 2
+function _G.custom_tabline()
+	local s = ""
+	for i = 1, vim.fn.tabpagenr("$") do
+		local winnr = vim.fn.tabpagewinnr(i)
+		local bufnr = vim.fn.tabpagebuflist(i)[winnr]
+		local name = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ":t")
+		if name == "" then
+			name = "[No Name]"
+		end
+		if i == vim.fn.tabpagenr() then
+			s = s .. "%#TabLineSel# " .. name .. " "
+		else
+			s = s .. "%#TabLine# " .. name .. " "
+		end
+	end
+	return s .. "%#TabLineFill#"
+end
+vim.o.tabline = "%!v:lua.custom_tabline()"
