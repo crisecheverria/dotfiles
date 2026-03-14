@@ -1,0 +1,8 @@
+# Runtime/generated content — not tracked
+plugged/
+autoload/
+undo/
+view/
+session.vim
+.netrwhist
+.viminfo
