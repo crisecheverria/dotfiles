@@ -7,19 +7,11 @@ vim.pack.add({
 	{ src = "https://github.com/sainnhe/gruvbox-material" },
 	{ src = "https://github.com/craftzdog/solarized-osaka.nvim" },
 	{ src = "https://github.com/aymenhafeez/doric-themes.nvim" },
-	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/rodolfo-arg/gentleman-kanagawa-blur" },
 	{ src = "https://github.com/Alan-TheGentleman/oldworld.nvim" },
 	{ src = "https://github.com/rebelot/kanagawa.nvim" },
 	{ src = "https://github.com/webhooked/kanso.nvim" },
 }, { load = true })
-
--- Catppuccin (mocha, transparent)
-require("catppuccin").setup({
-	flavour = "mocha",
-	transparent_background = true,
-	term_colors = true,
-})
 
 -- Kanagawa (wave, transparent)
 require("kanagawa").setup({
@@ -82,7 +74,10 @@ require("kanso").setup({
 
 -- All available colorschemes
 local colorschemes = {
-	"catppuccin",
+	"catppuccin-frappe",
+	"catppuccin-latte",
+	"catppuccin-macchiato",
+	"catppuccin-mocha",
 	"doric-beach",
 	"doric-cherry",
 	"doric-copper",
@@ -116,6 +111,13 @@ local colorschemes = {
 
 local function apply_post_colorscheme()
 	vim.cmd(":hi statusline guibg=NONE")
+	local name = vim.g.colors_name or ""
+	if name:match("^catppuccin") then
+		vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+		vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+		vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+	end
 end
 
 local function persist_colorscheme(name)
@@ -200,5 +202,5 @@ end
 vim.keymap.set("n", "<leader>cs", pick_colorscheme, { desc = "Pick Colorscheme" })
 
 -- Active colorscheme
-vim.cmd("colorscheme oldworld")
+vim.cmd("colorscheme doric-obsidian")
 apply_post_colorscheme()

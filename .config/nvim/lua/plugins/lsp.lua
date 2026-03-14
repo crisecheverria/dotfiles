@@ -63,6 +63,19 @@ vim.lsp.config("rust_analyzer", {
 	},
 })
 
+-- Override filetypes to remove invalid ones (javascript.jsx, typescript.tsx, gowork, gotmpl)
+vim.lsp.config("eslint", {
+	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "astro", "htmlangular" },
+})
+
+vim.lsp.config("vtsls", {
+	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+})
+
+vim.lsp.config("gopls", {
+	filetypes = { "go", "gomod" },
+})
+
 -- Enable LSP servers automatically
 vim.lsp.enable({
 	"gopls",

@@ -1,7 +1,7 @@
 {
   "plugins": {
     "VimTeacher": {
-      "rev": "1fd16735def449da558625deb24d8e75738d100d",
+      "rev": "04e100ff9ba420fb88d26cb85191f9b3cca0fbd9",
       "src": "https://github.com/brentsec/VimTeacher"
     },
     "amp.nvim": {
@@ -9,7 +9,7 @@
       "src": "https://github.com/sourcegraph/amp.nvim"
     },
     "blink.cmp": {
-      "rev": "fb59cdefc31cb043bb49af5a6dacdca9476c2b38",
+      "rev": "4b18c32adef2898f95cdef6192cbd5796c1a332d",
       "src": "https://github.com/saghen/blink.cmp",
       "version": "'v1.9.1'"
     },
@@ -97,7 +97,7 @@
     "noice.nvim": {
       "rev": "7bfd942445fb63089b59f97ca487d605e715f155",
       "sha_target": "7bfd942445fb63089b59f97ca487d605e715f155",
-      "src": "git@github.com:folke/noice.nvim"
+      "src": "https://github.com/folke/noice.nvim"
     },
     "nui.nvim": {
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
@@ -157,7 +157,7 @@
     "nvim-notify": {
       "rev": "8701bece920b38ea289b457f902e2ad184131a5d",
       "sha_target": "8701bece920b38ea289b457f902e2ad184131a5d",
-      "src": "git@github.com:rcarriga/nvim-notify"
+      "src": "https://github.com/rcarriga/nvim-notify"
     },
     "nvim-treesitter": {
       "rev": "4fc09bee78e91bf4ba471cdab4bf9dfa37fde51c",
@@ -207,6 +207,10 @@
       "rev": "9d3c46ae4ad874648bc881f26e33b38230a5c5f9",
       "src": "https://github.com/nemanjamalesija/ts-expand-hover.nvim"
     },
+    "typr": {
+      "rev": "584e4ef34dea25a4035627794322f315b22d1253",
+      "src": "https://github.com/nvzone/typr"
+    },
     "vague.nvim": {
       "rev": "fcc283576764474ccfbbcca240797d5d7f4d8a78",
       "src": "https://github.com/vague2k/vague.nvim"
@@ -226,6 +230,10 @@
     "vim-tmux-navigator": {
       "rev": "c45243dc1f32ac6bcf6068e5300f3b2b237e576a",
       "src": "https://github.com/christoomey/vim-tmux-navigator"
+    },
+    "volt": {
+      "rev": "620de1321f275ec9d80028c68d1b88b409c0c8b1",
+      "src": "https://github.com/nvzone/volt"
     },
     "vscode-diff.nvim": {
       "rev": "24fd73d889f2d71a467d65db03a01f4ca1255dca",

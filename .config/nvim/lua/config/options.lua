@@ -6,8 +6,7 @@ vim.o.signcolumn = "yes"
 -- Cursorline
 vim.o.cursorline = true
 -- Show whitespace characters
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.o.list = false
 -- Search
 vim.o.ignorecase = true
 vim.o.smartcase = true
