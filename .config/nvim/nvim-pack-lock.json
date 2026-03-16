@@ -4,6 +4,10 @@
       "rev": "04e100ff9ba420fb88d26cb85191f9b3cca0fbd9",
       "src": "https://github.com/brentsec/VimTeacher"
     },
+    "ai-cli.nvim": {
+      "rev": "97e4e43cdc1966e8adba0a353d3c890756a62ba2",
+      "src": "https://github.com/crisecheverria/ai-cli.nvim"
+    },
     "amp.nvim": {
       "rev": "3b9ad5ef0328de1b35cc9bfa723a37db5daf9434",
       "src": "https://github.com/sourcegraph/amp.nvim"

@@ -260,6 +260,12 @@ map("n", "<leader>]", ":tabnext<CR>", { desc = "Next Tab", silent = true })
 map("n", "<leader>[", ":tabprevious<CR>", { desc = "Previous Tab", silent = true })
 map("n", "<leader>tc", ":tabclose<CR>", { desc = "Close Tab", silent = true })
 
+-- ai-cli.nvim keymaps (Claude Code)
+map({ "n", "t" }, "<C-;>", ":AiCli<CR>", { desc = "Toggle AI CLI", silent = true })
+map("n", "<leader>co", ":AiCliOpen<CR>", { desc = "Open AI CLI", silent = true })
+map("n", "<leader>cc", ":AiCliClose<CR>", { desc = "Close AI CLI", silent = true })
+map("n", "<leader>ca", ":AiCliAdd<CR>", { desc = "Add file to AI CLI context", silent = true })
+
 -- Move selected blocks around
 vim.keymap.set("x", "K", ":m '<-2<CR>gv=gv") -- Move current line up
 vim.keymap.set("x", "J", ":m '>+1<CR>gv=gv")
