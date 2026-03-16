@@ -33,6 +33,7 @@ Plug 'davidoc/taskpaper.vim'
 
 "AI
 Plug 'github/copilot.vim'
+Plug 'madox2/vim-ai'
 
 "Color Scheme
 Plug 'ap/vim-css-color'
