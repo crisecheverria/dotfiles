@@ -29,6 +29,11 @@
 .config/opencode
 .config/zed
 
+# Claude and AI tokens
+**/.claude/
+.config/claude-code/
+openrouter.token
+
 # System files
 .DS_Store
 *.swp

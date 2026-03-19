@@ -76,5 +76,9 @@ let g:tagbar_autoclose   = 0
 " ---- Netrw settings ----
 let g:netrw_banner = 0
 
+" ---- vim-claude-code setup ----
+let g:claude_code_map_toggle = '<C-;>'
+let g:claude_code_diff_preview = 1
+
 " ---- vim-ai setup ----
 let g:vim_ai_roles_config_file = expand('~/.config/vim-ai/roles.ini')
