@@ -1,0 +1,8 @@
+{
+  "plugins": {
+    "ai-cli.nvim": {
+      "rev": "407151b35103a0e5d23764a98f0a7e1752a95a03",
+      "src": "https://github.com/crisecheverria/ai-cli.nvim"
+    }
+  }
+}

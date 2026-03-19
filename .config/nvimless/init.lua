@@ -1,0 +1,172 @@
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.autoread = true
+vim.opt.autowrite = true
+vim.opt.mouse = ""
+vim.opt.complete = ".,w,b,u"
+vim.opt.completeopt = "fuzzy,noselect,menuone,popup"
+vim.opt.wildmode = "noselect:longest"
+vim.opt.wildoptions = "fuzzy,pum"
+vim.opt.termguicolors = true
+vim.opt.cursorline = true
+vim.opt.cursorlineopt = "number"
+vim.opt.cmdheight = 0
+vim.opt.scrolloff = 5
+vim.opt.showcmd = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.breakindent = true
+vim.opt.linebreak = true
+vim.opt.ignorecase = true
+vim.opt.incsearch = true
+vim.opt.smartcase = true
+vim.opt.smartindent = true
+vim.opt.wrap = true
+vim.opt.virtualedit = "block"
+vim.opt.colorcolumn = "80,120"
+vim.opt.textwidth = 80
+vim.opt.formatoptions = "crl1"
+vim.opt.pumheight = 20
+vim.opt.compatible = false
+vim.opt.path = "**"
+vim.opt.undofile = true
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.writebackup = false
+vim.g.mapleader = " "
+
+local mode_names = {
+	n = "N", no = "N", i = "I", ic = "I",
+	v = "V", V = "V", ["\22"] = "V",
+	s = "S", S = "S", ["\19"] = "S",
+	R = "R", Rv = "R", c = "C",
+	t = "T",
+}
+
+local function git_branch()
+	local branch = vim.fn.system("git -C " .. vim.fn.expand("%:p:h") .. " branch --show-current 2>/dev/null"):gsub("\n", "")
+	if branch == "" then return "" end
+	if #branch > 15 then branch = branch:sub(1, 15) .. "…" end
+	return " " .. branch .. " |"
+end
+
+_G.statusline = function()
+	local mode = mode_names[vim.fn.mode()] or vim.fn.mode()
+	return " " .. mode .. " |" .. git_branch() .. " %t %= %S %= %Y | %02l/%02L "
+end
+
+vim.opt.statusline = "%!v:lua.statusline()"
+vim.opt.statuscolumn = "%l%#NonText#  "
+
+vim.g.loaded_matchit = 1
+vim.g.netrw_banner = 0
+vim.g.netrw_liststyle = 0
+vim.g.loaded_remote_plugins = 1
+vim.g.loaded_shada_plugin = 1
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_tutor_mode_plugin = 1
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
+
+-- Load Cfilter optional package
+vim.cmd.packadd("cfilter")
+
+-- Install and load packages
+vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" }, { load = true })
+
+require("ai-cli").setup({
+	provider = "claude",
+	terminal_cmd = "claude",
+	log_level = "info",
+})
+
+-- Load persisted colorscheme or fall back to darkblue
+local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
+local f = io.open(colorscheme_file, "r")
+local saved = f and f:read("*l")
+if f then f:close() end
+vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
+
+local utils = require("utils")
+-- Load configuration fragments
+local configurations = {}
+for _, config in pairs({
+	"keymaps",
+	"commands",
+	"treesitter",
+	"tools/find",
+	"tools/textobjects",
+	"tools/qf",
+	"tools/languages",
+	"tools/git",
+	"tools/lsp",
+}) do
+	package.loaded[config] = false
+	local config_setup = require(config)
+	if type(config_setup) == "table" then
+		for key, value in pairs(config_setup) do
+			configurations[key] = utils.merge_table(configurations[key], value)
+		end
+	end
+end
+
+function check_keymap(modes, lhs, rhs)
+	assert(type(modes) == "table", "invalid 'modes' type")
+	for _, mode in pairs(modes) do
+		local previous = vim.fn.maparg(lhs, mode)
+		assert(
+			string.len(previous) == 0,
+			string.format("multiple declaration of keymap '%s' in mode %s: '%s' & '%s'", lhs, mode, rhs, previous)
+		)
+	end
+end
+
+-- Clear all mappings that would have been created by plugins and set our owns
+vim.cmd.mapclear()
+for _, keymap in pairs(configurations.keymaps or {}) do
+	local mode, lhs, rhs, opts = unpack(keymap)
+
+	check_keymap(mode, lhs, rhs)
+	vim.keymap.set(mode, lhs, rhs, opts)
+	if type(rhs) ~= "function" then
+		local left, right = string.find(rhs, "<[ACS]%-%a>")
+		local len = string.len(rhs)
+		if len == 1 or (left == 1 and right == len) then
+			vim.keymap.set(mode, rhs, "<Nop>")
+		end
+	end
+end
+
+-- Unset unwanted default bindings
+for _, unbind in pairs(configurations.unbinds or {}) do
+	local mode, lhs, opts = unpack(unbind)
+	vim.keymap.set(mode, lhs, "<Nop>", opts)
+end
+
+-- Load autocommands
+vim.api.nvim_create_augroup("Config", { clear = true })
+for _, au in pairs(configurations.autocmds or {}) do
+	local events, fn, opts = unpack(au)
+	vim.api.nvim_create_autocmd(
+		events,
+		vim.tbl_extend("error", {
+			group = "Config",
+			callback = fn,
+		}, opts or {})
+	)
+end
+
+-- Load custom user commands
+for _, user in pairs(configurations.usercmds or {}) do
+	local name, callback, opts = unpack(user)
+	vim.api.nvim_create_user_command(name, callback, opts or {})
+end
+
+-- Load options
+for name, value in pairs(configurations.options or {}) do
+	vim.opt[name] = value
+end
