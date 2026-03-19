@@ -26,3 +26,4 @@ background-blur = macos-glass-regular
 # Notifications for Claude Code
 desktop-notifications = true
 
+macos-option-as-alt = true
