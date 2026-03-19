@@ -11,6 +11,8 @@ vim.pack.add({
 	{ src = "https://github.com/Alan-TheGentleman/oldworld.nvim" },
 	{ src = "https://github.com/rebelot/kanagawa.nvim" },
 	{ src = "https://github.com/webhooked/kanso.nvim" },
+	{ src = "https://gitlab.com/shmerl/neogotham.git" },
+	{ src = "https://github.com/gnualmalki/devel.nvim" },
 }, { load = true })
 
 -- Kanagawa (wave, transparent)
@@ -78,6 +80,7 @@ local colorschemes = {
 	"catppuccin-latte",
 	"catppuccin-macchiato",
 	"catppuccin-mocha",
+	"devel",
 	"doric-beach",
 	"doric-cherry",
 	"doric-copper",
@@ -102,6 +105,7 @@ local colorschemes = {
 	"kanagawa",
 	"kanso",
 	"matteblack",
+	"neogotham",
 	"oldworld",
 	"solarized-osaka",
 	"techbase",
@@ -120,46 +124,70 @@ local function apply_post_colorscheme()
 	end
 end
 
+local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme.txt"
+
 local function persist_colorscheme(name)
-	local config_path = vim.fn.stdpath("config") .. "/lua/plugins/colorscheme.lua"
-	local file = io.open(config_path, "r")
-	if not file then
-		return
-	end
-	local lines = {}
-	for line in file:lines() do
-		if line:match('^vim%.cmd%("colorscheme ') then
-			table.insert(lines, 'vim.cmd("colorscheme ' .. name .. '")')
-		else
-			table.insert(lines, line)
-		end
-	end
-	file:close()
-	file = io.open(config_path, "w")
+	local file = io.open(colorscheme_file, "w")
 	if file then
-		file:write(table.concat(lines, "\n") .. "\n")
+		file:write(name)
 		file:close()
 	end
 end
 
-local function pick_colorscheme()
-	local buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, colorschemes)
-	vim.bo[buf].modifiable = false
-	vim.bo[buf].bufhidden = "wipe"
+local function load_persisted_colorscheme()
+	local file = io.open(colorscheme_file, "r")
+	if file then
+		local name = file:read("*l")
+		file:close()
+		if name and name ~= "" then
+			return name
+		end
+	end
+	return nil
+end
 
+local function pick_colorscheme()
 	local original = vim.g.colors_name or "default"
+	local filtered = vim.list_extend({}, colorschemes)
+	local selected_idx = 1
+	local ns = vim.api.nvim_create_namespace("colorscheme_picker")
+
+	-- Input buffer (filter prompt)
+	local input_buf = vim.api.nvim_create_buf(false, true)
+	vim.bo[input_buf].bufhidden = "wipe"
+	vim.bo[input_buf].buftype = "nofile"
+
+	-- Results buffer
+	local results_buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_lines(results_buf, 0, -1, false, filtered)
+	vim.bo[results_buf].modifiable = false
+	vim.bo[results_buf].bufhidden = "wipe"
 
 	local width = 30
-	local height = math.min(#colorschemes, 30)
-	local row = math.floor((vim.o.lines - height) / 2)
+	local results_height = math.min(#colorschemes, 30)
+	local total_height = results_height + 3 -- input window + borders
+	local row = math.floor((vim.o.lines - total_height) / 2)
 	local col = math.floor((vim.o.columns - width) / 2)
 
-	local win = vim.api.nvim_open_win(buf, true, {
+	-- Input window (top)
+	local input_win = vim.api.nvim_open_win(input_buf, true, {
 		relative = "editor",
 		width = width,
-		height = height,
+		height = 1,
 		row = row,
+		col = col,
+		style = "minimal",
+		border = "rounded",
+		title = " Filter ",
+		title_pos = "center",
+	})
+
+	-- Results window (below input)
+	local results_win = vim.api.nvim_open_win(results_buf, false, {
+		relative = "editor",
+		width = width,
+		height = results_height,
+		row = row + 3,
 		col = col,
 		style = "minimal",
 		border = "rounded",
@@ -167,40 +195,94 @@ local function pick_colorscheme()
 		title_pos = "center",
 	})
 
-	-- Live preview on cursor move
-	vim.api.nvim_create_autocmd("CursorMoved", {
-		buffer = buf,
-		callback = function()
-			local idx = vim.api.nvim_win_get_cursor(win)[1]
-			pcall(vim.cmd, "colorscheme " .. colorschemes[idx])
+	local function update_highlight()
+		vim.api.nvim_buf_clear_namespace(results_buf, ns, 0, -1)
+		if #filtered > 0 and selected_idx >= 1 and selected_idx <= #filtered then
+			vim.api.nvim_buf_add_highlight(results_buf, ns, "Visual", selected_idx - 1, 0, -1)
+			pcall(vim.cmd, "colorscheme " .. filtered[selected_idx])
 			apply_post_colorscheme()
+		end
+	end
+
+	local function update_results()
+		local query = (vim.api.nvim_buf_get_lines(input_buf, 0, 1, false)[1] or ""):lower()
+		filtered = {}
+		for _, name in ipairs(colorschemes) do
+			if query == "" or name:lower():find(query, 1, true) then
+				table.insert(filtered, name)
+			end
+		end
+		vim.bo[results_buf].modifiable = true
+		vim.api.nvim_buf_set_lines(results_buf, 0, -1, false, filtered)
+		vim.bo[results_buf].modifiable = false
+		selected_idx = math.min(selected_idx, math.max(#filtered, 1))
+		-- Resize results window to fit filtered list
+		local new_height = math.max(math.min(#filtered, 30), 1)
+		vim.api.nvim_win_set_height(results_win, new_height)
+		update_highlight()
+	end
+
+	vim.cmd("startinsert")
+
+	vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, {
+		buffer = input_buf,
+		callback = function()
+			selected_idx = 1
+			update_results()
 		end,
 	})
 
-	-- Cancel: revert to original
+	local function close_picker()
+		vim.cmd("stopinsert")
+		if vim.api.nvim_win_is_valid(input_win) then
+			vim.api.nvim_win_close(input_win, true)
+		end
+		if vim.api.nvim_win_is_valid(results_win) then
+			vim.api.nvim_win_close(results_win, true)
+		end
+	end
+
 	local function cancel()
-		vim.api.nvim_win_close(win, true)
+		close_picker()
 		pcall(vim.cmd, "colorscheme " .. original)
 		apply_post_colorscheme()
 	end
 
-	vim.keymap.set("n", "q", cancel, { buffer = buf })
-	vim.keymap.set("n", "<Esc>", cancel, { buffer = buf })
+	local function confirm()
+		if #filtered > 0 and selected_idx >= 1 and selected_idx <= #filtered then
+			local name = filtered[selected_idx]
+			close_picker()
+			vim.cmd("colorscheme " .. name)
+			apply_post_colorscheme()
+			persist_colorscheme(name)
+			vim.notify("Colorscheme: " .. name, vim.log.levels.INFO)
+		end
+	end
 
-	-- Confirm selection
-	vim.keymap.set("n", "<CR>", function()
-		local idx = vim.api.nvim_win_get_cursor(win)[1]
-		local name = colorschemes[idx]
-		vim.api.nvim_win_close(win, true)
-		vim.cmd("colorscheme " .. name)
-		apply_post_colorscheme()
-		persist_colorscheme(name)
-		vim.notify("Colorscheme: " .. name, vim.log.levels.INFO)
-	end, { buffer = buf })
+	local opts = { buffer = input_buf, noremap = true }
+	local function move_down()
+		selected_idx = math.min(selected_idx + 1, #filtered)
+		update_highlight()
+	end
+	local function move_up()
+		selected_idx = math.max(selected_idx - 1, 1)
+		update_highlight()
+	end
+	vim.keymap.set({ "i", "n" }, "<C-j>", move_down, opts)
+	vim.keymap.set({ "i", "n" }, "<C-n>", move_down, opts)
+	vim.keymap.set({ "i", "n" }, "<Down>", move_down, opts)
+	vim.keymap.set({ "i", "n" }, "<C-k>", move_up, opts)
+	vim.keymap.set({ "i", "n" }, "<C-p>", move_up, opts)
+	vim.keymap.set({ "i", "n" }, "<Up>", move_up, opts)
+	vim.keymap.set({ "i", "n" }, "<CR>", confirm, opts)
+	vim.keymap.set({ "i", "n" }, "<Esc>", cancel, opts)
+	vim.keymap.set("n", "q", cancel, opts)
+
+	update_highlight()
 end
 
 vim.keymap.set("n", "<leader>cs", pick_colorscheme, { desc = "Pick Colorscheme" })
 
--- Active colorscheme
-vim.cmd("colorscheme doric-obsidian")
+-- Active colorscheme (load persisted choice, fall back to default)
+vim.cmd("colorscheme " .. (load_persisted_colorscheme() or "devel"))
 apply_post_colorscheme()

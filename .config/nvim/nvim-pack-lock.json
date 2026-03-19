@@ -29,6 +29,10 @@
       "rev": "f89e977c87180519ba3b942200e3d05b17b1e2fc",
       "src": "https://github.com/github/copilot.vim"
     },
+    "devel.nvim": {
+      "rev": "34a201926bbe6371e2f772e51571dcc6eb74c1c3",
+      "src": "https://github.com/gnualmalki/devel.nvim"
+    },
     "diffview.nvim": {
       "rev": "4516612fe98ff56ae0415a259ff6361a89419b0a",
       "src": "https://github.com/sindrets/diffview.nvim"
@@ -97,6 +101,10 @@
     "neogit": {
       "rev": "df323856553d4c5e5c41117606c63f628b24a3b0",
       "src": "https://github.com/NeogitOrg/neogit"
+    },
+    "neogotham": {
+      "rev": "e07379d32615b77180c71ba11520f0dd9b0022e5",
+      "src": "https://gitlab.com/shmerl/neogotham.git"
     },
     "noice.nvim": {
       "rev": "7bfd942445fb63089b59f97ca487d605e715f155",
