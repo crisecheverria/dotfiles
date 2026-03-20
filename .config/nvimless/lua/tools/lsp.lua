@@ -10,7 +10,28 @@ vim.lsp.config("vtsls", {
 	filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
 })
 
-vim.lsp.enable({ "gopls", "vtsls" })
+vim.lsp.config("rust_analyzer", {
+	cmd = { "rust-analyzer" },
+	root_markers = { "Cargo.toml", ".git" },
+	filetypes = { "rust" },
+})
+
+vim.lsp.config("lua_ls", {
+	cmd = { "lua-language-server" },
+	root_markers = { ".luarc.json", ".git" },
+	filetypes = { "lua" },
+	settings = {
+		Lua = {
+			runtime = { version = "LuaJIT" },
+			workspace = {
+				library = vim.api.nvim_get_runtime_file("", true),
+				checkThirdParty = false,
+			},
+		},
+	},
+})
+
+vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls" })
 
 return {
 	autocmds = {

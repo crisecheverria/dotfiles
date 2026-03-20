@@ -60,9 +60,66 @@ end
 
 local function close_floating_terminal()
 	if terminal_state.is_open and vim.api.nvim_win_is_valid(terminal_state.win) then
-		vim.api.nvim_win_close(terminal_state.win, false)
-		terminal_state.is_open = false
+		vim.api.nvim_win_close(terminal_state.win, true)
 	end
+	if terminal_state.buf and vim.api.nvim_buf_is_valid(terminal_state.buf) then
+		local job_id = vim.b[terminal_state.buf].terminal_job_id
+		if job_id then
+			vim.fn.jobstop(job_id)
+		end
+		vim.api.nvim_buf_delete(terminal_state.buf, { force = true })
+	end
+	terminal_state.buf = nil
+	terminal_state.win = nil
+	terminal_state.is_open = false
+end
+
+local function run_test()
+	local file = vim.fn.expand("%:p")
+	local ft = vim.bo.filetype
+	local cmd
+
+	if ft == "lua" then
+		local minimal = vim.fn.findfile("tests/minimal_init.lua", vim.fn.getcwd() .. ";")
+		if minimal ~= "" then
+			cmd = "nvim --headless -u " .. minimal .. " -l " .. file
+		else
+			cmd = "nvim --headless -l " .. file
+		end
+	elseif ft == "python" then
+		cmd = "python -m pytest " .. file .. " -v"
+	elseif ft == "javascript" or ft == "typescript" then
+		local dir = vim.fn.expand("%:p:h")
+		local vitest = vim.fn.findfile("node_modules/.bin/vitest", dir .. ";")
+		local jest = vim.fn.findfile("node_modules/.bin/jest", dir .. ";")
+		if vitest ~= "" then
+			cmd = vim.fn.fnamemodify(vitest, ":p") .. " run " .. file
+		elseif jest ~= "" then
+			cmd = vim.fn.fnamemodify(jest, ":p") .. " " .. file
+		else
+			cmd = "node --test " .. file
+		end
+	elseif ft == "go" then
+		cmd = "go test " .. vim.fn.expand("%:h") .. "/..."
+	else
+		vim.notify("No test runner configured for filetype: " .. ft, vim.log.levels.WARN)
+		return
+	end
+
+	vim.cmd("botright 15split")
+	local win = vim.api.nvim_get_current_win()
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_win_set_buf(win, buf)
+	vim.fn.termopen(cmd, {
+		on_exit = function(_, code)
+			vim.schedule(function()
+				local msg = code == 0 and "Tests passed" or "Tests FAILED (exit " .. code .. ")"
+				local level = code == 0 and vim.log.levels.INFO or vim.log.levels.WARN
+				vim.notify(msg, level)
+			end)
+		end,
+	})
+	vim.cmd("startinsert")
 end
 
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
@@ -119,12 +176,14 @@ end
 local function show_keymaps()
 	local modes = { "n", "i", "v", "x", "o" }
 	local lines = {}
+	local leader = vim.g.mapleader or "\\"
 	for _, mode in ipairs(modes) do
 		local maps = vim.api.nvim_get_keymap(mode)
 		for _, map in ipairs(maps) do
+			local lhs = map.lhs:gsub(leader, "<leader>", 1)
 			local rhs = map.rhs or (map.callback and "<function>" or "")
 			local desc = map.desc or ""
-			table.insert(lines, string.format("%-4s %-20s %-40s %s", mode, map.lhs, rhs, desc))
+			table.insert(lines, string.format("%-4s %-20s %-40s %s", mode, lhs, rhs, desc))
 		end
 	end
 	table.sort(lines)
@@ -185,5 +244,6 @@ return {
 		{ "FloatingTerminal", floating_terminal, {} },
 		{ "CloseFloatingTerminal", close_floating_terminal, {} },
 		{ "ColorPicker", colorscheme_picker, {} },
+		{ "RunTest", run_test, {} },
 	},
 }

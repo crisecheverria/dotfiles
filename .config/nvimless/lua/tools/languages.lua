@@ -50,12 +50,91 @@ local function go_config()
 	setup_format({ vim.bo.formatprg })
 end
 
+local eslint_ns = vim.api.nvim_create_namespace("eslint")
+
+local function eslint_lint(bufnr, eslint_bin)
+	local file = vim.api.nvim_buf_get_name(bufnr)
+	if file == "" then
+		return
+	end
+
+	vim.system(
+		{ eslint_bin, "--format", "json", file },
+		{ text = true },
+		vim.schedule_wrap(function(result)
+			if not vim.api.nvim_buf_is_valid(bufnr) then
+				return
+			end
+
+			vim.diagnostic.reset(eslint_ns, bufnr)
+
+			if not result.stdout or result.stdout == "" then
+				return
+			end
+
+			local ok, parsed = pcall(vim.json.decode, result.stdout)
+			if not ok or not parsed or not parsed[1] or not parsed[1].messages then
+				return
+			end
+
+			local diagnostics = {}
+			for _, msg in ipairs(parsed[1].messages) do
+				table.insert(diagnostics, {
+					lnum = (msg.line or 1) - 1,
+					col = (msg.column or 1) - 1,
+					end_lnum = msg.endLine and (msg.endLine - 1) or nil,
+					end_col = msg.endColumn and (msg.endColumn - 1) or nil,
+					message = msg.message,
+					source = "eslint",
+					severity = msg.severity == 2 and vim.diagnostic.severity.ERROR or vim.diagnostic.severity.WARN,
+				})
+			end
+
+			vim.diagnostic.set(eslint_ns, bufnr, diagnostics)
+		end)
+	)
+end
+
+local function find_local_bin(name)
+	local dir = vim.fn.expand("%:p:h")
+	local local_bin = vim.fn.findfile("node_modules/.bin/" .. name, dir .. ";")
+	if local_bin ~= "" then
+		return vim.fn.fnamemodify(local_bin, ":p")
+	end
+	return vim.fn.executable(name) == 1 and name or nil
+end
+
 local function js_ts_config()
 	vim.bo.formatprg = "prettier"
 	vim.bo.tabstop = 2
 	vim.bo.shiftwidth = 2
 
-	setup_format({ vim.bo.formatprg, "--stdin-filepath", vim.api.nvim_buf_get_name(0) })
+	local file = vim.api.nvim_buf_get_name(0)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local eslint_bin = find_local_bin("eslint")
+
+	if eslint_bin then
+		eslint_lint(bufnr, eslint_bin)
+
+		vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+			group = "Config",
+			buffer = bufnr,
+			callback = function()
+				eslint_lint(bufnr, eslint_bin)
+			end,
+		})
+
+		vim.api.nvim_create_autocmd("BufWritePre", {
+			group = "Config",
+			buffer = bufnr,
+			callback = function()
+				vim.system({ eslint_bin, "--fix", vim.api.nvim_buf_get_name(bufnr) }):wait()
+				vim.cmd("silent! checktime")
+			end,
+		})
+	end
+
+	setup_format({ vim.bo.formatprg, "--stdin-filepath", file })
 end
 
 return {

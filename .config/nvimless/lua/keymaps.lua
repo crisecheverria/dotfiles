@@ -31,18 +31,19 @@ return {
 		{ { "n" }, "<C-j>", "<C-w>j", { desc = "Move to window below" } },
 		{ { "n" }, "<C-k>", "<C-w>k", { desc = "Move to window above" } },
 		-- normal mode
-		{ { "n", "t" }, "<c-;>", "<cmd>aicli<cr>", { desc = "toggle claude code terminal" } },
+		{ { "n", "t" }, "<c-;>", "<cmd>AiCli<cr>", { desc = "toggle claude code terminal" } },
 		{ { "n" }, "<leader>t", "<cmd>FloatingTerminal<cr>", { noremap = true, silent = true, desc = "Toggle floating terminal" } },
 		{ { "t" }, "<Esc>", "<cmd>CloseFloatingTerminal<cr>", { noremap = true, silent = true, desc = "Close floating terminal" } },
 		{ { "n" }, "<esc>", "<esc><cmd>noh<cr>", { silent = true, desc = "clear search highlight" } },
 		{ { "n" }, "x", betterdelete(true), { expr = true, desc = "delete char (void register)" } },
 		{ { "n" }, "<leader>x", vim.diagnostic.setloclist, { desc = "Open diagnostic list" } },
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
+		{ { "n" }, "<leader>rt", "<cmd>RunTest<cr>", { desc = "run test for current file" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", "<cmd>buffers<cr>", { desc = "list buffers" } },
 		{ { "n" }, "<leader>cp",
 			function()
-				local path = vim.fn.expand("%:p")
+				local path = vim.fn.expand("%:.")
 				vim.fn.setreg("+", path)
 				print("file:", path)
 			end,
