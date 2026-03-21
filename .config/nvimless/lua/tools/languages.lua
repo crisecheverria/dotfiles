@@ -137,10 +137,15 @@ local function js_ts_config()
 	setup_format({ vim.bo.formatprg, "--stdin-filepath", file })
 end
 
+local function ghostty_config()
+	vim.bo.commentstring = "# %s"
+end
+
 return {
 	autocmds = {
 		{ "Filetype", lua_config, { pattern = "lua" } },
 		{ "Filetype", go_config, { pattern = "go" } },
 		{ "Filetype", js_ts_config, { pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact" } } },
+		{ "Filetype", ghostty_config, { pattern = "ghostty" } },
 	},
 }

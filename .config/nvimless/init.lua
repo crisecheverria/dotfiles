@@ -38,17 +38,31 @@ vim.opt.writebackup = false
 vim.g.mapleader = " "
 
 local mode_names = {
-	n = "N", no = "N", i = "I", ic = "I",
-	v = "V", V = "V", ["\22"] = "V",
-	s = "S", S = "S", ["\19"] = "S",
-	R = "R", Rv = "R", c = "C",
+	n = "N",
+	no = "N",
+	i = "I",
+	ic = "I",
+	v = "V",
+	V = "V",
+	["\22"] = "V",
+	s = "S",
+	S = "S",
+	["\19"] = "S",
+	R = "R",
+	Rv = "R",
+	c = "C",
 	t = "T",
 }
 
 local function git_branch()
-	local branch = vim.fn.system("git -C " .. vim.fn.expand("%:p:h") .. " branch --show-current 2>/dev/null"):gsub("\n", "")
-	if branch == "" then return "" end
-	if #branch > 15 then branch = branch:sub(1, 15) .. "…" end
+	local branch =
+		vim.fn.system("git -C " .. vim.fn.expand("%:p:h") .. " branch --show-current 2>/dev/null"):gsub("\n", "")
+	if branch == "" then
+		return ""
+	end
+	if #branch > 15 then
+		branch = branch:sub(1, 15) .. "…"
+	end
 	return " " .. branch .. " |"
 end
 
@@ -88,7 +102,9 @@ require("ai-cli").setup({
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
 local f = io.open(colorscheme_file, "r")
 local saved = f and f:read("*l")
-if f then f:close() end
+if f then
+	f:close()
+end
 vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
 
 local utils = require("utils")
@@ -127,6 +143,10 @@ end
 
 -- Clear all mappings that would have been created by plugins and set our owns
 vim.cmd.mapclear()
+-- Restore built-in comment mappings (gc/gcc) cleared by mapclear
+vim.keymap.set({ "n", "x" }, "gc", function() return require("vim._comment").operator() end, { expr = true, desc = "Toggle comment" })
+vim.keymap.set("n", "gcc", function() return require("vim._comment").operator() .. "_" end, { expr = true, desc = "Toggle comment line" })
+vim.keymap.set("o", "gc", function() require("vim._comment").textobject() end, { desc = "Comment textobject" })
 for _, keymap in pairs(configurations.keymaps or {}) do
 	local mode, lhs, rhs, opts = unpack(keymap)
 

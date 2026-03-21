@@ -59,16 +59,14 @@ return {
 		-- normal & visual mode
 		{ { "n", "v" }, "d", '"_d', { desc = "delete to void register" } },
 		{ { "n", "v" }, "gh", "^", { desc = "go to first non-blank char" } },
-		{ { "n", "v" }, "gj", "gg0", { desc = "go to last line" } },
-		{ { "n", "v" }, "gk", "ggg0", { desc = "go to first line" } },
+		{ { "n", "v" }, "gj", "G0", { desc = "go to last line" } },
+		{ { "n", "v" }, "gk", "gg0", { desc = "go to first line" } },
 		{ { "n", "v" }, "gl", "$", { desc = "go to end of line" } },
 		-- { { "n", "v" }, "&", "j", { desc = "join lines" } },
 		{ { "n", "v" }, "=", "gq", { desc = "format/wrap lines" } },
 		{ { "n", "v" }, "m", "%", { desc = "jump to matching bracket" } },
 	},
 	unbinds = {
-		{ { "n", "v" }, "gg" },
-		{ { "n", "v" }, "g" },
 		{ { "n", "v" }, "g0" },
 		{ { "n", "v" }, "g^" },
 		{ { "n", "v" }, "g$" },
