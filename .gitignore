@@ -28,6 +28,7 @@
 .config/atuin
 .config/opencode
 .config/zed
+.config/gh
 
 # Claude and AI tokens
 **/.claude/
