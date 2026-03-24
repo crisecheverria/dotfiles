@@ -21,10 +21,58 @@ local function betterdelete(should_void_register)
 	end
 end
 
+local function char_after_cursor()
+	local col = vim.fn.col(".")
+	local line = vim.fn.getline(".")
+	return line:sub(col, col)
+end
+
+local function auto_close(close)
+	return function()
+		if char_after_cursor() == close then
+			return "<Right>"
+		end
+		return close
+	end
+end
+
+local function auto_quote(quote)
+	return function()
+		if char_after_cursor() == quote then
+			return "<Right>"
+		end
+		return quote .. quote .. "<Left>"
+	end
+end
+
+local function auto_cr()
+	local col = vim.fn.col(".")
+	local line = vim.fn.getline(".")
+	local before = line:sub(col - 1, col - 1)
+	local after = line:sub(col, col)
+	if utils.v_pairs[before] == after then
+		return "<CR><Esc>==O"
+	end
+	return "<CR>"
+end
+
+local expr_rk = { expr = true, replace_keycodes = true }
+
 return {
 	keymaps = {
 		-- Insert mode
 		{ { "i" }, "jj", "<esc>", { desc = "Exit insert mode" } },
+		-- Auto-close pairs
+		{ { "i" }, "(", "()<Left>", { desc = "auto close ()" } },
+		{ { "i" }, "[", "[]<Left>", { desc = "auto close []" } },
+		{ { "i" }, "{", "{}<Left>", { desc = "auto close {}" } },
+		{ { "i" }, ")", auto_close(")"), vim.tbl_extend("force", expr_rk, { desc = "skip over )" }) },
+		{ { "i" }, "]", auto_close("]"), vim.tbl_extend("force", expr_rk, { desc = "skip over ]" }) },
+		{ { "i" }, "}", auto_close("}"), vim.tbl_extend("force", expr_rk, { desc = "skip over }" }) },
+		{ { "i" }, '"', auto_quote('"'), vim.tbl_extend("force", expr_rk, { desc = 'auto close "' }) },
+		{ { "i" }, "'", auto_quote("'"), vim.tbl_extend("force", expr_rk, { desc = "auto close '" }) },
+		{ { "i" }, "`", auto_quote("`"), vim.tbl_extend("force", expr_rk, { desc = "auto close `" }) },
+		{ { "i" }, "<CR>", auto_cr, vim.tbl_extend("force", expr_rk, { desc = "expand pair on enter" }) },
 		-- Terminal mode
 		{ { "n" }, "<C-h>", "<C-w>h", { desc = "Move to left window" } },
 		{ { "n" }, "<C-l>", "<C-w>l", { desc = "Move to right window" } },

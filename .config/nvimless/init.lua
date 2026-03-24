@@ -90,12 +90,11 @@ vim.g.loaded_node_provider = 0
 vim.cmd.packadd("cfilter")
 
 -- Install and load packages
+-- vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" }, { load = true })
 vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" }, { load = true })
-
 require("ai-cli").setup({
 	provider = "claude",
 	terminal_cmd = "claude",
-	log_level = "info",
 })
 
 -- Load persisted colorscheme or fall back to darkblue
@@ -106,6 +105,13 @@ if f then
 	f:close()
 end
 vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
+
+-- Transparent background
+vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
 
 local utils = require("utils")
 -- Load configuration fragments
@@ -144,9 +150,15 @@ end
 -- Clear all mappings that would have been created by plugins and set our owns
 vim.cmd.mapclear()
 -- Restore built-in comment mappings (gc/gcc) cleared by mapclear
-vim.keymap.set({ "n", "x" }, "gc", function() return require("vim._comment").operator() end, { expr = true, desc = "Toggle comment" })
-vim.keymap.set("n", "gcc", function() return require("vim._comment").operator() .. "_" end, { expr = true, desc = "Toggle comment line" })
-vim.keymap.set("o", "gc", function() require("vim._comment").textobject() end, { desc = "Comment textobject" })
+vim.keymap.set({ "n", "x" }, "gc", function()
+	return require("vim._comment").operator()
+end, { expr = true, desc = "Toggle comment" })
+vim.keymap.set("n", "gcc", function()
+	return require("vim._comment").operator() .. "_"
+end, { expr = true, desc = "Toggle comment line" })
+vim.keymap.set("o", "gc", function()
+	require("vim._comment").textobject()
+end, { desc = "Comment textobject" })
 for _, keymap in pairs(configurations.keymaps or {}) do
 	local mode, lhs, rhs, opts = unpack(keymap)
 
