@@ -1,4 +1,4 @@
-local function git_output(cmd, title)
+local function git_output(cmd, title, filetype)
 	local result = vim.system(cmd, { text = true }):wait()
 	if result.code ~= 0 then
 		vim.notify(result.stderr, vim.log.levels.ERROR)
@@ -10,6 +10,9 @@ local function git_output(cmd, title)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.bo[buf].modifiable = false
 	vim.api.nvim_buf_set_name(buf, title)
+	if filetype then
+		vim.bo[buf].filetype = filetype
+	end
 
 	vim.cmd("split")
 	vim.api.nvim_win_set_buf(0, buf)
@@ -32,7 +35,7 @@ return {
 				if args.args ~= "" then
 					table.insert(cmd, args.args)
 				end
-				git_output(cmd, "git:diff")
+				git_output(cmd, "git:diff", "diff")
 			end,
 			{ nargs = "?", desc = "Git diff (optional file)" },
 		},
@@ -93,6 +96,236 @@ return {
 			end,
 			{ desc = "Git commits for current file" },
 		},
+		{
+			"Gdiffbranch",
+			function(args)
+				local base = args.args ~= "" and args.args or "main"
+				git_output({ "git", "diff", base .. "...HEAD" }, "git:diff:" .. base, "diff")
+			end,
+			{ nargs = "?", desc = "Git diff current branch vs base (default: main)" },
+		},
+		{
+			"Greview",
+			function(args)
+				local base = args.args ~= "" and args.args or "main"
+				local result = vim.system(
+					{ "git", "diff", "--name-only", base .. "...HEAD" },
+					{ text = true }
+				):wait()
+				if result.code ~= 0 then
+					vim.notify(result.stderr, vim.log.levels.ERROR)
+					return
+				end
+				local files = vim.split(result.stdout, "\n", { trimempty = true })
+				if #files == 0 then
+					vim.notify("No changes vs " .. base, vim.log.levels.INFO)
+					return
+				end
+
+				local function short_path(path)
+					local parts = vim.split(path, "/")
+					if #parts <= 3 then
+						return path
+					end
+					return table.concat({ parts[#parts - 2], parts[#parts - 1], parts[#parts] }, "/")
+				end
+
+				local state = { files = files, base = base, index = 0, bufs = {} }
+				local root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
+
+				-- Create a dedicated tab so we don't disturb existing layout
+				vim.cmd("tabnew")
+				local tab = vim.api.nvim_get_current_tabpage()
+
+				-- Diff area (top, two vertical splits)
+				vim.cmd("vsplit")
+				local right_win = vim.api.nvim_get_current_win()
+				vim.cmd("wincmd h")
+				local left_diff_win = vim.api.nvim_get_current_win()
+				state.left_diff_win = left_diff_win
+				state.right_diff_win = right_win
+
+				-- File panel (bottom, horizontal)
+				local panel_buf = vim.api.nvim_create_buf(false, true)
+				local display = {}
+				for i, f in ipairs(files) do
+					display[i] = "  " .. f
+				end
+				vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, display)
+				vim.bo[panel_buf].modifiable = false
+				vim.bo[panel_buf].buftype = "nofile"
+				vim.api.nvim_buf_set_name(panel_buf, "review:" .. base)
+				vim.cmd("botright split")
+				local panel_win = vim.api.nvim_get_current_win()
+				vim.api.nvim_win_set_buf(panel_win, panel_buf)
+				local panel_height = math.min(#files + 1, 15)
+				vim.api.nvim_win_set_height(panel_win, panel_height)
+				vim.wo[panel_win].number = false
+				vim.wo[panel_win].relativenumber = false
+				vim.wo[panel_win].winfixheight = true
+				vim.wo[panel_win].wrap = false
+				vim.wo[panel_win].cursorline = true
+				state.panel_buf = panel_buf
+				state.panel_win = panel_win
+
+				local function highlight_panel(idx)
+					vim.bo[panel_buf].modifiable = true
+					local lines = {}
+					for i, f in ipairs(state.files) do
+						lines[i] = (i == idx and "> " or "  ") .. f
+					end
+					vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, lines)
+					vim.bo[panel_buf].modifiable = false
+					if vim.api.nvim_win_is_valid(state.panel_win) then
+						vim.api.nvim_win_set_cursor(state.panel_win, { idx, 0 })
+					end
+				end
+
+				local function load_file(idx)
+					if idx < 1 or idx > #state.files then
+						return
+					end
+					state.index = idx
+					highlight_panel(idx)
+
+					local rel = state.files[idx]
+					local abs = root .. "/" .. rel
+					local ft = vim.filetype.match({ filename = rel }) or ""
+
+					-- Turn off diff mode and clean up old diff buffers
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffoff")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffoff")
+					end
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							-- Unload without closing windows by replacing first
+							for _, w in ipairs(vim.fn.win_findbuf(b)) do
+								local scratch = vim.api.nvim_create_buf(false, true)
+								vim.api.nvim_win_set_buf(w, scratch)
+							end
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					state.bufs = {}
+
+					-- Left: base version
+					local base_result = vim.system(
+						{ "git", "show", base .. ":" .. rel },
+						{ text = true }
+					):wait()
+					local base_lines = {}
+					if base_result.code == 0 then
+						base_lines = vim.split(base_result.stdout, "\n", { trimempty = false })
+					end
+					local base_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(base_buf, 0, -1, false, base_lines)
+					vim.bo[base_buf].modifiable = false
+					vim.bo[base_buf].buftype = "nofile"
+					vim.bo[base_buf].filetype = ft
+					pcall(vim.api.nvim_buf_set_name, base_buf, base .. ":" .. rel)
+					table.insert(state.bufs, base_buf)
+
+					-- Right: current version
+					local head_lines = {}
+					local f = io.open(abs, "r")
+					if f then
+						local content = f:read("*a")
+						f:close()
+						head_lines = vim.split(content, "\n", { trimempty = false })
+					end
+					local head_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(head_buf, 0, -1, false, head_lines)
+					vim.bo[head_buf].modifiable = false
+					vim.bo[head_buf].buftype = "nofile"
+					vim.bo[head_buf].filetype = ft
+					pcall(vim.api.nvim_buf_set_name, head_buf, "HEAD:" .. rel)
+					table.insert(state.bufs, head_buf)
+
+					-- Set buffers in diff windows
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_win_set_buf(state.left_diff_win, base_buf)
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffthis")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_win_set_buf(state.right_diff_win, head_buf)
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffthis")
+					end
+				end
+
+				local function close_review()
+					vim.cmd("diffoff!")
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					if vim.api.nvim_buf_is_valid(panel_buf) then
+						vim.api.nvim_buf_delete(panel_buf, { force = true })
+					end
+					-- Close the review tab if it still exists
+					if vim.api.nvim_tabpage_is_valid(tab) then
+						local tabs = vim.api.nvim_list_tabpages()
+						if #tabs > 1 then
+							vim.cmd("tabclose")
+						end
+					end
+				end
+
+				local function next_file()
+					local next = state.index + 1
+					if next > #state.files then
+						next = 1
+					end
+					load_file(next)
+				end
+
+				local function prev_file()
+					local prev = state.index - 1
+					if prev < 1 then
+						prev = #state.files
+					end
+					load_file(prev)
+				end
+
+				-- Keymaps for all buffers in the review tab
+				local function set_review_keys(buf)
+					local opts = { buffer = buf, silent = true }
+					vim.keymap.set("n", "<Tab>", next_file, opts)
+					vim.keymap.set("n", "<S-Tab>", prev_file, opts)
+					vim.keymap.set("n", "q", close_review, opts)
+				end
+
+				set_review_keys(panel_buf)
+
+				-- Enter on file panel jumps to that file
+				vim.keymap.set("n", "<CR>", function()
+					local line = vim.api.nvim_win_get_cursor(state.panel_win)[1]
+					load_file(line)
+				end, { buffer = panel_buf, silent = true })
+
+				-- Also set keys on diff buffers when they load
+				local orig_load = load_file
+				load_file = function(idx)
+					orig_load(idx)
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							set_review_keys(b)
+						end
+					end
+				end
+
+				-- Load first file
+				load_file(1)
+			end,
+			{ nargs = "?", desc = "Review PR: file panel + side-by-side diff" },
+		},
 	},
 	keymaps = {
 		{ { "n" }, "<leader>gs", "<cmd>Gstatus<cr>", { desc = "Git status" } },
@@ -100,5 +333,6 @@ return {
 		{ { "n" }, "<leader>gl", "<cmd>Glog<cr>", { desc = "Git log" } },
 		{ { "n" }, "<leader>gb", "<cmd>Gblame<cr>", { desc = "Git blame" } },
 		{ { "n" }, "<leader>gc", "<cmd>Gcommits<cr>", { desc = "Git commits for file" } },
+		{ { "n" }, "<leader>gr", "<cmd>Greview<cr>", { desc = "Review PR (changed files)" } },
 	},
 }
