@@ -10,7 +10,7 @@ vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
-vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 vim.opt.scrolloff = 5
 vim.opt.showcmd = true
 vim.opt.splitright = true
@@ -35,7 +35,7 @@ vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
-vim.g.mapleader = " "
+vim.g.mapleader = ","
 
 local mode_names = {
 	n = "N",
@@ -90,7 +90,6 @@ vim.g.loaded_node_provider = 0
 vim.cmd.packadd("cfilter")
 
 -- Install and load packages
--- vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" }, { load = true })
 vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" }, { load = true })
 require("ai-cli").setup({
 	provider = "claude",
@@ -106,12 +105,6 @@ if f then
 end
 vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
 
--- Transparent background
-vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
 
 local utils = require("utils")
 -- Load configuration fragments
@@ -126,6 +119,7 @@ for _, config in pairs({
 	"tools/languages",
 	"tools/git",
 	"tools/lsp",
+	"tools/ai",
 }) do
 	package.loaded[config] = false
 	local config_setup = require(config)
@@ -159,6 +153,13 @@ end, { expr = true, desc = "Toggle comment line" })
 vim.keymap.set("o", "gc", function()
 	require("vim._comment").textobject()
 end, { desc = "Comment textobject" })
+local explicit_lhs = {}
+for _, keymap in pairs(configurations.keymaps or {}) do
+	for _, m in pairs(keymap[1]) do
+		explicit_lhs[m .. keymap[2]] = true
+	end
+end
+
 for _, keymap in pairs(configurations.keymaps or {}) do
 	local mode, lhs, rhs, opts = unpack(keymap)
 
@@ -168,7 +169,16 @@ for _, keymap in pairs(configurations.keymaps or {}) do
 		local left, right = string.find(rhs, "<[ACS]%-%a>")
 		local len = string.len(rhs)
 		if len == 1 or (left == 1 and right == len) then
-			vim.keymap.set(mode, rhs, "<Nop>")
+			local skip = false
+			for _, m in pairs(mode) do
+				if explicit_lhs[m .. rhs] then
+					skip = true
+					break
+				end
+			end
+			if not skip then
+				vim.keymap.set(mode, rhs, "<Nop>")
+			end
 		end
 	end
 end

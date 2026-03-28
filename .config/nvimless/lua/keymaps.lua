@@ -113,6 +113,8 @@ return {
 		-- { { "n", "v" }, "&", "j", { desc = "join lines" } },
 		{ { "n", "v" }, "=", "gq", { desc = "format/wrap lines" } },
 		{ { "n", "v" }, "m", "%", { desc = "jump to matching bracket" } },
+		{ { "n", "v" }, "<Space>", ":", { desc = "command-line mode" } },
+		{ { "n", "v" }, ":", ",", { desc = "reverse f/t" } },
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },
