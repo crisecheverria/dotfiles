@@ -5,8 +5,11 @@ local parsers = {
 	"gitcommit",
 	"javascript",
 	"typescript",
+	{ lang = "tsx", filetypes = { "typescriptreact" } },
+	"rust",
 	{ lang = "bash", filetypes = { "bash", "sh" } },
 	{ lang = "c", filetypes = { "c", "h" } },
+	{ lang = "cpp", filetypes = { "cpp", "hpp" } },
 }
 
 for _, parser in pairs(parsers) do

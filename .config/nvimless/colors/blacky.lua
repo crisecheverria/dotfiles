@@ -6,7 +6,7 @@ vim.g.colors_name = "blacky"
 
 local palette = {
 	fg = "#DDDDDD",
-	bg = "#111111",
+	bg = "#1E1E2E",
 
 	-- square colors harmony (darkened to suit dark bg)
 	square1 = "#1A4A1C",

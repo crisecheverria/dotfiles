@@ -113,6 +113,8 @@ local function js_ts_config()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local eslint_bin = find_local_bin("eslint")
 
+	local formatcmd = { vim.bo.formatprg, "--stdin-filepath", file }
+
 	if eslint_bin then
 		eslint_lint(bufnr, eslint_bin)
 
@@ -129,12 +131,31 @@ local function js_ts_config()
 			buffer = bufnr,
 			callback = function()
 				vim.system({ eslint_bin, "--fix", vim.api.nvim_buf_get_name(bufnr) }):wait()
-				vim.cmd("silent! checktime")
+				vim.cmd("silent! edit")
+				format(formatcmd)
 			end,
 		})
+	else
+		if vim.fn.executable(vim.bo.formatprg) == 1 then
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				group = "Config",
+				buffer = bufnr,
+				callback = function()
+					format(formatcmd)
+				end,
+			})
+		end
 	end
+end
 
-	setup_format({ vim.bo.formatprg, "--stdin-filepath", file })
+local function cpp_config()
+	vim.api.nvim_create_autocmd("BufWritePre", {
+		group = "Config",
+		buffer = 0,
+		callback = function()
+			vim.lsp.buf.format()
+		end,
+	})
 end
 
 local function ghostty_config()
@@ -146,6 +167,7 @@ return {
 		{ "Filetype", lua_config, { pattern = "lua" } },
 		{ "Filetype", go_config, { pattern = "go" } },
 		{ "Filetype", js_ts_config, { pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact" } } },
+		{ "Filetype", cpp_config, { pattern = { "c", "cpp" } } },
 		{ "Filetype", ghostty_config, { pattern = "ghostty" } },
 	},
 }

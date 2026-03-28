@@ -31,7 +31,17 @@ vim.lsp.config("lua_ls", {
 	},
 })
 
-vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls" })
+vim.lsp.config("clangd", {
+	cmd = { "clangd" },
+	root_markers = { "compile_commands.json", "compile_flags.txt", ".clangd", ".git" },
+	filetypes = { "c", "cpp", "objc", "objcpp" },
+})
+
+vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls", "clangd" })
+
+vim.diagnostic.config({
+	virtual_text = true,
+})
 
 return {
 	autocmds = {
@@ -67,6 +77,7 @@ return {
 				vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = ev.buf, desc = "Find references" })
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover documentation" })
 				vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
+				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code actions" })
 			end,
 		},
 	},
