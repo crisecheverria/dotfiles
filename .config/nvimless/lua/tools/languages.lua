@@ -2,17 +2,25 @@ local function format(formatcmd)
 	if not vim.bo.modified then
 		return
 	end
-	assert(string.len(vim.bo.formatprg) > 0, "Missing format command")
+	if string.len(vim.bo.formatprg) == 0 then
+		return
+	end
 
 	local maxline = vim.fn.line("$")
 	local lines = vim.api.nvim_buf_get_lines(0, 0, maxline, false)
 	local result = vim.system(formatcmd, {
 		stdin = lines,
 		text = true,
-	}):wait()
+	}):wait(5000)
+
+	if result == nil then
+		vim.notify("Format timed out", vim.log.levels.WARN)
+		return
+	end
 
 	if result.code ~= 0 then
-		vim.notify(result.stderr, vim.log.levels.ERROR)
+		local first_line = ((result.stderr or ""):match("^[^\n]*")) or ""
+		vim.notify("Format failed: " .. first_line, vim.log.levels.WARN)
 		return
 	end
 
@@ -29,6 +37,7 @@ local function setup_format(formatcmd)
 
 	vim.api.nvim_create_autocmd("BufWritePre", {
 		group = "Config",
+		buffer = 0,
 		callback = function()
 			format(formatcmd)
 		end,
