@@ -72,7 +72,7 @@ _G.statusline = function()
 end
 
 vim.opt.statusline = "%!v:lua.statusline()"
-vim.opt.statuscolumn = "%l%#NonText#  "
+vim.opt.statuscolumn = "%s%l%#NonText# "
 
 vim.g.loaded_matchit = 1
 vim.g.netrw_banner = 0
@@ -96,6 +96,11 @@ require("ai-cli").setup({
 	terminal_cmd = "claude",
 })
 
+-- Installing this plugin because I coded myself, so it doenst count as
+-- a plugin:
+vim.pack.add({ "https://github.com/crisecheverria/present.nvim" })
+require("present").setup()
+
 -- Load persisted colorscheme or fall back to darkblue
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
 local f = io.open(colorscheme_file, "r")
@@ -104,7 +109,6 @@ if f then
 	f:close()
 end
 vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
-
 
 local utils = require("utils")
 -- Load configuration fragments

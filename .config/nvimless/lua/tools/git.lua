@@ -19,7 +19,128 @@ local function git_output(cmd, title, filetype)
 	vim.keymap.set("n", "q", "<cmd>bdelete<cr>", { buffer = buf, silent = true })
 end
 
+-- Git signs: show added/changed/deleted lines in the sign column
+local ns = vim.api.nvim_create_namespace("git_signs")
+local timers = {}
+
+vim.api.nvim_set_hl(0, "GitSignAdd", { link = "Added" })
+vim.api.nvim_set_hl(0, "GitSignChange", { link = "Changed" })
+vim.api.nvim_set_hl(0, "GitSignDelete", { link = "Removed" })
+
+local function update_signs(buf)
+	if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].buftype ~= "" then
+		return
+	end
+
+	local file = vim.api.nvim_buf_get_name(buf)
+	if file == "" then
+		return
+	end
+
+	local dir = vim.fn.fnamemodify(file, ":h")
+
+	vim.system({ "git", "rev-parse", "--show-toplevel" }, { text = true, cwd = dir }, function(top)
+		if top.code ~= 0 then
+			return
+		end
+		local root = top.stdout:gsub("\n$", "")
+		local rel = file:sub(#root + 2)
+
+		vim.system({ "git", "show", "HEAD:" .. rel }, { text = true, cwd = root }, function(result)
+			vim.schedule(function()
+				if not vim.api.nvim_buf_is_valid(buf) then
+					return
+				end
+
+				vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+
+				local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+				local buf_text = table.concat(buf_lines, "\n") .. "\n"
+
+				if result.code ~= 0 then
+					-- New file not in git: mark all lines as added
+					for i = 0, #buf_lines - 1 do
+						vim.api.nvim_buf_set_extmark(buf, ns, i, 0, {
+							sign_text = "▎",
+							sign_hl_group = "GitSignAdd",
+						})
+					end
+					return
+				end
+
+				local hunks = vim.diff(result.stdout, buf_text, { result_type = "indices" })
+				if not hunks then
+					return
+				end
+
+				for _, hunk in ipairs(hunks) do
+					local _, count_a, start_b, count_b = unpack(hunk)
+
+					if count_a == 0 then
+						-- Added lines
+						for i = start_b, start_b + count_b - 1 do
+							vim.api.nvim_buf_set_extmark(buf, ns, i - 1, 0, {
+								sign_text = "▎",
+								sign_hl_group = "GitSignAdd",
+							})
+						end
+					elseif count_b == 0 then
+						-- Deleted lines: mark the line above the deletion
+						local line = math.max(0, start_b - 1)
+						vim.api.nvim_buf_set_extmark(buf, ns, line, 0, {
+							sign_text = "▎",
+							sign_hl_group = "GitSignDelete",
+						})
+					else
+						-- Changed lines
+						for i = start_b, start_b + count_b - 1 do
+							vim.api.nvim_buf_set_extmark(buf, ns, i - 1, 0, {
+								sign_text = "▎",
+								sign_hl_group = "GitSignChange",
+							})
+						end
+					end
+				end
+			end)
+		end)
+	end)
+end
+
+local function schedule_update(buf)
+	if timers[buf] then
+		timers[buf]:stop()
+	end
+	timers[buf] = vim.uv.new_timer()
+	timers[buf]:start(200, 0, vim.schedule_wrap(function()
+		timers[buf] = nil
+		update_signs(buf)
+	end))
+end
+
 return {
+	autocmds = {
+		{
+			{ "BufReadPost", "BufWritePost" },
+			function(ev)
+				update_signs(ev.buf)
+			end,
+		},
+		{
+			{ "TextChanged", "TextChangedI" },
+			function(ev)
+				schedule_update(ev.buf)
+			end,
+		},
+		{
+			"BufUnload",
+			function(ev)
+				if timers[ev.buf] then
+					timers[ev.buf]:stop()
+					timers[ev.buf] = nil
+				end
+			end,
+		},
+	},
 	usercmds = {
 		{
 			"Gstatus",
