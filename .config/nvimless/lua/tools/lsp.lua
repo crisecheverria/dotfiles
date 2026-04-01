@@ -43,6 +43,17 @@ vim.diagnostic.config({
 	virtual_text = true,
 })
 
+local active_count = 0
+local clear_timer = nil
+
+local function clear_progress()
+	if clear_timer then
+		clear_timer:stop()
+		clear_timer = nil
+	end
+	vim.api.nvim_ui_send("\027]9;4;0\027\\")
+end
+
 return {
 	autocmds = {
 		{
@@ -78,6 +89,39 @@ return {
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover documentation" })
 				vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
 				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code actions" })
+			end,
+		},
+		{
+			"LspProgress",
+			function(ev)
+				local value = ev.data.params.value
+
+				if clear_timer then
+					clear_timer:stop()
+					clear_timer = nil
+				end
+
+				if value.kind == "begin" then
+					active_count = active_count + 1
+					if value.percentage then
+						vim.api.nvim_ui_send(string.format("\027]9;4;1;%d\027\\", value.percentage))
+					else
+						vim.api.nvim_ui_send("\027]9;4;3\027\\")
+					end
+				elseif value.kind == "report" then
+					if value.percentage then
+						vim.api.nvim_ui_send(string.format("\027]9;4;1;%d\027\\", value.percentage))
+					else
+						vim.api.nvim_ui_send("\027]9;4;3\027\\")
+					end
+				elseif value.kind == "end" then
+					active_count = math.max(0, active_count - 1)
+					if active_count == 0 then
+						vim.api.nvim_ui_send("\027]9;4;1;100\027\\")
+						clear_timer = vim.uv.new_timer()
+						clear_timer:start(1500, 0, vim.schedule_wrap(clear_progress))
+					end
+				end
 			end,
 		},
 	},
