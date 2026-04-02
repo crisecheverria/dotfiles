@@ -76,14 +76,16 @@ return {
 					end,
 				})
 
-				vim.keymap.set("i", "<C-n>", function()
-					if vim.fn.pumvisible() == 1 then
-						local key = vim.api.nvim_replace_termcodes("<C-n>", true, false, true)
-						vim.api.nvim_feedkeys(key, "n", false)
-					else
-						vim.lsp.completion.get()
-					end
-				end, { buffer = ev.buf, desc = "LSP completion" })
+				-- Manual <C-n> trigger for LSP completion (replaced by autocomplete option in init.lua)
+				-- To revert: remove `vim.opt.autocomplete = "."` from init.lua and uncomment this block
+				-- vim.keymap.set("i", "<C-n>", function()
+				-- 	if vim.fn.pumvisible() == 1 then
+				-- 		local key = vim.api.nvim_replace_termcodes("<C-n>", true, false, true)
+				-- 		vim.api.nvim_feedkeys(key, "n", false)
+				-- 	else
+				-- 		vim.lsp.completion.get()
+				-- 	end
+				-- end, { buffer = ev.buf, desc = "LSP completion" })
 				vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition" })
 				vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = ev.buf, desc = "Find references" })
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover documentation" })

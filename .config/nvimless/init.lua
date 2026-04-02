@@ -1,16 +1,21 @@
+-- Neovim 0.12 experimental UI2: redesigned messages and command-line
+require("vim._core.ui2").enable({})
+
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
 vim.opt.mouse = ""
 vim.opt.complete = ".,w,b,u"
-vim.opt.completeopt = "fuzzy,noselect,menuone,popup"
+vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
+-- Nvim 0.12: auto-trigger completion as you type (set to false to go back to manual <C-n>)
+vim.opt.autocomplete = true
 vim.opt.wildmode = "noselect:longest"
 vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
-vim.opt.cmdheight = 1
+vim.opt.cmdheight = 0
 vim.opt.scrolloff = 5
 vim.opt.showcmd = true
 vim.opt.splitright = true
@@ -29,6 +34,7 @@ vim.opt.colorcolumn = "80,120"
 vim.opt.textwidth = 80
 vim.opt.formatoptions = "crl1"
 vim.opt.pumheight = 20
+vim.opt.pumborder = "rounded"
 vim.opt.compatible = false
 vim.opt.path = "**"
 vim.opt.undofile = true
@@ -157,6 +163,27 @@ end, { expr = true, desc = "Toggle comment line" })
 vim.keymap.set("o", "gc", function()
 	require("vim._comment").textobject()
 end, { desc = "Comment textobject" })
+-- Restore built-in incremental treesitter selection cleared by mapclear
+vim.keymap.set({ "x" }, "[n", function()
+	require("vim.treesitter._select").select_prev(vim.v.count1)
+end, { desc = "Select previous node" })
+vim.keymap.set({ "x" }, "]n", function()
+	require("vim.treesitter._select").select_next(vim.v.count1)
+end, { desc = "Select next node" })
+vim.keymap.set({ "x", "o" }, "an", function()
+	if vim.treesitter.get_parser(nil, nil, { error = false }) then
+		require("vim.treesitter._select").select_parent(vim.v.count1)
+	else
+		vim.lsp.buf.selection_range(vim.v.count1)
+	end
+end, { desc = "Select parent (outer) node" })
+vim.keymap.set({ "x", "o" }, "in", function()
+	if vim.treesitter.get_parser(nil, nil, { error = false }) then
+		require("vim.treesitter._select").select_child(vim.v.count1)
+	else
+		vim.lsp.buf.selection_range(-vim.v.count1)
+	end
+end, { desc = "Select child (inner) node" })
 local explicit_lhs = {}
 for _, keymap in pairs(configurations.keymaps or {}) do
 	for _, m in pairs(keymap[1]) do

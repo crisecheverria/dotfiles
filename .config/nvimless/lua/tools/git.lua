@@ -68,7 +68,7 @@ local function update_signs(buf)
 					return
 				end
 
-				local hunks = vim.diff(result.stdout, buf_text, { result_type = "indices" })
+				local hunks = vim.text.diff(result.stdout, buf_text, { result_type = "indices" })
 				if not hunks then
 					return
 				end
