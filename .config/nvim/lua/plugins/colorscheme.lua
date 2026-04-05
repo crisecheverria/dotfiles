@@ -284,5 +284,5 @@ end
 vim.keymap.set("n", "<leader>cs", pick_colorscheme, { desc = "Pick Colorscheme" })
 
 -- Active colorscheme (load persisted choice, fall back to default)
-vim.cmd("colorscheme " .. (load_persisted_colorscheme() or "devel"))
+vim.cmd("colorscheme " .. (load_persisted_colorscheme() or "catppuccin-mocha"))
 apply_post_colorscheme()
