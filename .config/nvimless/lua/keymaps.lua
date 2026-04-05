@@ -66,36 +66,93 @@ return {
 		{ { "i" }, "(", "()<Left>", { desc = "auto close ()" } },
 		{ { "i" }, "[", "[]<Left>", { desc = "auto close []" } },
 		{ { "i" }, "{", "{}<Left>", { desc = "auto close {}" } },
-		{ { "i" }, ")", auto_close(")"), vim.tbl_extend("force", expr_rk, { desc = "skip over )" }) },
-		{ { "i" }, "]", auto_close("]"), vim.tbl_extend("force", expr_rk, { desc = "skip over ]" }) },
-		{ { "i" }, "}", auto_close("}"), vim.tbl_extend("force", expr_rk, { desc = "skip over }" }) },
-		{ { "i" }, '"', auto_quote('"'), vim.tbl_extend("force", expr_rk, { desc = 'auto close "' }) },
-		{ { "i" }, "'", auto_quote("'"), vim.tbl_extend("force", expr_rk, { desc = "auto close '" }) },
-		{ { "i" }, "`", auto_quote("`"), vim.tbl_extend("force", expr_rk, { desc = "auto close `" }) },
-		{ { "i" }, "<CR>", auto_cr, vim.tbl_extend("force", expr_rk, { desc = "expand pair on enter" }) },
-		-- Terminal mode
-		{ { "n" }, "<C-h>", "<C-w>h", { desc = "Move to left window" } },
-		{ { "n" }, "<C-l>", "<C-w>l", { desc = "Move to right window" } },
-		{ { "n" }, "<C-j>", "<C-w>j", { desc = "Move to window below" } },
-		{ { "n" }, "<C-k>", "<C-w>k", { desc = "Move to window above" } },
+		{
+			{ "i" },
+			")",
+			auto_close(")"),
+			vim.tbl_extend("force", expr_rk, { desc = "skip over )" }),
+		},
+		{
+			{ "i" },
+			"]",
+			auto_close("]"),
+			vim.tbl_extend("force", expr_rk, { desc = "skip over ]" }),
+		},
+		{
+			{ "i" },
+			"}",
+			auto_close("}"),
+			vim.tbl_extend("force", expr_rk, { desc = "skip over }" }),
+		},
+		{
+			{ "i" },
+			'"',
+			auto_quote('"'),
+			vim.tbl_extend("force", expr_rk, { desc = 'auto close "' }),
+		},
+		{
+			{ "i" },
+			"'",
+			auto_quote("'"),
+			vim.tbl_extend("force", expr_rk, { desc = "auto close '" }),
+		},
+		{
+			{ "i" },
+			"`",
+			auto_quote("`"),
+			vim.tbl_extend("force", expr_rk, { desc = "auto close `" }),
+		},
+		{
+			{ "i" },
+			"<CR>",
+			auto_cr,
+			vim.tbl_extend("force", expr_rk, { desc = "expand pair on enter" }),
+		},
 		-- normal mode
-		{ { "n", "t" }, "<c-;>", "<cmd>AiCli<cr>", { desc = "toggle claude code terminal" } },
-		{ { "n" }, "<leader>t", "<cmd>FloatingTerminal<cr>", { noremap = true, silent = true, desc = "Toggle floating terminal" } },
-		{ { "t" }, "<Esc>", "<cmd>CloseFloatingTerminal<cr>", { noremap = true, silent = true, desc = "Close floating terminal" } },
-		{ { "n" }, "<esc>", "<esc><cmd>noh<cr>", { silent = true, desc = "clear search highlight" } },
-		{ { "n" }, "x", betterdelete(true), { expr = true, desc = "delete char (void register)" } },
+		{
+			{ "n", "t" },
+			"<c-;>",
+			"<cmd>AiCli<cr>",
+			{ desc = "toggle claude code terminal" },
+		},
+		{
+			{ "n" },
+			"<leader>t",
+			"<cmd>FloatingTerminal<cr>",
+			{ noremap = true, silent = true, desc = "Toggle floating terminal" },
+		},
+		{
+			{ "t" },
+			"<Esc>",
+			"<cmd>CloseFloatingTerminal<cr>",
+			{ noremap = true, silent = true, desc = "Close floating terminal" },
+		},
+		{
+			{ "n" },
+			"<esc>",
+			"<esc><cmd>noh<cr>",
+			{ silent = true, desc = "clear search highlight" },
+		},
+		{
+			{ "n" },
+			"x",
+			betterdelete(true),
+			{ expr = true, desc = "delete char (void register)" },
+		},
 		{ { "n" }, "<leader>x", vim.diagnostic.setloclist, { desc = "Open diagnostic list" } },
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
 		{ { "n" }, "<leader>rt", "<cmd>RunTest<cr>", { desc = "run test for current file" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", "<cmd>buffers<cr>", { desc = "list buffers" } },
-		{ { "n" }, "<leader>cp",
+		{
+			{ "n" },
+			"<leader>cp",
 			function()
 				local path = vim.fn.expand("%:.")
 				vim.fn.setreg("+", path)
 				print("file:", path)
 			end,
-			{ desc = "Copy file path to clipboard" }
+			{ desc = "Copy file path to clipboard" },
 		},
 		-- visual mode
 		{ { "v" }, "r", '"_dp', { desc = "replace selection without yanking" } },
@@ -115,6 +172,10 @@ return {
 		{ { "n", "v" }, "m", "%", { desc = "jump to matching bracket" } },
 		{ { "n", "v" }, "<Space>", ":", { desc = "command-line mode" } },
 		{ { "n", "v" }, ":", ",", { desc = "reverse f/t" } },
+		-- avante.nvim
+		{ { "n", "v" }, "<leader>cc", "<cmd>AvanteToggle<cr>", { desc = "Toggle Avante" } },
+		{ { "n", "v" }, "<leader>ca", "<cmd>AvanteAsk<cr>", { desc = "Avante Ask" } },
+		{ { "v" }, "<leader>ce", "<cmd>AvanteEdit<cr>", { desc = "Avante Edit selection" } },
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },
