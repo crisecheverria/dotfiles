@@ -9,7 +9,7 @@ vim.opt.mouse = ""
 vim.opt.complete = ".,w,b,u"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
 -- Nvim 0.12: auto-trigger completion as you type (set to false to go back to manual <C-n>)
-vim.opt.autocomplete = true
+vim.opt.autocomplete = false
 vim.opt.wildmode = "noselect:longest"
 vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
