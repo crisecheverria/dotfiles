@@ -447,13 +447,141 @@ return {
 			end,
 			{ nargs = "?", desc = "Review PR: file panel + side-by-side diff" },
 		},
+		{
+			"Gstage",
+			function(opts)
+				vim.cmd("silent write")
+				local root, rel = get_git_file_info()
+				if not root then
+					return vim.notify("Not in a git repo", vim.log.levels.ERROR)
+				end
+
+				local diff = vim.system({ "git", "diff", "--", rel }, { text = true, cwd = root }):wait()
+				if diff.stdout == "" then
+					return vim.notify("No unstaged changes")
+				end
+
+				local patch, count = filter_diff(diff.stdout, opts.line1, opts.line2)
+				if not patch then
+					return vim.notify("No hunks in selection")
+				end
+
+				local result = vim.system(
+						 { "git", "apply", "--cached", "-" },
+						 { text = true, cwd = root, stdin = patch }
+					 )
+					 :wait()
+				if result.code == 0 then
+					vim.notify(count .. " hunk(s) staged")
+					update_signs(vim.api.nvim_get_current_buf())
+				else
+					vim.notify("Stage failed: " .. result.stderr, vim.log.levels.ERROR)
+				end
+			end,
+			{ range = true, desc = "Stage selected hunks" },
+		},
+		{
+			"Gdiscard",
+			function(opts)
+				vim.cmd("silent write")
+				local root, rel = get_git_file_info()
+				if not root then
+					return vim.notify("Not in a git repo", vim.log.levels.ERROR)
+				end
+
+				local diff = vim.system({ "git", "diff", "--", rel }, { text = true, cwd = root }):wait()
+				if diff.stdout == "" then
+					return vim.notify("No unstaged changes")
+				end
+
+				local patch, count = filter_diff(diff.stdout, opts.line1, opts.line2)
+				if not patch then
+					return vim.notify("No hunks in selection")
+				end
+
+				local result = vim.system({ "git", "apply", "-R", "-" }, { text = true, cwd = root, stdin = patch })
+					 :wait()
+				if result.code == 0 then
+					vim.notify(count .. " hunk(s) discarded")
+					vim.cmd("edit!")
+				else
+					vim.notify("Discard failed: " .. result.stderr, vim.log.levels.ERROR)
+				end
+			end,
+			{ range = true, desc = "Discard selected hunks" },
+		},
+		{
+			"Gcommit",
+			function()
+				-- Show staged diff as context
+				local staged = vim.system({ "git", "diff", "--cached", "--stat" }, { text = true }):wait()
+				if staged.code ~= 0 or staged.stdout == "" then
+					return vim.notify("Nothing staged to commit", vim.log.levels.WARN)
+				end
+
+				local buf = vim.api.nvim_create_buf(false, true)
+				local comment_lines = {}
+				table.insert(comment_lines, "")
+				table.insert(comment_lines, "# Staged changes:")
+				for _, line in ipairs(vim.split(staged.stdout, "\n", { trimempty = true })) do
+					table.insert(comment_lines, "# " .. line)
+				end
+				table.insert(comment_lines, "#")
+				table.insert(comment_lines, "# Write your commit message above. Save and close to commit.")
+				table.insert(comment_lines, "# Leave empty or delete all lines to abort.")
+				vim.api.nvim_buf_set_lines(buf, 0, -1, false, comment_lines)
+				vim.api.nvim_win_set_buf(0, buf)
+				vim.api.nvim_win_set_cursor(0, { 1, 0 })
+				vim.bo[buf].filetype = "gitcommit"
+				vim.bo[buf].buftype = "acwrite"
+				vim.api.nvim_buf_set_name(buf, "COMMIT_MSG")
+
+				vim.api.nvim_create_autocmd("BufWriteCmd", {
+					buffer = buf,
+					once = true,
+					callback = function()
+						local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+						local msg_lines = {}
+						for _, l in ipairs(lines) do
+							if not l:match("^#") then
+								table.insert(msg_lines, l)
+							end
+						end
+						-- Trim trailing empty lines
+						while #msg_lines > 0 and msg_lines[#msg_lines] == "" do
+							table.remove(msg_lines)
+						end
+						local msg = table.concat(msg_lines, "\n")
+						if msg == "" then
+							vim.api.nvim_buf_delete(buf, { force = true })
+							return vim.notify("Commit aborted")
+						end
+						local result = vim.system({ "git", "commit", "-m", msg }, { text = true }):wait()
+						vim.api.nvim_buf_delete(buf, { force = true })
+						vim.notify(result.code == 0 and result.stdout or result.stderr)
+						if result.code == 0 then
+							for _, b in ipairs(vim.api.nvim_list_bufs()) do
+								if vim.api.nvim_buf_is_loaded(b) then
+									update_signs(b)
+								end
+							end
+						end
+					end,
+				})
+
+				vim.keymap.set("n", "q", function()
+					vim.api.nvim_buf_delete(buf, { force = true })
+					vim.notify("Commit aborted")
+				end, { buffer = buf, silent = true })
+
+				vim.cmd("startinsert")
+			end,
+			{ desc = "Git commit" },
+		},
 	},
 	keymaps = {
-		{ { "n" }, "<leader>gs", "<cmd>Gstatus<cr>", { desc = "Git status" } },
-		{ { "n" }, "<leader>gd", "<cmd>Gdiff<cr>", { desc = "Git diff" } },
-		{ { "n" }, "<leader>gl", "<cmd>Glog<cr>", { desc = "Git log" } },
-		{ { "n" }, "<leader>gb", "<cmd>Gblame<cr>", { desc = "Git blame" } },
-		{ { "n" }, "<leader>gc", "<cmd>Gcommits<cr>", { desc = "Git commits for file" } },
-		{ { "n" }, "<leader>gr", "<cmd>Greview<cr>", { desc = "Review PR (changed files)" } },
+		{ { "v" }, "<leader>s",  ":Gstage<CR>",      { desc = "Stage hunk(s)" } },
+		{ { "v" }, "<leader>d",  ":Gdiscard<CR>",    { desc = "Discard hunk(s)" } },
+		{ { "n" }, "<leader>gc", "<cmd>Gcommit<cr>", { desc = "Git commit" } },
 	},
 }
