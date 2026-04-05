@@ -452,10 +452,7 @@ return {
 					state.bufs = {}
 
 					-- Left: base version
-					local base_result = vim.system(
-						{ "git", "show", base .. ":" .. rel },
-						{ text = true }
-					):wait()
+					local base_result = vim.system({ "git", "show", base .. ":" .. rel }, { text = true }):wait()
 					local base_lines = {}
 					if base_result.code == 0 then
 						base_lines = vim.split(base_result.stdout, "\n", { trimempty = false })
