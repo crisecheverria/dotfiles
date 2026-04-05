@@ -111,10 +111,130 @@ local function schedule_update(buf)
 		timers[buf]:stop()
 	end
 	timers[buf] = vim.uv.new_timer()
-	timers[buf]:start(200, 0, vim.schedule_wrap(function()
-		timers[buf] = nil
-		update_signs(buf)
-	end))
+	timers[buf]:start(
+		200,
+		0,
+		vim.schedule_wrap(function()
+			timers[buf] = nil
+			update_signs(buf)
+		end)
+	)
+end
+
+local function get_git_file_info()
+	local file = vim.api.nvim_buf_get_name(0)
+	if file == "" then
+		return
+	end
+	local result = vim.system({ "git", "rev-parse", "--show-toplevel" }, { text = true }):wait()
+	if result.code ~= 0 then
+		return
+	end
+	local root = result.stdout:gsub("\n$", "")
+	local rel = file:sub(#root + 2)
+	return root, rel
+end
+
+local function filter_diff(diff_text, start_line, end_line)
+	local diff_lines = vim.split(diff_text, "\n")
+	local header = {}
+	local hunk_list = {}
+
+	-- Parse into header + hunks
+	for i, line in ipairs(diff_lines) do
+		if line:match("^@@") then
+			if #header == 0 and #hunk_list == 0 then
+				for j = 1, i - 1 do
+					table.insert(header, diff_lines[j])
+				end
+			end
+			if #hunk_list > 0 then
+				hunk_list[#hunk_list].end_idx = i - 1
+			end
+			local os, oc, ns, nc = line:match("^@@ %-(%d+),?(%d*) %+(%d+),?(%d*) @@")
+			table.insert(hunk_list, {
+				start_idx = i + 1,
+				old_start = tonumber(os),
+				old_count = tonumber(oc ~= "" and oc or "1"),
+				new_start = tonumber(ns),
+				new_count = tonumber(nc ~= "" and nc or "1"),
+			})
+		end
+	end
+	if #hunk_list == 0 then
+		return
+	end
+	hunk_list[#hunk_list].end_idx = #diff_lines
+
+	-- Filter each hunk to only include lines within the selection
+	local result_hunks = {}
+	for _, hunk in ipairs(hunk_list) do
+		local new_line = hunk.new_start
+		local filtered = {}
+		local has_changes = false
+		local old_cnt = 0
+		local new_cnt = 0
+
+		for i = hunk.start_idx, hunk.end_idx do
+			local line = diff_lines[i]
+			local prefix = line:sub(1, 1)
+
+			if prefix == "+" then
+				if new_line >= start_line and new_line <= end_line then
+					table.insert(filtered, line)
+					new_cnt = new_cnt + 1
+					has_changes = true
+				end
+				new_line = new_line + 1
+			elseif prefix == "-" then
+				if new_line >= start_line and new_line <= end_line then
+					table.insert(filtered, line)
+					old_cnt = old_cnt + 1
+					has_changes = true
+				else
+					-- Convert to context so the line stays in the index
+					table.insert(filtered, " " .. line:sub(2))
+					old_cnt = old_cnt + 1
+					new_cnt = new_cnt + 1
+				end
+			elseif prefix == " " then
+				table.insert(filtered, line)
+				old_cnt = old_cnt + 1
+				new_cnt = new_cnt + 1
+				new_line = new_line + 1
+			elseif prefix == "\\" then
+				if #filtered > 0 then
+					table.insert(filtered, line)
+				end
+			end
+		end
+
+		if has_changes then
+			table.insert(result_hunks, {
+				header = string.format(
+					"@@ -%d,%d +%d,%d @@",
+					hunk.old_start, old_cnt, hunk.new_start, new_cnt
+				),
+				lines = filtered,
+			})
+		end
+	end
+
+	if #result_hunks == 0 then
+		return
+	end
+
+	local parts = {}
+	for _, h in ipairs(header) do
+		table.insert(parts, h)
+	end
+	for _, h in ipairs(result_hunks) do
+		table.insert(parts, h.header)
+		for _, l in ipairs(h.lines) do
+			table.insert(parts, l)
+		end
+	end
+	return table.concat(parts, "\n") .. "\n", #result_hunks
 end
 
 return {
@@ -229,10 +349,7 @@ return {
 			"Greview",
 			function(args)
 				local base = args.args ~= "" and args.args or "main"
-				local result = vim.system(
-					{ "git", "diff", "--name-only", base .. "...HEAD" },
-					{ text = true }
-				):wait()
+				local result = vim.system({ "git", "diff", "--name-only", base .. "...HEAD" }, { text = true }):wait()
 				if result.code ~= 0 then
 					vim.notify(result.stderr, vim.log.levels.ERROR)
 					return
