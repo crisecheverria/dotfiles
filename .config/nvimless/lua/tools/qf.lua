@@ -30,40 +30,6 @@ return {
 		},
 	},
 	usercmds = {
-		{
-			"Grep",
-			function(opts)
-				local pattern = opts.args
-				local cmd = vim.o.grepprg .. " " .. vim.fn.shellescape(pattern)
-				local lines = {}
-
-				vim.api.nvim_ui_send("\027]9;4;3\027\\")
-
-				vim.fn.jobstart(cmd, {
-					on_stdout = function(_, data)
-						for _, line in ipairs(data) do
-							if line ~= "" then
-								table.insert(lines, line)
-							end
-						end
-					end,
-					on_exit = function()
-						vim.api.nvim_ui_send("\027]9;4;0\027\\")
-						if #lines > 0 then
-							vim.fn.setqflist({}, " ", {
-								title = "Grep: " .. pattern,
-								lines = lines,
-								efm = vim.o.grepformat,
-							})
-							vim.notify(#lines .. " matches for '" .. pattern .. "'")
-							vim.cmd("cwindow 20")
-						else
-							vim.notify("No matches for '" .. pattern .. "'")
-						end
-					end,
-				})
-			end,
-			{ nargs = 1 },
-		},
+		{ "Grep", ":silent grep! '<args>'", { nargs = 1 } },
 	},
 }
