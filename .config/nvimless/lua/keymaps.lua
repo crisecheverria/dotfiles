@@ -144,6 +144,10 @@ return {
 		{ { "n" }, "<leader>rt", "<cmd>RunTest<cr>", { desc = "run test for current file" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", "<cmd>buffers<cr>", { desc = "list buffers" } },
+		{ { "n" }, "<M-Left>", "<C-w>h", { desc = "move to left window" } },
+		{ { "n" }, "<M-Right>", "<C-w>l", { desc = "move to right window" } },
+		{ { "n" }, "<M-Up>", "<C-w>k", { desc = "move to upper window" } },
+		{ { "n" }, "<M-Down>", "<C-w>j", { desc = "move to lower window" } },
 		{
 			{ "n" },
 			"<leader>cp",
