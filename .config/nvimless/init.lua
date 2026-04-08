@@ -43,6 +43,12 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.g.mapleader = ","
 
+-- Force POSIX shell for :grep, :make, etc. (Nushell/Fish are not compatible)
+vim.opt.shell = "/bin/sh"
+vim.opt.shellcmdflag = "-c"
+vim.opt.shellquote = ""
+vim.opt.shellxquote = ""
+
 local mode_names = {
 	n = "N",
 	no = "N",
