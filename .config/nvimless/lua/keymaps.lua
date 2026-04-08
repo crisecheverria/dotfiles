@@ -156,6 +156,7 @@ return {
 		},
 		-- visual mode
 		{ { "v" }, "r", '"_dp', { desc = "replace selection without yanking" } },
+		{ { "n", "x", "o" }, "f", require("jump").start, { desc = "jump" } },
 		{ { "v" }, "s", surround, { expr = true, desc = "surround selection" } },
 		{ { "n" }, "<a-j>", ":m .+1<cr>==", { desc = "move line down" } },
 		{ { "n" }, "<a-k>", ":m .-2<cr>==", { desc = "move line up" } },

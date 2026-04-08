@@ -113,6 +113,43 @@ require("ai-cli").setup({
 vim.pack.add({ "https://github.com/crisecheverria/present.nvim" })
 require("present").setup()
 
+-- A jump plugin
+vim.pack.add({ "https://github.com/yorickpeterse/nvim-jump" })
+require("jump").setup({
+	labels = "abcdef",
+})
+
+-- avante.nvim with local llama.cpp server
+vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
+vim.pack.add({ "https://github.com/MunifTanjim/nui.nvim" })
+vim.pack.add({ "https://github.com/stevearc/dressing.nvim" })
+vim.pack.add({ "https://github.com/yetone/avante.nvim" }, { ["do"] = "make" })
+require("avante").setup({
+	provider = "openai",
+	providers = {
+		openai = {
+			endpoint = "http://127.0.0.1:8080/v1",
+			model = "gemma-4-26B-A4B-it",
+			api_key_name = "",
+			timeout = 60000,
+		},
+	},
+})
+
+-- Java Setup
+vim.pack.add({
+	{
+		src = "https://github.com/JavaHello/spring-boot.nvim",
+		version = "218c0c26c14d99feca778e4d13f5ec3e8b1b60f0",
+	},
+	"https://github.com/MunifTanjim/nui.nvim",
+	"https://github.com/mfussenegger/nvim-dap",
+
+	"https://github.com/nvim-java/nvim-java",
+})
+
+require("java").setup()
+vim.lsp.enable("jdtls")
 -- Load persisted colorscheme or fall back to darkblue
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
 local f = io.open(colorscheme_file, "r")
