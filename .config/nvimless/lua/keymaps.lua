@@ -124,8 +124,15 @@ return {
 		{
 			{ "t" },
 			"<Esc>",
-			"<cmd>CloseFloatingTerminal<cr>",
-			{ noremap = true, silent = true, desc = "Close floating terminal" },
+			function()
+				if vim.bo.filetype == "ai-cli-terminal" then
+					local keys = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+					vim.api.nvim_feedkeys(keys, "n", false)
+				else
+					vim.cmd("CloseFloatingTerminal")
+				end
+			end,
+			{ noremap = true, silent = true, desc = "Close floating terminal (pass Esc to ai-cli)" },
 		},
 		{
 			{ "n" },
