@@ -122,23 +122,6 @@ require("jump").setup({
 	labels = "abcdef",
 })
 
--- avante.nvim with local llama.cpp server
-vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
-vim.pack.add({ "https://github.com/MunifTanjim/nui.nvim" })
-vim.pack.add({ "https://github.com/stevearc/dressing.nvim" })
-vim.pack.add({ "https://github.com/yetone/avante.nvim" }, { ["do"] = "make" })
-require("avante").setup({
-	provider = "openai",
-	providers = {
-		openai = {
-			endpoint = "http://127.0.0.1:8080/v1",
-			model = "gemma-4-26B-A4B-it",
-			api_key_name = "",
-			timeout = 60000,
-		},
-	},
-})
-
 -- llama.vim (FIM code completion via local llama.cpp server)
 vim.g.llama_config = {
 	endpoint_fim = "http://127.0.0.1:8012/infill",
