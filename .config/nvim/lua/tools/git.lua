@@ -6,6 +6,11 @@ local function git_output(cmd, title, filetype)
 	end
 
 	local lines = vim.split(result.stdout, "\n", { trimempty = true })
+	-- Wipe existing buffer with this name if it exists
+	local existing = vim.fn.bufnr(title)
+	if existing ~= -1 then
+		vim.api.nvim_buf_delete(existing, { force = true })
+	end
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	vim.bo[buf].modifiable = false
@@ -133,6 +138,64 @@ local function get_git_file_info()
 	local root = result.stdout:gsub("\n$", "")
 	local rel = file:sub(#root + 2)
 	return root, rel
+end
+
+local function patch_from_diff_buffer(line1, line2)
+	local all = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+	-- Build file sections: each starts with "diff --git"
+	local files = {}
+	local cur_file, cur_hunk
+	for i, line in ipairs(all) do
+		if line:match("^diff %-%-git") then
+			if cur_hunk then
+				cur_hunk.end_idx = i - 1
+			end
+			cur_file = { header_start = i, hunks = {} }
+			cur_hunk = nil
+			table.insert(files, cur_file)
+		elseif line:match("^@@") and cur_file then
+			if cur_hunk then
+				cur_hunk.end_idx = i - 1
+			end
+			if not cur_file.header_end then
+				cur_file.header_end = i - 1
+			end
+			cur_hunk = { start_idx = i }
+			table.insert(cur_file.hunks, cur_hunk)
+		end
+	end
+	if cur_hunk then
+		cur_hunk.end_idx = #all
+	end
+
+	-- Collect file headers + hunks overlapping with [line1, line2]
+	local parts = {}
+	local count = 0
+	for _, file in ipairs(files) do
+		local selected = {}
+		for _, hunk in ipairs(file.hunks) do
+			if hunk.start_idx <= line2 and hunk.end_idx >= line1 then
+				table.insert(selected, hunk)
+			end
+		end
+		if #selected > 0 then
+			for i = file.header_start, file.header_end do
+				table.insert(parts, all[i])
+			end
+			for _, hunk in ipairs(selected) do
+				for i = hunk.start_idx, hunk.end_idx do
+					table.insert(parts, all[i])
+				end
+				count = count + 1
+			end
+		end
+	end
+
+	if count == 0 then
+		return
+	end
+	return table.concat(parts, "\n") .. "\n", count
 end
 
 local function filter_diff(diff_text, start_line, end_line)
@@ -564,30 +627,45 @@ return {
 		{
 			"Gstage",
 			function(opts)
-				vim.cmd("silent write")
-				local root, rel = get_git_file_info()
-				if not root then
+				local root = vim.system({ "git", "rev-parse", "--show-toplevel" }, { text = true }):wait()
+				if root.code ~= 0 then
 					return vim.notify("Not in a git repo", vim.log.levels.ERROR)
 				end
+				local cwd = root.stdout:gsub("\n$", "")
 
-				local diff = vim.system({ "git", "diff", "--", rel }, { text = true, cwd = root }):wait()
-				if diff.stdout == "" then
-					return vim.notify("No unstaged changes")
+				local patch, count
+				if vim.bo.filetype == "diff" then
+					-- Staging from Gdiff buffer
+					patch, count = patch_from_diff_buffer(opts.line1, opts.line2)
+				else
+					-- Staging from file buffer
+					vim.cmd("silent write")
+					local _, rel = get_git_file_info()
+					if not rel then
+						return vim.notify("Not a git file", vim.log.levels.ERROR)
+					end
+					local diff = vim.system({ "git", "diff", "--", rel }, { text = true, cwd = cwd }):wait()
+					if diff.stdout == "" then
+						return vim.notify("No unstaged changes")
+					end
+					patch, count = filter_diff(diff.stdout, opts.line1, opts.line2)
 				end
 
-				local patch, count = filter_diff(diff.stdout, opts.line1, opts.line2)
 				if not patch then
 					return vim.notify("No hunks in selection")
 				end
 
 				local result = vim.system(
-						 { "git", "apply", "--cached", "-" },
-						 { text = true, cwd = root, stdin = patch }
-					 )
-					 :wait()
+					{ "git", "apply", "--cached", "-" },
+					{ text = true, cwd = cwd, stdin = patch }
+				):wait()
 				if result.code == 0 then
 					vim.notify(count .. " hunk(s) staged")
-					update_signs(vim.api.nvim_get_current_buf())
+					for _, b in ipairs(vim.api.nvim_list_bufs()) do
+						if vim.api.nvim_buf_is_loaded(b) then
+							update_signs(b)
+						end
+					end
 				else
 					vim.notify("Stage failed: " .. result.stderr, vim.log.levels.ERROR)
 				end

@@ -10,6 +10,7 @@ local parsers = {
 	{ lang = "bash", filetypes = { "bash", "sh" } },
 	{ lang = "c", filetypes = { "c", "h" } },
 	{ lang = "cpp", filetypes = { "cpp", "hpp" } },
+	"java",
 }
 
 for _, parser in pairs(parsers) do

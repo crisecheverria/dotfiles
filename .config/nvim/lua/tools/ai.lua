@@ -1,20 +1,40 @@
 local active_job = nil
 
+local function osc(seq)
+	io.write(string.format("\x1b]%s\x1b\\", seq))
+end
+
+local function start_progress()
+	osc("9;4;3;0")
+end
+
+local function stop_progress()
+	osc("9;4;0;0")
+end
+
 local function cancel()
 	if active_job then
 		vim.fn.jobstop(active_job)
 		active_job = nil
 	end
+	stop_progress()
 end
 
 local function stream_to_buf(buf, start_row, prompt, on_done)
 	cancel()
 	local row = start_row
 	local partial = ""
+	local got_output = false
+
+	start_progress()
 
 	active_job = vim.fn.jobstart({ "claude", "-p", prompt }, {
 		on_stdout = function(_, data)
 			vim.schedule(function()
+				if not got_output then
+					got_output = true
+					stop_progress()
+				end
 				if not vim.api.nvim_buf_is_valid(buf) then
 					return
 				end
@@ -32,6 +52,7 @@ local function stream_to_buf(buf, start_row, prompt, on_done)
 		end,
 		on_exit = function(_, code)
 			vim.schedule(function()
+				stop_progress()
 				active_job = nil
 				if on_done then
 					on_done(code)
@@ -92,6 +113,53 @@ local function ai_edit(opts)
 	local buf = vim.api.nvim_get_current_buf()
 	vim.api.nvim_buf_set_lines(buf, opts.line1 - 1, opts.line2, false, { "" })
 	stream_to_buf(buf, opts.line1 - 1, prompt)
+end
+
+-- :AIExplain [prompt] - show AI response in a floating window
+local function ai_explain(opts)
+	local selection = get_selection(opts)
+	local instruction = opts.args
+
+	local prompt
+	if selection and instruction ~= "" then
+		prompt = instruction .. "\n\n" .. selection
+	elseif selection then
+		prompt = "Explain this code:\n\n" .. selection
+	elseif instruction ~= "" then
+		prompt = instruction
+	else
+		vim.notify("Provide a prompt or visual selection", vim.log.levels.WARN)
+		return
+	end
+
+	local buf = vim.api.nvim_create_buf(false, true)
+	vim.bo[buf].filetype = "markdown"
+	vim.bo[buf].bufhidden = "wipe"
+
+	local width = math.floor(vim.o.columns * 0.7)
+	local height = math.floor(vim.o.lines * 0.6)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		row = math.floor((vim.o.lines - height) / 2),
+		col = math.floor((vim.o.columns - width) / 2),
+		width = width,
+		height = height,
+		style = "minimal",
+		border = "rounded",
+		title = " AI ",
+		title_pos = "center",
+	})
+	vim.wo[win].wrap = true
+	vim.wo[win].linebreak = true
+
+	vim.keymap.set("n", "q", function()
+		cancel()
+		if vim.api.nvim_win_is_valid(win) then
+			vim.api.nvim_win_close(win, true)
+		end
+	end, { buffer = buf, desc = "Close AI float" })
+
+	stream_to_buf(buf, 0, prompt)
 end
 
 -- Chat
@@ -244,6 +312,7 @@ return {
 	usercmds = {
 		{ "AI", ai_complete, { range = true, nargs = "?" } },
 		{ "AIEdit", ai_edit, { range = true, nargs = "?" } },
+		{ "AIExplain", ai_explain, { range = true, nargs = "?" } },
 		{ "AIChat", ai_chat, { range = true, nargs = "?" } },
 		{ "AIStop", cancel, {} },
 	},
