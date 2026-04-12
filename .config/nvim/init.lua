@@ -81,9 +81,45 @@ local function git_branch()
 	return " " .. branch .. " |"
 end
 
+local function diagnostics()
+	local e = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
+	local w = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
+	local parts = {}
+	if e > 0 then
+		table.insert(parts, "%#DiagnosticError#E:" .. e)
+	end
+	if w > 0 then
+		table.insert(parts, "%#DiagnosticWarn#W:" .. w)
+	end
+	if #parts == 0 then
+		return ""
+	end
+	return " " .. table.concat(parts, " ") .. "%* |"
+end
+
+local function lsp_status()
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	if #clients == 0 then
+		return ""
+	end
+	local names = {}
+	for _, c in ipairs(clients) do
+		table.insert(names, c.name)
+	end
+	return " " .. table.concat(names, ",") .. " |"
+end
+
 _G.statusline = function()
 	local mode = mode_names[vim.fn.mode()] or vim.fn.mode()
-	return " " .. mode .. " |" .. git_branch() .. " %t %= %S %= %Y | %02l/%02L "
+	return " "
+		 .. mode
+		 .. " |"
+		 .. git_branch()
+		 .. " %t"
+		 .. diagnostics()
+		 .. " %= %S %= %Y"
+		 .. lsp_status()
+		 .. " %02l/%02L "
 end
 
 vim.opt.statusline = "%!v:lua.statusline()"
