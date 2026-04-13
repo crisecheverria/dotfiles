@@ -354,7 +354,7 @@ return {
 			"Gblame",
 			function()
 				local file = vim.api.nvim_buf_get_name(0)
-				local result = vim.system({ "git", "blame", file }, { text = true }):wait()
+				local result = vim.system({ "git", "blame", "--porcelain", file }, { text = true }):wait()
 				if result.code ~= 0 then
 					vim.notify(result.stderr, vim.log.levels.ERROR)
 					return
@@ -363,13 +363,57 @@ return {
 				local source_win = vim.api.nvim_get_current_win()
 				local cursor = vim.api.nvim_win_get_cursor(source_win)
 
-				local lines = vim.split(result.stdout, "\n", { trimempty = true })
+				-- Parse porcelain blame into compact annotations
+				local annotations = {}
+				local commits = {} -- cache commit info since porcelain only describes each commit once
+				local current_hash
+				local max_width = 0
+				for line in result.stdout:gmatch("[^\n]+") do
+					local hash = line:match("^(%x+) %d+ %d+")
+					if hash then
+						current_hash = hash
+						if not commits[hash] then
+							commits[hash] = {}
+						end
+					elseif line:match("^author ") then
+						commits[current_hash].author = line:sub(8)
+					elseif line:match("^author%-time ") then
+						commits[current_hash].date = os.date("%Y-%m-%d", tonumber(line:sub(13)))
+					elseif line:match("^\t") then
+						local info = commits[current_hash]
+						local text = string.format("%s %s %s", current_hash:sub(1, 7), info.author, info.date)
+						if #text > max_width then
+							max_width = #text
+						end
+						table.insert(annotations, text)
+					end
+				end
+
 				local buf = vim.api.nvim_create_buf(false, true)
-				vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+				vim.api.nvim_buf_set_lines(buf, 0, -1, false, annotations)
 				vim.bo[buf].modifiable = false
 				vim.api.nvim_buf_set_name(buf, "git:blame")
 
-				vim.cmd("leftabove vsplit")
+				-- Apply highlights per segment: hash, author, date
+				local blame_ns = vim.api.nvim_create_namespace("git_blame")
+				for i, text in ipairs(annotations) do
+					local hash_end = 7
+					local date_start = #text - 10
+					vim.api.nvim_buf_set_extmark(buf, blame_ns, i - 1, 0, {
+						end_col = hash_end,
+						hl_group = "Function",
+					})
+					vim.api.nvim_buf_set_extmark(buf, blame_ns, i - 1, hash_end + 1, {
+						end_col = date_start - 1,
+						hl_group = "Title",
+					})
+					vim.api.nvim_buf_set_extmark(buf, blame_ns, i - 1, date_start, {
+						end_col = #text,
+						hl_group = "Comment",
+					})
+				end
+
+				vim.cmd("leftabove " .. math.min(max_width + 2, 60) .. "vsplit")
 				local blame_win = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_buf(blame_win, buf)
 				vim.api.nvim_win_set_cursor(blame_win, cursor)
@@ -382,6 +426,7 @@ return {
 				vim.wo[blame_win].number = false
 				vim.wo[blame_win].relativenumber = false
 				vim.wo[blame_win].wrap = false
+				vim.cmd("syncbind")
 
 				-- Close blame and restore source window bindings on q
 				vim.keymap.set("n", "q", function()
