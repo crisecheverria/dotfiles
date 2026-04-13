@@ -9,13 +9,13 @@ vim.opt.mouse = ""
 vim.opt.complete = ".,w,b,u"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
 -- Nvim 0.12: auto-trigger completion as you type (set to false to go back to manual <C-n>)
-vim.opt.autocomplete = false
+vim.opt.autocomplete = true
 vim.opt.wildmode = "noselect:longest"
 vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
-vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 vim.opt.scrolloff = 5
 vim.opt.showcmd = true
 vim.opt.splitright = true
@@ -41,7 +41,7 @@ vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
-vim.g.mapleader = ","
+vim.g.mapleader = ";"
 
 -- Force POSIX shell for :grep, :make, etc. (Nushell/Fish are not compatible)
 vim.opt.shell = "/bin/sh"
@@ -177,7 +177,6 @@ vim.pack.add({ "https://github.com/ggml-org/llama.vim" })
 vim.pack.add({
 	{
 		src = "https://github.com/JavaHello/spring-boot.nvim",
-		version = "218c0c26c14d99feca778e4d13f5ec3e8b1b60f0",
 	},
 	"https://github.com/MunifTanjim/nui.nvim",
 	"https://github.com/mfussenegger/nvim-dap",
