@@ -155,6 +155,10 @@ return {
 		{ { "n" }, "<M-Right>", "<C-w>l", { desc = "move to right window" } },
 		{ { "n" }, "<M-Up>", "<C-w>k", { desc = "move to upper window" } },
 		{ { "n" }, "<M-Down>", "<C-w>j", { desc = "move to lower window" } },
+		{ { "n" }, "<C-h>", "<C-w>h", { desc = "move to left window" } },
+		{ { "n" }, "<C-l>", "<C-w>l", { desc = "move to right window" } },
+		{ { "n" }, "<C-k>", "<C-w>k", { desc = "move to upper window" } },
+		{ { "n" }, "<C-j>", "<C-w>j", { desc = "move to lower window" } },
 		{
 			{ "n" },
 			"<leader>cp",

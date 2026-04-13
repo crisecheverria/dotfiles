@@ -1,6 +1,6 @@
 {
   "plugins": {
-    "avante.nvim": {
+"avante.nvim": {
       "rev": "8c84af0f09e5d9058362ac58401a8e7b047d826e",
       "src": "https://github.com/yetone/avante.nvim"
     },
@@ -37,9 +37,9 @@
       "src": "https://github.com/crisecheverria/present.nvim"
     },
     "spring-boot.nvim": {
-      "rev": "218c0c26c14d99feca778e4d13f5ec3e8b1b60f0",
+      "rev": "98c6ff1dcdda943d341bba3c00ae9d190a2e5f7d",
       "src": "https://github.com/JavaHello/spring-boot.nvim",
-      "version": "'218c0c26c14d99feca778e4d13f5ec3e8b1b60f0'"
+      "version": "98c6ff1dcdda943d341bba3c00ae9d190a2e5f7d"
     }
   }
 }
