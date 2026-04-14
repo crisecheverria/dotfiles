@@ -49,82 +49,6 @@ vim.opt.shellcmdflag = "-c"
 vim.opt.shellquote = ""
 vim.opt.shellxquote = ""
 
-local mode_names = {
-	n = "N",
-	no = "N",
-	i = "I",
-	ic = "I",
-	v = "V",
-	V = "V",
-	["\22"] = "V",
-	s = "S",
-	S = "S",
-	["\19"] = "S",
-	R = "R",
-	Rv = "R",
-	c = "C",
-	t = "T",
-}
-
-local function git_branch()
-	if vim.bo.buftype ~= "" then
-		return ""
-	end
-	local branch =
-		 vim.fn.system("git -C " .. vim.fn.expand("%:p:h") .. " branch --show-current 2>/dev/null"):gsub("\n", "")
-	if branch == "" or branch:match("^fatal") then
-		return ""
-	end
-	if #branch > 15 then
-		branch = branch:sub(1, 15) .. "…"
-	end
-	return " " .. branch .. " |"
-end
-
-local function diagnostics()
-	local e = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.ERROR })
-	local w = #vim.diagnostic.get(0, { severity = vim.diagnostic.severity.WARN })
-	local parts = {}
-	if e > 0 then
-		table.insert(parts, "%#DiagnosticError#E:" .. e)
-	end
-	if w > 0 then
-		table.insert(parts, "%#DiagnosticWarn#W:" .. w)
-	end
-	if #parts == 0 then
-		return ""
-	end
-	return " " .. table.concat(parts, " ") .. "%* |"
-end
-
-local function lsp_status()
-	local clients = vim.lsp.get_clients({ bufnr = 0 })
-	if #clients == 0 then
-		return ""
-	end
-	local names = {}
-	for _, c in ipairs(clients) do
-		table.insert(names, c.name)
-	end
-	return " " .. table.concat(names, ",") .. " |"
-end
-
-_G.statusline = function()
-	local mode = mode_names[vim.fn.mode()] or vim.fn.mode()
-	return " "
-		 .. mode
-		 .. " |"
-		 .. git_branch()
-		 .. " %t"
-		 .. diagnostics()
-		 .. " %= %S %= %Y"
-		 .. lsp_status()
-		 .. " %02l/%02L "
-end
-
-vim.opt.statusline = "%!v:lua.statusline()"
-vim.opt.statuscolumn = "%s%l%#NonText# "
-
 vim.g.loaded_matchit = 1
 vim.g.netrw_banner = 0
 vim.g.netrw_liststyle = 0
@@ -140,53 +64,6 @@ vim.g.loaded_node_provider = 0
 -- Load Cfilter optional package
 vim.cmd.packadd("cfilter")
 
--- Load ai-cli.nvim from local dev directory
-vim.opt.rtp:prepend(vim.fn.expand("~/personal/ai-cli.nvim"))
-require("ai-cli").setup({
-	provider = "claude",
-	terminal_cmd = "claude",
-})
-
--- Installing this plugin because I coded myself, so it doenst count as
--- a plugin:
-vim.pack.add({ "https://github.com/crisecheverria/present.nvim" })
-require("present").setup()
-
--- A jump plugin
-vim.pack.add({ "https://github.com/yorickpeterse/nvim-jump" })
-require("jump").setup({
-	labels = "abcdef",
-})
-
--- llama.vim (FIM code completion via local llama.cpp server)
-vim.g.llama_config = {
-	endpoint_fim = "http://127.0.0.1:8012/infill",
-	endpoint_inst = "http://127.0.0.1:8012/v1/chat/completions",
-	n_prefix = 512,
-	n_suffix = 128,
-	n_predict = 128,
-	auto_fim = true,
-	show_info = 2,
-	ring_n_chunks = 32,
-	ring_chunk_size = 64,
-	ring_scope = 1024,
-}
-vim.pack.add({ "https://github.com/ggml-org/llama.vim" })
-
--- Java Setup
-vim.pack.add({
-	{
-		src = "https://github.com/JavaHello/spring-boot.nvim",
-	},
-	"https://github.com/MunifTanjim/nui.nvim",
-	"https://github.com/mfussenegger/nvim-dap",
-
-	"https://github.com/nvim-java/nvim-java",
-})
-
-require("java").setup()
-vim.lsp.enable("jdtls")
-
 -- Load persisted colorscheme or fall back to darkblue
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
 local f = io.open(colorscheme_file, "r")
@@ -200,6 +77,8 @@ local utils = require("utils")
 -- Load configuration fragments
 local configurations = {}
 for _, config in pairs({
+	"plugins",
+	"statusline",
 	"keymaps",
 	"commands",
 	"treesitter",
