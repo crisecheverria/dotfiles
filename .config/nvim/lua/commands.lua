@@ -40,7 +40,7 @@ local function floating_terminal()
 		end
 	end
 	if not has_terminal then
-		vim.fn.termopen(os.getenv("SHELL"))
+		vim.fn.jobstart(os.getenv("SHELL"), { term = true })
 	end
 
 	terminal_state.is_open = true
@@ -110,7 +110,8 @@ local function run_test()
 	local win = vim.api.nvim_get_current_win()
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_win_set_buf(win, buf)
-	vim.fn.termopen(cmd, {
+	vim.fn.jobstart(cmd, {
+		term = true,
 		on_exit = function(_, code)
 			vim.schedule(function()
 				local msg = code == 0 and "Tests passed" or "Tests FAILED (exit " .. code .. ")"
@@ -120,6 +121,26 @@ local function run_test()
 		end,
 	})
 	vim.cmd("startinsert")
+end
+
+local function run_async(opts)
+	local cmd = opts.args
+	vim.notify("Running: " .. cmd, vim.log.levels.INFO)
+	vim.fn.jobstart(cmd, {
+		stdout_buffered = true,
+		stderr_buffered = true,
+		on_exit = function(_, code)
+			vim.schedule(function()
+				local status = code == 0 and "succeeded" or "FAILED (exit " .. code .. ")"
+				local msg = cmd .. " " .. status
+				-- Ghostty desktop notification via OSC 9
+				vim.fn.chansend(vim.v.stderr, "\027]9;" .. msg .. "\007")
+				-- Also show in-editor
+				local level = code == 0 and vim.log.levels.INFO or vim.log.levels.ERROR
+				vim.notify(msg, level)
+			end)
+		end,
+	})
 end
 
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"
@@ -171,6 +192,35 @@ local function colorscheme_picker()
 	vim.keymap.set("n", "<cr>", function() close(true) end, opts)
 	vim.keymap.set("n", "q", function() close(false) end, opts)
 	vim.keymap.set("n", "<esc>", function() close(false) end, opts)
+end
+
+local function lazygit()
+	local buf = vim.api.nvim_create_buf(false, true)
+	local width = vim.o.columns
+	local height = vim.o.lines - 1
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		width = width,
+		height = height,
+		row = 0,
+		col = 0,
+		style = "minimal",
+		border = "rounded",
+	})
+	vim.fn.jobstart("lazygit", {
+		term = true,
+		on_exit = function()
+			vim.schedule(function()
+				if vim.api.nvim_win_is_valid(win) then
+					vim.api.nvim_win_close(win, true)
+				end
+				if vim.api.nvim_buf_is_valid(buf) then
+					vim.api.nvim_buf_delete(buf, { force = true })
+				end
+			end)
+		end,
+	})
+	vim.cmd("startinsert")
 end
 
 local function show_keymaps()
@@ -245,5 +295,7 @@ return {
 		{ "CloseFloatingTerminal", close_floating_terminal, {} },
 		{ "ColorPicker", colorscheme_picker, {} },
 		{ "RunTest", run_test, {} },
+		{ "Lazygit", lazygit, {} },
+		{ "Run", run_async, { nargs = "+" } },
 	},
 }
