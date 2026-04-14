@@ -147,6 +147,7 @@ return {
 			{ expr = true, desc = "delete char (void register)" },
 		},
 		{ { "n" }, "<leader>x", vim.diagnostic.setloclist, { desc = "Open diagnostic list" } },
+		{ { "n" }, "<leader>gg", "<cmd>Lazygit<cr>", { desc = "open lazygit" } },
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
 		{ { "n" }, "<leader>rt", "<cmd>RunTest<cr>", { desc = "run test for current file" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
