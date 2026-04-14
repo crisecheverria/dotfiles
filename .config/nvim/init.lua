@@ -6,7 +6,7 @@ vim.opt.relativenumber = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
 vim.opt.mouse = ""
-vim.opt.complete = ".,w,b,u"
+vim.opt.complete = ".,w,b,u,o"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
 -- Nvim 0.12: auto-trigger completion as you type (set to false to go back to manual <C-n>)
 vim.opt.autocomplete = true

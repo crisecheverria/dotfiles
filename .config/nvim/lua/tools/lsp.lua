@@ -8,6 +8,18 @@ vim.lsp.config("vtsls", {
 	cmd = { "vtsls", "--stdio" },
 	root_markers = { "tsconfig.json", "package.json", ".git" },
 	filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+	settings = {
+		typescript = {
+			preferences = {
+				importModuleSpecifier = "relative",
+			},
+		},
+		javascript = {
+			preferences = {
+				importModuleSpecifier = "relative",
+			},
+		},
+	},
 })
 
 vim.lsp.config("rust_analyzer", {
