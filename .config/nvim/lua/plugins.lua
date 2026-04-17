@@ -10,8 +10,8 @@ require("agentic").setup({
 	},
 })
 
--- Load ai-cli.nvim from local dev directory
-vim.opt.rtp:prepend(vim.fn.expand("~/personal/ai-cli.nvim"))
+-- Load ai-cli.nvim
+vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" })
 require("ai-cli").setup({
 	provider = "claude",
 	terminal_cmd = "claude",
@@ -35,7 +35,7 @@ vim.g.llama_config = {
 	n_prefix = 512,
 	n_suffix = 128,
 	n_predict = 128,
-	auto_fim = true,
+	auto_fim = false,
 	show_info = 2,
 	ring_n_chunks = 32,
 	ring_chunk_size = 64,
@@ -56,3 +56,34 @@ vim.pack.add({
 
 require("java").setup()
 vim.lsp.enable("jdtls")
+
+-- fff.nvim for file picker and grep?
+vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
+
+vim.api.nvim_create_autocmd("PackChanged", {
+	callback = function(ev)
+		local name, kind = ev.data.spec.name, ev.data.kind
+		if name == "fff.nvim" and (kind == "install" or kind == "update") then
+			if not ev.data.active then
+				vim.cmd.packadd("fff.nvim")
+			end
+			require("fff.download").download_or_build_binary()
+		end
+	end,
+})
+
+-- the plugin will automatically lazy load
+vim.g.fff = {
+	lazy_sync = true, -- start syncing only when the picker is open
+	debug = {
+		enabled = true,
+		show_scores = true,
+	},
+}
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "fff_input",
+	callback = function(args)
+		vim.bo[args.buf].autocomplete = false
+	end,
+})
