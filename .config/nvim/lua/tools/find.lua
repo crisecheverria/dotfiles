@@ -12,9 +12,6 @@ function _G.CustomFind(arg, _)
 end
 
 return {
-	keymaps = {
-		{ { "n" }, "<leader>f", ":find<space>", { desc = "Find file (fuzzy)" } },
-	},
 	options = {
 		findfunc = "v:lua.CustomFind",
 	},
