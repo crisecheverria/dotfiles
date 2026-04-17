@@ -24,7 +24,7 @@ title = " "
 # background-blur = macos-glass-regular
 
 # Notifications for Claude Code
-# desktop-notifications = true
+desktop-notifications = true
 
 # macos-option-as-alt = true
 
@@ -43,7 +43,7 @@ title = " "
 
   # --- Theme and Colors ---
   # Catppuccin with automatic light/dark switching
-  theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+  theme = Catppuccin Mocha
 
   # --- Window and Appearance ---
   background-opacity = 1
@@ -52,11 +52,15 @@ title = " "
   window-padding-y = 8
   window-save-state = always
   window-theme = auto
+  window-padding-x = 10
+  window-padding-y = 8
+  window-save-state = always
+  window-theme = auto
 
   # --- Cursor ---
-  cursor-style = bar
-  cursor-style-blink = true
-  cursor-opacity = 0.8
+  # cursor-style = bar
+  # cursor-style-blink = true
+  # cursor-opacity = 0.8
 
   # --- Mouse ---
   mouse-hide-while-typing = true
@@ -91,6 +95,12 @@ title = " "
   keybind = cmd+alt+up=goto_split:top
   keybind = cmd+alt+down=goto_split:bottom
 
+  # Send Cmd+Arrow to Neovim for window navigation
+  keybind = cmd+left=text:\x1b[1;3D
+  keybind = cmd+right=text:\x1b[1;3C
+  keybind = cmd+up=text:\x1b[1;3A
+  keybind = cmd+down=text:\x1b[1;3B
+
   # Font size
   keybind = cmd+plus=increase_font_size:1
   keybind = cmd+minus=decrease_font_size:1
@@ -105,7 +115,3 @@ title = " "
 
   # Reload config
   keybind = cmd+shift+comma=reload_config
-
-  # --- Performance ---
-  # Generous scrollback (25MB)
-  scrollback-limit = 25000000
