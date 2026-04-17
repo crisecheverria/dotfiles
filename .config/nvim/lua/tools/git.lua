@@ -247,6 +247,11 @@ local function filter_diff(diff_text, start_line, end_line)
 					table.insert(filtered, line)
 					new_cnt = new_cnt + 1
 					has_changes = true
+				else
+					-- Keep as context (line exists in working tree, we're not discarding it)
+					table.insert(filtered, " " .. line:sub(2))
+					old_cnt = old_cnt + 1
+					new_cnt = new_cnt + 1
 				end
 				new_line = new_line + 1
 			elseif prefix == "-" then
@@ -254,12 +259,8 @@ local function filter_diff(diff_text, start_line, end_line)
 					table.insert(filtered, line)
 					old_cnt = old_cnt + 1
 					has_changes = true
-				else
-					-- Convert to context so the line stays in the index
-					table.insert(filtered, " " .. line:sub(2))
-					old_cnt = old_cnt + 1
-					new_cnt = new_cnt + 1
 				end
+				-- Outside selection: drop entirely (line doesn't exist in working tree)
 			elseif prefix == " " then
 				table.insert(filtered, line)
 				old_cnt = old_cnt + 1
@@ -335,13 +336,225 @@ return {
 		{
 			"Gdiff",
 			function(args)
-				local cmd = { "git", "diff" }
+				local extra_args = {}
 				if args.args ~= "" then
-					table.insert(cmd, args.args)
+					for arg in args.args:gmatch("%S+") do
+						table.insert(extra_args, arg)
+					end
 				end
-				git_output(cmd, "git:diff", "diff")
+
+				local is_cached = vim.tbl_contains(extra_args, "--cached")
+					or vim.tbl_contains(extra_args, "--staged")
+
+				local cmd = { "git", "diff", "--name-only" }
+				vim.list_extend(cmd, extra_args)
+				local result = vim.system(cmd, { text = true }):wait()
+				if result.code ~= 0 then
+					return vim.notify(result.stderr, vim.log.levels.ERROR)
+				end
+				local files = vim.split(result.stdout, "\n", { trimempty = true })
+				if #files == 0 then
+					return vim.notify("No changes", vim.log.levels.INFO)
+				end
+
+				local root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
+
+				vim.cmd("tabnew")
+				local tab = vim.api.nvim_get_current_tabpage()
+
+				local state = { files = files, index = 0, bufs = {} }
+
+				-- Diff area (top, two vertical splits)
+				vim.cmd("vsplit")
+				local right_win = vim.api.nvim_get_current_win()
+				vim.cmd("wincmd h")
+				local left_win = vim.api.nvim_get_current_win()
+				state.left_diff_win = left_win
+				state.right_diff_win = right_win
+
+				-- File panel (bottom)
+				local panel_buf = vim.api.nvim_create_buf(false, true)
+				local display = {}
+				for i, f in ipairs(files) do
+					display[i] = "  " .. f
+				end
+				vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, display)
+				vim.bo[panel_buf].modifiable = false
+				vim.bo[panel_buf].buftype = "nofile"
+				pcall(vim.api.nvim_buf_set_name, panel_buf, "diff:files")
+				vim.cmd("botright split")
+				local panel_win = vim.api.nvim_get_current_win()
+				vim.api.nvim_win_set_buf(panel_win, panel_buf)
+				local panel_height = math.min(#files + 1, 15)
+				vim.api.nvim_win_set_height(panel_win, panel_height)
+				vim.wo[panel_win].number = false
+				vim.wo[panel_win].relativenumber = false
+				vim.wo[panel_win].winfixheight = true
+				vim.wo[panel_win].wrap = false
+				vim.wo[panel_win].cursorline = true
+				state.panel_buf = panel_buf
+				state.panel_win = panel_win
+
+				local function highlight_panel(idx)
+					vim.bo[panel_buf].modifiable = true
+					local lines = {}
+					for i, f in ipairs(state.files) do
+						lines[i] = (i == idx and "> " or "  ") .. f
+					end
+					vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, lines)
+					vim.bo[panel_buf].modifiable = false
+					if vim.api.nvim_win_is_valid(state.panel_win) then
+						vim.api.nvim_win_set_cursor(state.panel_win, { idx, 0 })
+					end
+				end
+
+				local function load_file(idx)
+					if idx < 1 or idx > #state.files then
+						return
+					end
+					state.index = idx
+					highlight_panel(idx)
+
+					local rel = state.files[idx]
+					local abs = root .. "/" .. rel
+					local ft = vim.filetype.match({ filename = rel }) or ""
+
+					-- Turn off diff mode and clean up old buffers
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffoff")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffoff")
+					end
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							for _, w in ipairs(vim.fn.win_findbuf(b)) do
+								local scratch = vim.api.nvim_create_buf(false, true)
+								vim.api.nvim_win_set_buf(w, scratch)
+							end
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					state.bufs = {}
+
+					-- Left buffer: "before" version
+					local before_cmd = is_cached
+						and { "git", "show", "HEAD:" .. rel }
+						or { "git", "show", ":0:" .. rel }
+					local before_lines = {}
+					local r = vim.system(before_cmd, { text = true, cwd = root }):wait()
+					if r.code == 0 then
+						before_lines = vim.split(r.stdout, "\n", { trimempty = false })
+					end
+					local before_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(before_buf, 0, -1, false, before_lines)
+					vim.bo[before_buf].modifiable = false
+					vim.bo[before_buf].buftype = "nofile"
+					vim.bo[before_buf].filetype = ft
+					local before_label = is_cached and "HEAD:" or "Index:"
+					pcall(vim.api.nvim_buf_set_name, before_buf, before_label .. rel)
+					table.insert(state.bufs, before_buf)
+
+					-- Right buffer: "after" version
+					local after_lines = {}
+					if is_cached then
+						local ar = vim.system({ "git", "show", ":0:" .. rel }, { text = true, cwd = root }):wait()
+						if ar.code == 0 then
+							after_lines = vim.split(ar.stdout, "\n", { trimempty = false })
+						end
+					else
+						local f = io.open(abs, "r")
+						if f then
+							local content = f:read("*a")
+							f:close()
+							after_lines = vim.split(content, "\n", { trimempty = false })
+						end
+					end
+					local after_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(after_buf, 0, -1, false, after_lines)
+					vim.bo[after_buf].modifiable = false
+					vim.bo[after_buf].buftype = "nofile"
+					vim.bo[after_buf].filetype = ft
+					local after_label = is_cached and "Staged:" or "Working:"
+					pcall(vim.api.nvim_buf_set_name, after_buf, after_label .. rel)
+					table.insert(state.bufs, after_buf)
+
+					-- Set buffers in diff windows
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_win_set_buf(state.left_diff_win, before_buf)
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffthis")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_win_set_buf(state.right_diff_win, after_buf)
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffthis")
+					end
+				end
+
+				local function close_diff()
+					vim.cmd("diffoff!")
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					if vim.api.nvim_buf_is_valid(panel_buf) then
+						vim.api.nvim_buf_delete(panel_buf, { force = true })
+					end
+					if vim.api.nvim_tabpage_is_valid(tab) then
+						local tabs = vim.api.nvim_list_tabpages()
+						if #tabs > 1 then
+							vim.cmd("tabclose")
+						end
+					end
+				end
+
+				local function next_file()
+					local next = state.index + 1
+					if next > #state.files then
+						next = 1
+					end
+					load_file(next)
+				end
+
+				local function prev_file()
+					local prev = state.index - 1
+					if prev < 1 then
+						prev = #state.files
+					end
+					load_file(prev)
+				end
+
+				local function set_keys(buf)
+					local opts = { buffer = buf, silent = true }
+					vim.keymap.set("n", "<Tab>", next_file, opts)
+					vim.keymap.set("n", "<S-Tab>", prev_file, opts)
+					vim.keymap.set("n", "q", close_diff, opts)
+				end
+
+				set_keys(panel_buf)
+
+				vim.keymap.set("n", "<CR>", function()
+					local line = vim.api.nvim_win_get_cursor(state.panel_win)[1]
+					load_file(line)
+				end, { buffer = panel_buf, silent = true })
+
+				local orig_load = load_file
+				load_file = function(idx)
+					orig_load(idx)
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							set_keys(b)
+						end
+					end
+				end
+
+				load_file(1)
 			end,
-			{ nargs = "?", desc = "Git diff (optional file)" },
+			{ nargs = "?", desc = "Git diff with file panel and side-by-side view" },
 		},
 		{
 			"Glog",
@@ -643,6 +856,16 @@ return {
 					vim.keymap.set("n", "<Tab>", next_file, opts)
 					vim.keymap.set("n", "<S-Tab>", prev_file, opts)
 					vim.keymap.set("n", "q", close_review, opts)
+					vim.keymap.set("n", "gf", function()
+						if state.index < 1 or state.index > #state.files then
+							return
+						end
+						local abs = root .. "/" .. state.files[state.index]
+						local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+						close_review()
+						vim.cmd("edit " .. vim.fn.fnameescape(abs))
+						pcall(vim.api.nvim_win_set_cursor, 0, { cursor_line, 0 })
+					end, opts)
 				end
 
 				set_review_keys(panel_buf)
@@ -668,6 +891,411 @@ return {
 				load_file(1)
 			end,
 			{ nargs = "?", desc = "Review PR: file panel + side-by-side diff" },
+		},
+		{
+			"Ghistory",
+			function(args)
+				local file_only = args.args == "%"
+
+				local root_result = vim.system({ "git", "rev-parse", "--show-toplevel" }, { text = true }):wait()
+				if root_result.code ~= 0 then
+					return vim.notify("Not in a git repo", vim.log.levels.ERROR)
+				end
+				local root = root_result.stdout:gsub("\n$", "")
+
+				local current_file_rel
+				if file_only then
+					local file = vim.api.nvim_buf_get_name(0)
+					if file == "" then
+						return vim.notify("No file open", vim.log.levels.ERROR)
+					end
+					current_file_rel = file:sub(#root + 2)
+				end
+
+				-- Get commits
+				local log_cmd = { "git", "log", "--pretty=format:%h\t%ad\t%an\t%s", "--date=short", "-50" }
+				if file_only then
+					table.insert(log_cmd, "--follow")
+					table.insert(log_cmd, "--")
+					table.insert(log_cmd, current_file_rel)
+				end
+
+				local result = vim.system(log_cmd, { text = true, cwd = root }):wait()
+				if result.code ~= 0 then
+					return vim.notify(result.stderr, vim.log.levels.ERROR)
+				end
+
+				local log_lines = vim.split(result.stdout, "\n", { trimempty = true })
+				if #log_lines == 0 then
+					return vim.notify("No commits found", vim.log.levels.INFO)
+				end
+
+				-- Parse commits
+				local commits = {}
+				local max_author = 0
+				for _, line in ipairs(log_lines) do
+					local hash, date, author, subject = line:match("^([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$")
+					if hash then
+						if #author > max_author then
+							max_author = #author
+						end
+						table.insert(commits, {
+							hash = hash,
+							date = date,
+							author = author,
+							subject = subject,
+						})
+					end
+				end
+
+				-- Format display lines with aligned columns
+				local commit_displays = {}
+				for _, c in ipairs(commits) do
+					table.insert(commit_displays, string.format(
+						"%s  %s  %-" .. max_author .. "s  %s",
+						c.hash, c.date, c.author, c.subject
+					))
+				end
+
+				-- Create tab
+				vim.cmd("tabnew")
+				local tab = vim.api.nvim_get_current_tabpage()
+
+				local state = {
+					commits = commits,
+					commit_index = 0,
+					files = {},
+					file_index = 0,
+					bufs = {},
+					mode = "commits",
+				}
+
+				-- Diff area (top, two vertical splits)
+				vim.cmd("vsplit")
+				local right_win = vim.api.nvim_get_current_win()
+				vim.cmd("wincmd h")
+				local left_win = vim.api.nvim_get_current_win()
+				state.left_diff_win = left_win
+				state.right_diff_win = right_win
+
+				-- Panel (bottom)
+				local panel_buf = vim.api.nvim_create_buf(false, true)
+				pcall(vim.api.nvim_buf_set_name, panel_buf, "history:panel")
+				vim.bo[panel_buf].buftype = "nofile"
+				vim.cmd("botright split")
+				local panel_win = vim.api.nvim_get_current_win()
+				vim.api.nvim_win_set_buf(panel_win, panel_buf)
+				vim.api.nvim_win_set_height(panel_win, math.min(#commits + 1, 15))
+				vim.wo[panel_win].number = false
+				vim.wo[panel_win].relativenumber = false
+				vim.wo[panel_win].winfixheight = true
+				vim.wo[panel_win].wrap = false
+				vim.wo[panel_win].cursorline = true
+				state.panel_buf = panel_buf
+				state.panel_win = panel_win
+
+				local panel_ns = vim.api.nvim_create_namespace("history_panel")
+
+				local function render_panel(items, selected)
+					vim.bo[panel_buf].modifiable = true
+					local lines = {}
+					for i, item in ipairs(items) do
+						lines[i] = (i == selected and "> " or "  ") .. item
+					end
+					vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, lines)
+					vim.api.nvim_buf_clear_namespace(panel_buf, panel_ns, 0, -1)
+
+					local prefix = 2 -- "> " or "  "
+					if state.mode == "commits" then
+						for i, c in ipairs(state.commits) do
+							local col = prefix
+							-- hash
+							vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, col, {
+								end_col = col + #c.hash,
+								hl_group = "Function",
+							})
+							col = col + #c.hash + 2
+							-- date
+							vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, col, {
+								end_col = col + #c.date,
+								hl_group = "Comment",
+							})
+							col = col + #c.date + 2
+							-- author
+							vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, col, {
+								end_col = col + #c.author,
+								hl_group = "Title",
+							})
+						end
+					else
+						for i, f in ipairs(items) do
+							local ext = f:match("%.([^%.]+)$") or ""
+							local hl = "Normal"
+							if ext == "ts" or ext == "tsx" then
+								hl = "Function"
+							elseif ext == "js" or ext == "jsx" then
+								hl = "Keyword"
+							elseif ext == "css" or ext == "scss" then
+								hl = "String"
+							elseif ext == "json" then
+								hl = "Comment"
+							elseif ext == "md" then
+								hl = "Title"
+							end
+							local dir_end = f:find("/[^/]*$")
+							if dir_end then
+								vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, prefix, {
+									end_col = prefix + dir_end,
+									hl_group = "Comment",
+								})
+								vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, prefix + dir_end, {
+									end_col = prefix + #f,
+									hl_group = hl,
+								})
+							else
+								vim.api.nvim_buf_set_extmark(panel_buf, panel_ns, i - 1, prefix, {
+									end_col = prefix + #f,
+									hl_group = hl,
+								})
+							end
+						end
+					end
+
+					vim.bo[panel_buf].modifiable = false
+					if vim.api.nvim_win_is_valid(state.panel_win) and selected > 0 then
+						vim.api.nvim_win_set_cursor(state.panel_win, { selected, 0 })
+					end
+				end
+
+				local function clear_diff()
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffoff")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffoff")
+					end
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							for _, w in ipairs(vim.fn.win_findbuf(b)) do
+								local scratch = vim.api.nvim_create_buf(false, true)
+								vim.api.nvim_win_set_buf(w, scratch)
+							end
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					state.bufs = {}
+				end
+
+				local function show_diff(hash, rel)
+					clear_diff()
+
+					local ft = vim.filetype.match({ filename = rel }) or ""
+
+					-- Before: parent commit version
+					local before_lines = {}
+					local r = vim.system(
+						{ "git", "show", hash .. "~1:" .. rel },
+						{ text = true, cwd = root }
+					):wait()
+					if r.code == 0 then
+						before_lines = vim.split(r.stdout, "\n", { trimempty = false })
+					end
+					local before_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(before_buf, 0, -1, false, before_lines)
+					vim.bo[before_buf].modifiable = false
+					vim.bo[before_buf].buftype = "nofile"
+					vim.bo[before_buf].filetype = ft
+					pcall(vim.api.nvim_buf_set_name, before_buf, hash .. "~1:" .. rel)
+					table.insert(state.bufs, before_buf)
+
+					-- After: this commit version
+					local after_lines = {}
+					local ar = vim.system(
+						{ "git", "show", hash .. ":" .. rel },
+						{ text = true, cwd = root }
+					):wait()
+					if ar.code == 0 then
+						after_lines = vim.split(ar.stdout, "\n", { trimempty = false })
+					end
+					local after_buf = vim.api.nvim_create_buf(false, true)
+					vim.api.nvim_buf_set_lines(after_buf, 0, -1, false, after_lines)
+					vim.bo[after_buf].modifiable = false
+					vim.bo[after_buf].buftype = "nofile"
+					vim.bo[after_buf].filetype = ft
+					pcall(vim.api.nvim_buf_set_name, after_buf, hash .. ":" .. rel)
+					table.insert(state.bufs, after_buf)
+
+					if vim.api.nvim_win_is_valid(state.left_diff_win) then
+						vim.api.nvim_win_set_buf(state.left_diff_win, before_buf)
+						vim.api.nvim_set_current_win(state.left_diff_win)
+						vim.cmd("diffthis")
+					end
+					if vim.api.nvim_win_is_valid(state.right_diff_win) then
+						vim.api.nvim_win_set_buf(state.right_diff_win, after_buf)
+						vim.api.nvim_set_current_win(state.right_diff_win)
+						vim.cmd("diffthis")
+					end
+				end
+
+				local function close_history()
+					vim.cmd("diffoff!")
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							vim.api.nvim_buf_delete(b, { force = true })
+						end
+					end
+					if vim.api.nvim_buf_is_valid(panel_buf) then
+						vim.api.nvim_buf_delete(panel_buf, { force = true })
+					end
+					if vim.api.nvim_tabpage_is_valid(tab) then
+						local tabs = vim.api.nvim_list_tabpages()
+						if #tabs > 1 then
+							vim.cmd("tabclose")
+						end
+					end
+				end
+
+				local set_keys
+
+				local function show_commits_panel()
+					state.mode = "commits"
+					state.commit_index = math.max(state.commit_index, 1)
+					render_panel(commit_displays, state.commit_index)
+				end
+
+				local function load_file_in_commit(file_idx)
+					if file_idx < 1 or file_idx > #state.files then
+						return
+					end
+					state.file_index = file_idx
+					render_panel(state.files, file_idx)
+					show_diff(state.commits[state.commit_index].hash, state.files[file_idx])
+					for _, b in ipairs(state.bufs) do
+						if vim.api.nvim_buf_is_valid(b) then
+							set_keys(b)
+						end
+					end
+				end
+
+				local function enter_commit(commit_idx)
+					if commit_idx < 1 or commit_idx > #state.commits then
+						return
+					end
+					state.commit_index = commit_idx
+					local hash = state.commits[commit_idx].hash
+
+					if file_only then
+						render_panel(commit_displays, commit_idx)
+						show_diff(hash, current_file_rel)
+						for _, b in ipairs(state.bufs) do
+							if vim.api.nvim_buf_is_valid(b) then
+								set_keys(b)
+							end
+						end
+						return
+					end
+
+					-- Project mode: get files changed in this commit
+					local r = vim.system(
+						{ "git", "diff-tree", "--no-commit-id", "-r", "--name-only", hash },
+						{ text = true, cwd = root }
+					):wait()
+					if r.code ~= 0 then
+						return vim.notify(r.stderr, vim.log.levels.ERROR)
+					end
+
+					state.files = vim.split(r.stdout, "\n", { trimempty = true })
+					if #state.files == 0 then
+						return vim.notify("No files in commit")
+					end
+
+					state.mode = "files"
+					state.file_index = 1
+					load_file_in_commit(1)
+				end
+
+				local function next_item()
+					if file_only then
+						local next = state.commit_index + 1
+						if next > #state.commits then
+							next = 1
+						end
+						enter_commit(next)
+					elseif state.mode == "files" then
+						local next = state.file_index + 1
+						if next > #state.files then
+							next = 1
+						end
+						load_file_in_commit(next)
+					elseif state.mode == "commits" then
+						local next = state.commit_index + 1
+						if next > #state.commits then
+							next = 1
+						end
+						enter_commit(next)
+					end
+				end
+
+				local function prev_item()
+					if file_only then
+						local prev = state.commit_index - 1
+						if prev < 1 then
+							prev = #state.commits
+						end
+						enter_commit(prev)
+					elseif state.mode == "files" then
+						local prev = state.file_index - 1
+						if prev < 1 then
+							prev = #state.files
+						end
+						load_file_in_commit(prev)
+					elseif state.mode == "commits" then
+						local prev = state.commit_index - 1
+						if prev < 1 then
+							prev = #state.commits
+						end
+						enter_commit(prev)
+					end
+				end
+
+				local function go_back()
+					if state.mode == "files" and not file_only then
+						clear_diff()
+						show_commits_panel()
+						if vim.api.nvim_win_is_valid(state.panel_win) then
+							vim.api.nvim_set_current_win(state.panel_win)
+						end
+					end
+				end
+
+				set_keys = function(buf)
+					local opts = { buffer = buf, silent = true }
+					vim.keymap.set("n", "<Tab>", next_item, opts)
+					vim.keymap.set("n", "<S-Tab>", prev_item, opts)
+					vim.keymap.set("n", "q", close_history, opts)
+					vim.keymap.set("n", "<Backspace>", go_back, opts)
+				end
+
+				set_keys(panel_buf)
+
+				vim.keymap.set("n", "<CR>", function()
+					local line = vim.api.nvim_win_get_cursor(state.panel_win)[1]
+					if state.mode == "commits" then
+						enter_commit(line)
+					else
+						load_file_in_commit(line)
+					end
+				end, { buffer = panel_buf, silent = true })
+
+				-- Show commits and auto-load first in file mode
+				show_commits_panel()
+				if file_only and #commits > 0 then
+					enter_commit(1)
+				end
+			end,
+			{ nargs = "?", desc = "Git history (% for current file)" },
 		},
 		{
 			"Gstage",
@@ -736,7 +1364,7 @@ return {
 					return vim.notify("No hunks in selection")
 				end
 
-				local result = vim.system({ "git", "apply", "-R", "-" }, { text = true, cwd = root, stdin = patch })
+				local result = vim.system({ "git", "apply", "-R", "--recount", "-" }, { text = true, cwd = root, stdin = patch })
 					 :wait()
 				if result.code == 0 then
 					vim.notify(count .. " hunk(s) discarded")
@@ -820,5 +1448,6 @@ return {
 		{ { "v" }, "<leader>s",  ":Gstage<CR>",      { desc = "Stage hunk(s)" } },
 		{ { "v" }, "<leader>d",  ":Gdiscard<CR>",    { desc = "Discard hunk(s)" } },
 		{ { "n" }, "<leader>gc", "<cmd>Gcommit<cr>", { desc = "Git commit" } },
+		{ { "n" }, "<leader>gh", "<cmd>Ghistory %<cr>", { desc = "Git file history" } },
 	},
 }
