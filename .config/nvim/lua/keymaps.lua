@@ -148,8 +148,29 @@ return {
 		},
 		{ { "n" }, "<leader>x", vim.diagnostic.setloclist, { desc = "Open diagnostic list" } },
 		{ { "n" }, "<leader>gg", "<cmd>Lazygit<cr>", { desc = "open lazygit" } },
+		{
+			{ "n" },
+			"<leader>f",
+			function()
+				require("fff").find_files()
+			end,
+			{ desc = "Find files" },
+		},
+		{
+			{ "n" },
+			"<leader>s",
+			function()
+				require("fff").live_grep()
+			end,
+			{ desc = "Live grep" },
+		},
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
-		{ { "n" }, "<leader>rt", "<cmd>RunTest<cr>", { desc = "run test for current file" } },
+		{
+			{ "n" },
+			"<leader>rt",
+			"<cmd>RunTest<cr>",
+			{ desc = "run test for current file" },
+		},
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", "<cmd>buffers<cr>", { desc = "list buffers" } },
 		{ { "n" }, "<M-Left>", "<C-w>h", { desc = "move to left window" } },
@@ -171,9 +192,19 @@ return {
 			{ desc = "Copy file path to clipboard" },
 		},
 		-- visual mode
-		{ { "v" }, "r", '"_dp', { desc = "replace selection without yanking" } },
+		{
+			{ "v" },
+			"r",
+			'"_dp',
+			{ desc = "replace selection without yanking" },
+		},
 		{ { "n", "x", "o" }, "f", require("jump").start, { desc = "jump" } },
-		{ { "v" }, "s", surround, { expr = true, desc = "surround selection" } },
+		{
+			{ "v" },
+			"s",
+			surround,
+			{ expr = true, desc = "surround selection" },
+		},
 		{ { "n" }, "<a-j>", ":m .+1<cr>==", { desc = "move line down" } },
 		{ { "n" }, "<a-k>", ":m .-2<cr>==", { desc = "move line up" } },
 		{ { "v" }, "<a-j>", ":m '>+1<cr>gv=gv", { desc = "move selection down" } },
@@ -189,6 +220,17 @@ return {
 		{ { "n", "v" }, "m", "%", { desc = "jump to matching bracket" } },
 		{ { "n", "v" }, "<Space>", ":", { desc = "command-line mode" } },
 		{ { "n", "v" }, ":", ",", { desc = "reverse f/t" } },
+		-- llama.vim
+		{
+			{ "v" },
+			"<leader>li",
+			":LlamaInstruct<cr>",
+			{ desc = "Llama instruct (ask about selection)" },
+		},
+		{ { "n" }, "<leader>lr", ":LlamaInstruct<cr>", { desc = "Llama rerun instruction" } },
+		{ { "n" }, "<leader>lt", "<cmd>LlamaToggle<cr>", { desc = "Llama toggle on/off" } },
+		{ { "n" }, "<leader>lf", "<cmd>LlamaToggleAutoFim<cr>", { desc = "Llama toggle auto-FIM" } },
+		{ { "n" }, "<leader>ld", "<cmd>LlamaDebugToggle<cr>", { desc = "Llama toggle debug" } },
 		-- avante.nvim
 		{ { "n", "v" }, "<leader>cc", "<cmd>AvanteToggle<cr>", { desc = "Toggle Avante" } },
 		{ { "n", "v" }, "<leader>ca", "<cmd>AvanteAsk<cr>", { desc = "Avante Ask" } },
