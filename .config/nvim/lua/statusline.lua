@@ -15,19 +15,40 @@ local mode_names = {
 	t = "T",
 }
 
-local function git_branch()
+local cached_branch = ""
+
+local function update_branch()
 	if vim.bo.buftype ~= "" then
-		return ""
+		cached_branch = ""
+		return
 	end
-	local branch =
-		vim.fn.system("git -C " .. vim.fn.expand("%:p:h") .. " branch --show-current 2>/dev/null"):gsub("\n", "")
-	if branch == "" or branch:match("^fatal") then
-		return ""
+	local dir = vim.fn.expand("%:p:h")
+	if dir == "" then
+		cached_branch = ""
+		return
 	end
-	if #branch > 15 then
-		branch = branch:sub(1, 15) .. "..."
-	end
-	return " " .. branch .. " |"
+	vim.system({ "git", "-C", dir, "branch", "--show-current" }, { text = true }, function(result)
+		vim.schedule(function()
+			if result.code ~= 0 or result.stdout == "" then
+				cached_branch = ""
+			else
+				local branch = result.stdout:gsub("\n", "")
+				if #branch > 15 then
+					branch = branch:sub(1, 15) .. "..."
+				end
+				cached_branch = " " .. branch .. " |"
+			end
+			vim.cmd.redrawstatus()
+		end)
+	end)
+end
+
+vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "DirChanged" }, {
+	callback = update_branch,
+})
+
+local function git_branch()
+	return cached_branch
 end
 
 local function diagnostics()
