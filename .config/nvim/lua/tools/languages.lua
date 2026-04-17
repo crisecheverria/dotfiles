@@ -114,11 +114,14 @@ local function find_local_bin(name)
 end
 
 local function js_ts_config()
+	local file = vim.api.nvim_buf_get_name(0)
+	if file:match("^diffview://") or file:match("^fugitive://") or not vim.uv.fs_stat(file) then
+		return
+	end
+
 	vim.bo.formatprg = "prettier"
 	vim.bo.tabstop = 2
 	vim.bo.shiftwidth = 2
-
-	local file = vim.api.nvim_buf_get_name(0)
 	local bufnr = vim.api.nvim_get_current_buf()
 	local eslint_bin = find_local_bin("eslint")
 

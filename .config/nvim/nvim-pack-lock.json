@@ -4,6 +4,10 @@
       "rev": "58c38cf5a8e77b3a88853e6f99cefdd5bcfbbe08",
       "src": "https://github.com/carlos-algms/agentic.nvim"
     },
+    "ai-cli.nvim": {
+      "rev": "5707503ed84a20b52a60d40a73bffc6bd9af8b9e",
+      "src": "https://github.com/crisecheverria/ai-cli.nvim"
+    },
     "avante.nvim": {
       "rev": "8c84af0f09e5d9058362ac58401a8e7b047d826e",
       "src": "https://github.com/yetone/avante.nvim"
@@ -11,6 +15,14 @@
     "dressing.nvim": {
       "rev": "2d7c2db2507fa3c4956142ee607431ddb2828639",
       "src": "https://github.com/stevearc/dressing.nvim"
+    },
+    "emoji.nvim": {
+      "rev": "34ccd330be21d0ba5050f9c4ced3fbc80d137347",
+      "src": "https://github.com/Allaman/emoji.nvim"
+    },
+    "fff.nvim": {
+      "rev": "7de55be63d725d94944e5e89206284a67b8baa08",
+      "src": "https://github.com/dmtrKovalenko/fff.nvim"
     },
     "llama.vim": {
       "rev": "cfb472aa94e08e982e0ae395bbf01f2cc8a3c6b7",
@@ -43,10 +55,6 @@
     "spring-boot.nvim": {
       "rev": "98c6ff1dcdda943d341bba3c00ae9d190a2e5f7d",
       "src": "https://github.com/JavaHello/spring-boot.nvim"
-    },
-    "staline.nvim": {
-      "rev": "d337bc9b343df3328921ef4c3f8ff604102d0201",
-      "src": "https://github.com/tamton-aquib/staline.nvim"
     }
   }
 }
