@@ -15,7 +15,7 @@ vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
-vim.opt.cmdheight = 1
+vim.opt.cmdheight = 0
 vim.opt.scrolloff = 5
 vim.opt.showcmd = true
 vim.opt.splitright = true
@@ -42,12 +42,6 @@ vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
 vim.g.mapleader = ";"
-
--- Force POSIX shell for :grep, :make, etc. (Nushell/Fish are not compatible)
-vim.opt.shell = "/bin/sh"
-vim.opt.shellcmdflag = "-c"
-vim.opt.shellquote = ""
-vim.opt.shellxquote = ""
 
 vim.g.loaded_matchit = 1
 vim.g.netrw_banner = 0
