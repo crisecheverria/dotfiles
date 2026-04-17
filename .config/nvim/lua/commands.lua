@@ -224,28 +224,10 @@ local function lazygit()
 end
 
 local function show_keymaps()
-	local modes = { "n", "i", "v", "x", "o" }
-	local lines = {}
-	local leader = vim.g.mapleader or "\\"
-	for _, mode in ipairs(modes) do
-		local maps = vim.api.nvim_get_keymap(mode)
-		for _, map in ipairs(maps) do
-			local lhs = map.lhs:gsub(leader, "<leader>", 1)
-			local rhs = map.rhs or (map.callback and "<function>" or "")
-			local desc = map.desc or ""
-			table.insert(lines, string.format("%-4s %-20s %-40s %s", mode, lhs, rhs, desc))
-		end
-	end
-	table.sort(lines)
-
-	local buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-	vim.bo[buf].filetype = "conf"
-	vim.bo[buf].modifiable = false
-
-	vim.cmd("split")
-	vim.api.nvim_win_set_buf(0, buf)
-	vim.keymap.set("n", "q", "<cmd>bdelete<cr>", { buffer = buf, silent = true })
+	vim.cmd("enew | put =execute('map')")
+	vim.bo.modifiable = false
+	vim.bo.buftype = "nofile"
+	vim.keymap.set("n", "q", "<cmd>bdelete<cr>", { buffer = 0, silent = true })
 end
 
 return {
