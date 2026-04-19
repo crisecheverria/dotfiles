@@ -165,6 +165,12 @@ return {
 			"<cmd>RunTest<cr>",
 			{ desc = "run test for current file" },
 		},
+		{
+			{ "n" },
+			"<leader>rr",
+			"<cmd>RunFile<cr>",
+			{ desc = "build & run current file" },
+		},
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", "<cmd>buffers<cr>", { desc = "list buffers" } },
 		{ { "n" }, "<M-Left>", "<C-w>h", { desc = "move to left window" } },

@@ -123,8 +123,50 @@ local function run_test()
 	vim.cmd("startinsert")
 end
 
+local function run_file()
+	vim.cmd("silent! write")
+	local ft = vim.bo.filetype
+	local file = vim.fn.shellescape(vim.fn.expand("%:p"))
+	local stem = vim.fn.shellescape(vim.fn.expand("%:p:r"))
+	local cmd
+	if ft == "cpp" then
+		cmd = ("g++ -std=c++20 -O0 -g %s -o %s && %s"):format(file, stem, stem)
+	elseif ft == "c" then
+		cmd = ("gcc -std=c17 -O0 -g %s -o %s && %s"):format(file, stem, stem)
+	elseif ft == "python" then
+		cmd = "python3 " .. file
+	elseif ft == "go" then
+		cmd = "go run " .. file
+	elseif ft == "rust" then
+		cmd = "cargo run"
+	elseif ft == "javascript" or ft == "typescript" then
+		cmd = "node " .. file
+	elseif ft == "lua" then
+		cmd = "lua " .. file
+	elseif ft == "sh" or ft == "bash" or ft == "zsh" then
+		cmd = ft .. " " .. file
+	else
+		vim.notify("No runner configured for filetype: " .. ft, vim.log.levels.WARN)
+		return
+	end
+
+	vim.cmd("botright 15split | enew")
+	vim.b.keep_term = true
+	vim.fn.jobstart(cmd, {
+		term = true,
+		on_exit = function(_, code)
+			vim.schedule(function()
+				local msg = code == 0 and "Run succeeded" or "Run FAILED (exit " .. code .. ")"
+				local level = code == 0 and vim.log.levels.INFO or vim.log.levels.WARN
+				vim.notify(msg, level)
+			end)
+		end,
+	})
+	vim.cmd("stopinsert")
+end
+
 local function run_async(opts)
-	local cmd = opts.args
+	local cmd = vim.fn.expandcmd(opts.args)
 	vim.notify("Running: " .. cmd, vim.log.levels.INFO)
 	vim.fn.jobstart(cmd, {
 		stdout_buffered = true,
@@ -243,6 +285,9 @@ return {
 		{
 			"TermClose",
 			function()
+				if vim.b.keep_term then
+					return
+				end
 				if vim.v.event.status == 0 then
 					vim.api.nvim_buf_delete(0, {})
 				end
@@ -277,6 +322,7 @@ return {
 		{ "CloseFloatingTerminal", close_floating_terminal, {} },
 		{ "ColorPicker", colorscheme_picker, {} },
 		{ "RunTest", run_test, {} },
+		{ "RunFile", run_file, {} },
 		{ "Lazygit", lazygit, {} },
 		{ "Run", run_async, { nargs = "+" } },
 	},
