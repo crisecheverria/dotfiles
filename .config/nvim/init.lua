@@ -55,6 +55,32 @@ vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_node_provider = 0
 
+-- Auto-reload buffers when the underlying file is changed externally.
+-- `autoread` alone is not enough: Neovim only checks the file's mtime on
+-- specific events. Without this autocmd, edits made by external tools
+-- (Claude Code, formatters, `git pull`, etc.) are not reflected in open
+-- buffers until you manually run `:e`. CursorHold fires after `updatetime`
+-- ms of inactivity, which catches the common case of staring at a buffer
+-- right after an external write. The `mode() ~= "c"` guard avoids
+-- triggering `:checktime` while the cmdline is open.
+--
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermLeave" }, {
+	pattern = "*",
+	callback = function()
+		if vim.fn.mode() ~= "c" then
+			vim.cmd("checktime")
+		end
+	end,
+})
+
+-- Surface silent reloads so it's obvious a buffer was refreshed from disk.
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	pattern = "*",
+	callback = function()
+		vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
+	end,
+})
+
 -- Load Cfilter optional package
 vim.cmd.packadd("cfilter")
 
