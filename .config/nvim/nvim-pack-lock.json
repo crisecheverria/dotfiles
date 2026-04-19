@@ -1,9 +1,5 @@
 {
   "plugins": {
-    "agentic.nvim": {
-      "rev": "58c38cf5a8e77b3a88853e6f99cefdd5bcfbbe08",
-      "src": "https://github.com/carlos-algms/agentic.nvim"
-    },
     "ai-cli.nvim": {
       "rev": "5707503ed84a20b52a60d40a73bffc6bd9af8b9e",
       "src": "https://github.com/crisecheverria/ai-cli.nvim"
@@ -11,6 +7,10 @@
     "avante.nvim": {
       "rev": "8c84af0f09e5d9058362ac58401a8e7b047d826e",
       "src": "https://github.com/yetone/avante.nvim"
+    },
+    "claudecode.nvim": {
+      "rev": "432121f0f5b9bda041030d1e9e83b7ba3a93dd8f",
+      "src": "https://github.com/coder/claudecode.nvim"
     },
     "dressing.nvim": {
       "rev": "2d7c2db2507fa3c4956142ee607431ddb2828639",

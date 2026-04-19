@@ -110,12 +110,6 @@ return {
 		},
 		-- normal mode
 		{
-			{ "n", "t" },
-			"<c-;>",
-			"<cmd>AiCli<cr>",
-			{ desc = "toggle claude code terminal" },
-		},
-		{
 			{ "n" },
 			"<leader>t",
 			"<cmd>FloatingTerminal<cr>",
@@ -231,59 +225,16 @@ return {
 		{ { "n" }, "<leader>lt", "<cmd>LlamaToggle<cr>", { desc = "Llama toggle on/off" } },
 		{ { "n" }, "<leader>lf", "<cmd>LlamaToggleAutoFim<cr>", { desc = "Llama toggle auto-FIM" } },
 		{ { "n" }, "<leader>ld", "<cmd>LlamaDebugToggle<cr>", { desc = "Llama toggle debug" } },
-		-- avante.nvim
-		{ { "n", "v" }, "<leader>cc", "<cmd>AvanteToggle<cr>", { desc = "Toggle Avante" } },
-		{ { "n", "v" }, "<leader>ca", "<cmd>AvanteAsk<cr>", { desc = "Avante Ask" } },
-		{ { "v" }, "<leader>ce", "<cmd>AvanteEdit<cr>", { desc = "Avante Edit selection" } },
-		-- agentic.nvim
-		{
-			{ "n", "v", "i" },
-			"<C-\\>",
-			function()
-				require("agentic").toggle()
-			end,
-			{ desc = "Toggle Agentic Chat" },
-		},
-		{
-			{ "n", "v" },
-			"<C-'>",
-			function()
-				require("agentic").add_selection_or_file_to_context()
-			end,
-			{ desc = "Add file or selection to Agentic Context" },
-		},
-		{
-			{ "n", "v", "i" },
-			"<C-,>",
-			function()
-				require("agentic").new_session()
-			end,
-			{ desc = "New Agentic Session" },
-		},
-		{
-			{ "n", "v", "i" },
-			"<leader>rs",
-			function()
-				require("agentic").restore_session()
-			end,
-			{ silent = true, desc = "Agentic Restore session" },
-		},
-		{
-			{ "n" },
-			"<leader>ad",
-			function()
-				require("agentic").add_current_line_diagnostics()
-			end,
-			{ desc = "Add current line diagnostic to Agentic" },
-		},
-		{
-			{ "n" },
-			"<leader>aD",
-			function()
-				require("agentic").add_buffer_diagnostics()
-			end,
-			{ desc = "Add all buffer diagnostics to Agentic" },
-		},
+		-- claudecode.nvim
+		{ { "n" }, "<leader>ac", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" } },
+		{ { "n" }, "<leader>af", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" } },
+		{ { "n" }, "<leader>ar", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" } },
+		{ { "n" }, "<leader>aC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" } },
+		{ { "n" }, "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select Claude model" } },
+		{ { "n" }, "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", { desc = "Add current buffer to Claude" } },
+		{ { "v" }, "<leader>as", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" } },
+		{ { "n" }, "<leader>ay", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept Claude diff" } },
+		{ { "n" }, "<leader>an", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny Claude diff" } },
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },

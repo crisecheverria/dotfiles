@@ -1,22 +1,3 @@
--- Agentic.nvim
-vim.pack.add({ "https://github.com/carlos-algms/agentic.nvim" })
-require("agentic").setup({
-	opts = {
-		provider = "claude-agent-acp",
-		diff_preview = {
-			enabled = true,
-			layout = "split",
-		},
-	},
-})
-
--- Load ai-cli.nvim
-vim.pack.add({ "https://github.com/crisecheverria/ai-cli.nvim" })
-require("ai-cli").setup({
-	provider = "claude",
-	terminal_cmd = "claude",
-})
-
 -- Installing this plugin because I coded myself, so it doenst count as
 -- a plugin:
 vim.pack.add({ "https://github.com/crisecheverria/present.nvim" })
@@ -56,6 +37,7 @@ vim.pack.add({
 
 require("java").setup()
 vim.lsp.enable("jdtls")
+-- end Java setup
 
 -- fff.nvim for file picker and grep?
 vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
@@ -87,3 +69,9 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.bo[args.buf].autocomplete = false
 	end,
 })
+
+-- end fff.nvim pluging
+
+-- claudecode.nvim
+vim.pack.add({ "https://github.com/coder/claudecode.nvim" })
+require("claudecode").setup({})
