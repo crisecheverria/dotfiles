@@ -82,6 +82,7 @@ for _, config in pairs({
 	"tools/languages",
 	"tools/git",
 	"tools/lsp",
+	"tools/dap",
 	"tools/ai",
 }) do
 	package.loaded[config] = false
