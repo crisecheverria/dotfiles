@@ -44,12 +44,25 @@ vim.lsp.config("lua_ls", {
 })
 
 vim.lsp.config("clangd", {
-	cmd = { "clangd" },
+	cmd = {
+		"clangd",
+		"--background-index",
+		"--clang-tidy",
+		"--completion-style=detailed",
+		"--header-insertion=iwyu",
+		"--function-arg-placeholders",
+		"--offset-encoding=utf-16",
+	},
 	root_markers = { "compile_commands.json", "compile_flags.txt", ".clangd", ".git" },
 	filetypes = { "c", "cpp", "objc", "objcpp" },
 })
 
-vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls", "clangd" })
+vim.lsp.config("harper_ls", {
+	cmd = { "harper-ls", "--stdio" },
+	filetypes = { "markdown", "text", "gitcommit" },
+})
+
+vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls", "clangd", "harper_ls" })
 
 vim.diagnostic.config({
 	virtual_text = true,
@@ -102,6 +115,10 @@ return {
 					end,
 				})
 
+				if client:supports_method("textDocument/inlayHint") then
+					vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+				end
+
 				-- Manual <C-n> trigger for LSP completion (replaced by autocomplete option in init.lua)
 				-- To revert: update `vim.opt.autocomplete = false` from init.lua and uncomment this block
 				-- vim.keymap.set("i", "<C-n>", function()
@@ -117,6 +134,19 @@ return {
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = ev.buf, desc = "Hover documentation" })
 				vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
 				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code actions" })
+
+				if client.name == "clangd" then
+					vim.keymap.set("n", "<leader>h", function()
+						local params = vim.lsp.util.make_text_document_params(ev.buf)
+						client:request("textDocument/switchSourceHeader", params, function(err, result)
+							if err or not result then
+								vim.notify("No matching source/header", vim.log.levels.WARN)
+								return
+							end
+							vim.cmd.edit(vim.uri_to_fname(result))
+						end, ev.buf)
+					end, { buffer = ev.buf, desc = "Switch C/C++ header/source" })
+				end
 
 				if client:supports_method("textDocument/formatting") then
 					vim.api.nvim_create_autocmd("BufWritePre", {
