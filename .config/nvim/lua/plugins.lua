@@ -92,3 +92,23 @@ require("claudecode").setup({
 
 -- conjure for clojure
 vim.pack.add({ "https://github.com/Olical/conjure" })
+
+-- conform.nvim: formatters per filetype, format on save. Filetypes without
+-- an explicit formatter fall back to the active LSP formatter.
+vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
+require("conform").setup({
+	formatters_by_ft = {
+		lua = { "stylua" },
+		go = { "goimports", "gofmt" },
+		javascript = { "eslint_d", "prettier" },
+		typescript = { "eslint_d", "prettier" },
+		javascriptreact = { "eslint_d", "prettier" },
+		typescriptreact = { "eslint_d", "prettier" },
+		c = { "clang-format" },
+		cpp = { "clang-format" },
+		clojure = { "cljfmt" },
+		clojurescript = { "cljfmt" },
+	},
+	default_format_opts = { lsp_format = "fallback" },
+	format_on_save = { timeout_ms = 5000, lsp_format = "fallback" },
+})

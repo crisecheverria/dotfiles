@@ -1,62 +1,11 @@
-local function format(formatcmd)
-	if not vim.bo.modified then
-		return
-	end
-	if string.len(vim.bo.formatprg) == 0 then
-		return
-	end
-
-	local maxline = vim.fn.line("$")
-	local lines = vim.api.nvim_buf_get_lines(0, 0, maxline, false)
-	local result = vim.system(formatcmd, {
-		stdin = lines,
-		text = true,
-	}):wait(5000)
-
-	if result == nil then
-		vim.notify("Format timed out", vim.log.levels.WARN)
-		return
-	end
-
-	if result.code ~= 0 then
-		local first_line = ((result.stderr or ""):match("^[^\n]*")) or ""
-		vim.notify("Format failed: " .. first_line, vim.log.levels.WARN)
-		return
-	end
-
-	local current_position = vim.fn.winsaveview()
-	vim.api.nvim_buf_set_lines(0, 0, maxline, false, vim.fn.split(result.stdout, "\n"))
-	vim.fn.winrestview(current_position)
-end
-
-local function setup_format(formatcmd)
-	local formatprg = formatcmd[1]
-	if vim.fn.executable(vim.bo.formatprg) ~= 1 or vim.fn.executable(formatprg) ~= 1 then
-		return
-	end
-
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		group = "Config",
-		buffer = 0,
-		callback = function()
-			format(formatcmd)
-		end,
-	})
-end
-
 local function lua_config()
-	vim.bo.formatprg = "stylua"
 	vim.bo.tabstop = 3
 	vim.bo.shiftwidth = 3
-
-	setup_format({ vim.bo.formatprg, "-" })
 end
 
 local function go_config()
 	vim.bo.tabstop = 4
 	vim.bo.shiftwidth = 4
-
-	setup_format({ vim.bo.formatprg })
 end
 
 local eslint_ns = vim.api.nvim_create_namespace("eslint")
@@ -119,56 +68,26 @@ local function js_ts_config()
 		return
 	end
 
-	vim.bo.formatprg = "prettier"
 	vim.bo.tabstop = 2
 	vim.bo.shiftwidth = 2
+
 	local bufnr = vim.api.nvim_get_current_buf()
 	local eslint_bin = find_local_bin("eslint")
-
-	local formatcmd = { vim.bo.formatprg, "--stdin-filepath", file }
-
-	if eslint_bin then
-		eslint_lint(bufnr, eslint_bin)
-
-		vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
-			group = "Config",
-			buffer = bufnr,
-			callback = function()
-				eslint_lint(bufnr, eslint_bin)
-			end,
-		})
-
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			group = "Config",
-			buffer = bufnr,
-			callback = function()
-				vim.system({ eslint_bin, "--fix", vim.api.nvim_buf_get_name(bufnr) }):wait()
-				vim.cmd("silent! edit")
-				format(formatcmd)
-			end,
-		})
-	else
-		if vim.fn.executable(vim.bo.formatprg) == 1 then
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				group = "Config",
-				buffer = bufnr,
-				callback = function()
-					format(formatcmd)
-				end,
-			})
-		end
+	if not eslint_bin then
+		return
 	end
+
+	eslint_lint(bufnr, eslint_bin)
+	vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+		group = "Config",
+		buffer = bufnr,
+		callback = function()
+			eslint_lint(bufnr, eslint_bin)
+		end,
+	})
 end
 
 local function cpp_config()
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		group = "Config",
-		buffer = 0,
-		callback = function()
-			vim.lsp.buf.format()
-		end,
-	})
-
 	local cpp = require("tools.cpp")
 	local root = cpp.find_project_root(0)
 	if not root then

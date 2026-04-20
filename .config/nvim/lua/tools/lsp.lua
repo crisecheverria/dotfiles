@@ -154,14 +154,6 @@ return {
 					end, { buffer = ev.buf, desc = "Switch C/C++ header/source" })
 				end
 
-				if client:supports_method("textDocument/formatting") then
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						buffer = ev.buf,
-						callback = function()
-							vim.lsp.buf.format({ bufnr = ev.buf })
-						end,
-					})
-				end
 			end,
 		},
 		{
