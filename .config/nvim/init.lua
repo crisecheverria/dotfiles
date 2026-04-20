@@ -15,7 +15,7 @@ vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
-vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 vim.opt.scrolloff = 5
 vim.opt.showcmd = true
 vim.opt.splitright = true
@@ -80,6 +80,7 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 		vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
 	end,
 })
+-- end autoreload settings
 
 -- Load Cfilter optional package
 vim.cmd.packadd("cfilter")
