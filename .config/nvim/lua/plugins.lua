@@ -89,3 +89,6 @@ require("claudecode").setup({
 		},
 	},
 })
+
+-- conjure for clojure
+vim.pack.add({ "https://github.com/Olical/conjure" })

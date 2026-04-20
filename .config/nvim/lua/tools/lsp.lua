@@ -62,7 +62,13 @@ vim.lsp.config("harper_ls", {
 	filetypes = { "markdown", "text", "gitcommit" },
 })
 
-vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls", "clangd", "harper_ls" })
+vim.lsp.config("clojure_lsp", {
+	cmd = { "clojure-lsp" },
+	root_markers = { "project.clj", "deps.edn", "build.boot", "shadow-cljs.edn", "bb.edn", ".git" },
+	filetypes = { "clojure", "clojurescript", "edn" },
+})
+
+vim.lsp.enable({ "gopls", "vtsls", "rust_analyzer", "lua_ls", "clangd", "harper_ls", "clojure_lsp" })
 
 vim.diagnostic.config({
 	virtual_text = true,
