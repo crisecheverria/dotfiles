@@ -72,6 +72,20 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- end fff.nvim pluging
 
+-- snacks.nvim (used by claudecode.nvim for floating terminal)
+vim.pack.add({ "https://github.com/folke/snacks.nvim" })
+require("snacks").setup({})
+
 -- claudecode.nvim
 vim.pack.add({ "https://github.com/coder/claudecode.nvim" })
-require("claudecode").setup({})
+require("claudecode").setup({
+	terminal = {
+		provider = "snacks",
+		snacks_win_opts = {
+			position = "float",
+			width = 0.85,
+			height = 0.85,
+			border = "rounded",
+		},
+	},
+})

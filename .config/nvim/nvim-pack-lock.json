@@ -1,13 +1,5 @@
 {
   "plugins": {
-    "ai-cli.nvim": {
-      "rev": "5707503ed84a20b52a60d40a73bffc6bd9af8b9e",
-      "src": "https://github.com/crisecheverria/ai-cli.nvim"
-    },
-    "avante.nvim": {
-      "rev": "8c84af0f09e5d9058362ac58401a8e7b047d826e",
-      "src": "https://github.com/yetone/avante.nvim"
-    },
     "claudecode.nvim": {
       "rev": "432121f0f5b9bda041030d1e9e83b7ba3a93dd8f",
       "src": "https://github.com/coder/claudecode.nvim"
@@ -51,6 +43,10 @@
     "present.nvim": {
       "rev": "f3568b604b3b1c91b736acac838bb3f6a68f4144",
       "src": "https://github.com/crisecheverria/present.nvim"
+    },
+    "snacks.nvim": {
+      "rev": "ad9ede6a9cddf16cedbd31b8932d6dcdee9b716e",
+      "src": "https://github.com/folke/snacks.nvim"
     },
     "spring-boot.nvim": {
       "rev": "98c6ff1dcdda943d341bba3c00ae9d190a2e5f7d",

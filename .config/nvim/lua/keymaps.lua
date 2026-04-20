@@ -118,15 +118,8 @@ return {
 		{
 			{ "t" },
 			"<Esc>",
-			function()
-				if vim.bo.filetype == "ai-cli-terminal" then
-					local keys = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
-					vim.api.nvim_feedkeys(keys, "n", false)
-				else
-					vim.cmd("CloseFloatingTerminal")
-				end
-			end,
-			{ noremap = true, silent = true, desc = "Close floating terminal (pass Esc to ai-cli)" },
+			"<cmd>CloseFloatingTerminal<cr>",
+			{ noremap = true, silent = true, desc = "Close floating terminal" },
 		},
 		{
 			{ "n" },
@@ -232,7 +225,7 @@ return {
 		{ { "n" }, "<leader>lf", "<cmd>LlamaToggleAutoFim<cr>", { desc = "Llama toggle auto-FIM" } },
 		{ { "n" }, "<leader>ld", "<cmd>LlamaDebugToggle<cr>", { desc = "Llama toggle debug" } },
 		-- claudecode.nvim
-		{ { "n" }, "<leader>ac", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" } },
+		{ { "n", "i", "t" }, "<C-;>", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" } },
 		{ { "n" }, "<leader>af", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" } },
 		{ { "n" }, "<leader>ar", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" } },
 		{ { "n" }, "<leader>aC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" } },
