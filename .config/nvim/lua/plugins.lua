@@ -92,6 +92,12 @@ require("claudecode").setup({
 
 -- conjure for clojure
 vim.pack.add({ "https://github.com/Olical/conjure" })
+-- be able to run :Lein or Clojure CLI commands inside neovim
+-- added dependency of dispatch.vim
+-- added dependency of vim-dispatch-neovim
+vim.pack.add({ "https://github.com/tpope/vim-dispatch" })
+vim.pack.add({ "https://github.com/radenling/vim-dispatch-neovim" })
+vim.pack.add({ "https://github.com/clojure-vim/vim-jack-in" })
 
 -- conform.nvim: formatters per filetype, format on save. Filetypes without
 -- an explicit formatter fall back to the active LSP formatter.

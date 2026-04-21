@@ -42,6 +42,7 @@ vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
 vim.g.mapleader = ";"
+vim.g.maplocalleader = ","
 
 vim.g.loaded_matchit = 1
 vim.g.netrw_banner = 0
