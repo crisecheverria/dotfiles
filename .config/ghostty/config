@@ -1,5 +1,5 @@
 # macos-titlebar-style = hidden
-font-family = "Lilex Nerd Font"
+# font-family = "Lilex Nerd Font"
 # font-style = Regular
 # font-size = 14
 # font-thicken = true
@@ -36,7 +36,8 @@ desktop-notifications = true
   # View options: ghostty +show-config --default --docs
 
   # --- Typography ---
-  font-family = JetBrainsMonoNerdFont
+  font-family = "Iosevka Custom Light"
+  font-family = "JetBrainsMono Nerd Font"
   font-size = 14
   font-thicken = true
   adjust-cell-height = 2
