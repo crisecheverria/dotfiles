@@ -74,7 +74,9 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- snacks.nvim (used by claudecode.nvim for floating terminal)
 vim.pack.add({ "https://github.com/folke/snacks.nvim" })
-require("snacks").setup({})
+require("snacks").setup({
+	picker = { enabled = true },
+})
 
 -- claudecode.nvim
 vim.pack.add({ "https://github.com/coder/claudecode.nvim" })
@@ -82,9 +84,9 @@ require("claudecode").setup({
 	terminal = {
 		provider = "snacks",
 		snacks_win_opts = {
-			position = "float",
-			width = 0.85,
-			height = 0.85,
+			position = "right",
+			width = 0.4,
+			height = 0.95,
 			border = "rounded",
 		},
 	},
@@ -118,3 +120,6 @@ require("conform").setup({
 	default_format_opts = { lsp_format = "fallback" },
 	format_on_save = { timeout_ms = 5000, lsp_format = "fallback" },
 })
+
+-- Markdown files viewer
+vim.pack.add({ "https://github.com/delphinus/md-render.nvim" })
