@@ -74,10 +74,33 @@ vim.diagnostic.config({
 	virtual_text = true,
 })
 
-local active_count = 0
+local active = {}
 local clear_timer = nil ---@type uv.uv_timer_t?
 local show_timer = nil ---@type uv.uv_timer_t?
-local bar_visible = false
+local visible = false
+
+local function format_item(item)
+	local text = "[" .. item.client .. "]"
+	if item.title and item.title ~= "" then
+		text = text .. " " .. item.title
+	end
+	if item.message and item.message ~= "" then
+		text = text .. ": " .. item.message
+	end
+	if item.percentage then
+		text = text .. string.format(" %d%%", item.percentage)
+	end
+	return text
+end
+
+local function render()
+	local parts = {}
+	for _, item in pairs(active) do
+		parts[#parts + 1] = format_item(item)
+	end
+	visible = true
+	vim.api.nvim_echo({ { table.concat(parts, " | "), "Comment" } }, false, {})
+end
 
 local function clear_progress()
 	if clear_timer then
@@ -88,15 +111,10 @@ local function clear_progress()
 		show_timer:stop()
 		show_timer = nil
 	end
-	if bar_visible then
-		vim.api.nvim_ui_send("\027]9;4;0\027\\")
-		bar_visible = false
+	if visible then
+		vim.api.nvim_echo({ { "" } }, false, {})
+		visible = false
 	end
-end
-
-local function show_progress(osc)
-	bar_visible = true
-	vim.api.nvim_ui_send(osc)
 end
 
 return {
@@ -160,6 +178,9 @@ return {
 			"LspProgress",
 			function(ev)
 				local value = ev.data.params.value
+				local client = vim.lsp.get_client_by_id(ev.data.client_id)
+				local client_name = client and client.name or "lsp"
+				local key = ev.data.client_id .. ":" .. tostring(ev.data.params.token)
 
 				if clear_timer then
 					clear_timer:stop()
@@ -167,8 +188,15 @@ return {
 				end
 
 				if value.kind == "begin" then
-					active_count = active_count + 1
-					if not bar_visible and not show_timer then
+					active[key] = {
+						client = client_name,
+						title = value.title,
+						message = value.message,
+						percentage = value.percentage,
+					}
+					if visible then
+						render()
+					elseif not show_timer then
 						show_timer = vim.uv.new_timer()
 						if show_timer then
 							show_timer:start(
@@ -176,29 +204,36 @@ return {
 								0,
 								vim.schedule_wrap(function()
 									show_timer = nil
-									if active_count > 0 then
-										show_progress("\027]9;4;3\027\\")
+									if next(active) then
+										render()
 									end
 								end)
 							)
 						end
 					end
 				elseif value.kind == "report" then
-					if bar_visible and value.percentage then
-						show_progress(string.format("\027]9;4;1;%d\027\\", value.percentage))
+					local item = active[key]
+					if item then
+						item.message = value.message or item.message
+						item.percentage = value.percentage or item.percentage
+						if visible then
+							render()
+						end
 					end
 				elseif value.kind == "end" then
-					active_count = math.max(0, active_count - 1)
-					if active_count == 0 then
-						if bar_visible then
-							show_progress("\027]9;4;1;100\027\\")
+					active[key] = nil
+					if next(active) == nil then
+						if visible then
 							clear_timer = vim.uv.new_timer()
 							if clear_timer then
 								clear_timer:start(500, 0, vim.schedule_wrap(clear_progress))
 							end
-						else
-							clear_progress()
+						elseif show_timer then
+							show_timer:stop()
+							show_timer = nil
 						end
+					elseif visible then
+						render()
 					end
 				end
 			end,
