@@ -1,3 +1,19 @@
+local function default_base_branch()
+	local origin_head = vim.system({ "git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD" }, { text = true }):wait()
+	if origin_head.code == 0 then
+		local ref = vim.trim(origin_head.stdout)
+		if ref ~= "" then
+			return ref:gsub("^origin/", "")
+		end
+	end
+	for _, name in ipairs({ "main", "master", "trunk" }) do
+		if vim.system({ "git", "rev-parse", "--verify", "--quiet", name }, { text = true }):wait().code == 0 then
+			return name
+		end
+	end
+	return "main"
+end
+
 local function git_output(cmd, title, filetype)
 	local result = vim.system(cmd, { text = true }):wait()
 	if result.code ~= 0 then
@@ -661,15 +677,15 @@ return {
 		{
 			"Gdiffbranch",
 			function(args)
-				local base = args.args ~= "" and args.args or "main"
+				local base = args.args ~= "" and args.args or default_base_branch()
 				git_output({ "git", "diff", base .. "...HEAD" }, "git:diff:" .. base, "diff")
 			end,
-			{ nargs = "?", desc = "Git diff current branch vs base (default: main)" },
+			{ nargs = "?", desc = "Git diff current branch vs base (default: repo default branch)" },
 		},
 		{
 			"Greview",
 			function(args)
-				local base = args.args ~= "" and args.args or "main"
+				local base = args.args ~= "" and args.args or default_base_branch()
 				local result = vim.system({ "git", "diff", "--name-only", base .. "...HEAD" }, { text = true }):wait()
 				if result.code ~= 0 then
 					vim.notify(result.stderr, vim.log.levels.ERROR)
