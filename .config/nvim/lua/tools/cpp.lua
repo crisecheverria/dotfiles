@@ -1,3 +1,8 @@
+-- C/C++ helper module: used by `tools/languages.lua` and `tools/dap.lua`.
+-- NOT a contract module — init.lua does not load this through the module
+-- list. Exposes: find_project_root (looks for CMakeLists.txt),
+-- find_executables (walks build/ for executable files).
+
 local M = {}
 
 function M.find_project_root(bufnr)

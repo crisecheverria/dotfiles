@@ -1,3 +1,9 @@
+-- :Grep command + quickfix window ergonomics.
+-- Contributes: keymaps (<leader>g, <leader>G), options (grepprg=ag),
+-- usercmds (:Grep), autocmds (auto-open qf, qf buffer keymaps).
+-- In the qf window: `o` opens+centers+returns, `<Esc>` closes it.
+-- Disable to lose :Grep; use :grep directly with default grepprg.
+
 return {
 	keymaps = {
 		{ { "n" }, "<leader>g", ":Grep<space>", { desc = "Grep prompt" } },

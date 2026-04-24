@@ -1,3 +1,8 @@
+-- Internal helpers shared across modules. NOT a contract module — init.lua
+-- does not load this through the module list; other files `require("utils")`
+-- directly. Exposes: merge_table (list-aware), gfind (all matches), v_pairs
+-- (bracket pairs lookup).
+
 return {
 	merge_table = function(t1, t2)
 		if t2 == nil then

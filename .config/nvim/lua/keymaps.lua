@@ -1,3 +1,10 @@
+-- Global keymaps (all modes) + auto-pairs helpers.
+-- Contributes: keymaps, unbinds.
+-- Includes: jj-escape, auto-close brackets/quotes, leader bindings for
+-- find/grep/buffer/test/run/lazygit/colorscheme, Claude Code and Llama
+-- shortcuts, window navigation (<C-hjkl> and <M-arrows>), line-move (<a-j/k>).
+-- Disabling this module leaves you with only Neovim defaults.
+
 local utils = require("utils")
 
 local function surround()

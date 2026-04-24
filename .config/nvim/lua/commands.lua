@@ -1,3 +1,11 @@
+-- Custom :user commands and general autocmds not tied to a language/tool.
+-- Contributes: autocmds, usercmds.
+-- Commands: :FloatingTerminal, :CloseFloatingTerminal, :RunTest, :RunFile,
+-- :Run, :Lazygit, :ColorPicker, :Keymaps, :ConfigReload.
+-- Autocmds: yank highlight, resize equalize, term-close cleanup, restore
+-- cursor to last position. Disabling loses :RunFile/:RunTest and the
+-- floating terminal/lazygit/colorscheme pickers.
+
 local terminal_state = { buf = nil, win = nil, is_open = false }
 
 local function floating_terminal()

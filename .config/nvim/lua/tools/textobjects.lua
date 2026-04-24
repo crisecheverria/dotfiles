@@ -1,3 +1,8 @@
+-- Custom text objects for operator-pending / visual mode.
+-- Contributes: keymaps (o/x mode text objects).
+-- Adds bracket-aware and pair-aware objects beyond Neovim's built-ins.
+-- Disabling loses these custom objects; vim defaults (iw/ip/...) still work.
+
 local utils = require("utils")
 
 local function cursor_gfind(str, pattern)

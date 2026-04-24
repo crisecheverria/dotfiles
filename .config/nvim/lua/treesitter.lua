@@ -1,3 +1,8 @@
+-- Tree-sitter: register parsers and auto-start highlighting per filetype.
+-- Contributes: autocmds (FileType -> vim.treesitter.start).
+-- Parsers are loaded from `parser/` + `queries/` (packed alongside this
+-- config). Disabling drops syntax highlighting for the listed languages.
+
 local parsers = {
 	"go",
 	"sql",

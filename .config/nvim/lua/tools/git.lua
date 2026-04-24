@@ -1,3 +1,10 @@
+-- Git integration (no plugin). LARGEST file in this config.
+-- Contributes: autocmds (sign updates on BufEnter/BufWritePost), usercmds
+-- (:Gstatus, :Gdiff, :Gblame, :Glog, :Greview, :Gdiffbranch), keymaps.
+-- Features: diff hunks in signcolumn, side-by-side branch review,
+-- default-base-branch auto-detection (origin/HEAD → main/master/trunk).
+-- Disable to lose all git UI; `git` on the CLI still works, obviously.
+
 local function default_base_branch()
 	local origin_head = vim.system({ "git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD" }, { text = true }):wait()
 	if origin_head.code == 0 then

@@ -1,3 +1,10 @@
+-- Third-party plugin installation (vim.pack.add) + per-plugin setup().
+-- Contributes: nothing through the module contract — everything runs as
+-- side effects at require-time. This file owns: jump, llama.vim, nvim-java,
+-- fff.nvim, snacks.nvim, claudecode.nvim, conjure + dispatch (clojure),
+-- conform.nvim, md-render.nvim, and `present.nvim` (self-authored).
+-- Disable: comment out individual `vim.pack.add(...)` blocks below.
+
 -- Installing this plugin because I coded myself, so it doenst count as
 -- a plugin:
 vim.pack.add({ "https://github.com/crisecheverria/present.nvim" })

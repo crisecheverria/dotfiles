@@ -96,22 +96,43 @@ end
 vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
 
 local utils = require("utils")
--- Load configuration fragments
+
+-- ─── Module contract ────────────────────────────────────────────────────────
+-- Each module listed below is a `require()`-able Lua file that returns a
+-- table describing what it contributes to the editor. The loader merges all
+-- contributions and applies them once, so a module is purely declarative:
+-- add an entry, comment out an entry — that's the whole feature toggle.
+--
+-- A module MAY return any of these keys (all optional):
+--
+--   options   = { [name] = value, ... }            -> vim.opt[name] = value
+--   keymaps   = { { modes, lhs, rhs, opts? }, ... } -> vim.keymap.set(...)
+--   unbinds   = { { modes, lhs, opts? }, ... }      -> map lhs to <Nop>
+--   autocmds  = { { events, fn, opts? }, ... }      -> augroup "Config"
+--   usercmds  = { { name, fn, opts? }, ... }        -> :user commands
+--
+-- Anything else in the returned table is ignored. A module may also have
+-- top-level side effects (e.g. `plugins.lua` calling `vim.pack.add`); those
+-- run at require-time, before the declarative sections are applied.
+--
+-- To disable a feature: comment out its line in the list below.
+-- ────────────────────────────────────────────────────────────────────────────
+
 local configurations = {}
 for _, config in pairs({
-	"plugins",
-	"statusline",
-	"keymaps",
-	"commands",
-	"treesitter",
-	"tools/find",
-	"tools/textobjects",
-	"tools/qf",
-	"tools/languages",
-	"tools/git",
-	"tools/lsp",
-	"tools/dap",
-	"tools/ai",
+	"plugins", -- third-party plugins (pack.add + setup): jump, llama, snacks, claudecode, conjure, conform, fff, ...
+	"statusline", -- custom statusline: mode, git branch, diagnostics, LSP clients, line count
+	"keymaps", -- global keymaps: leader bindings, window nav, auto-pairs, Claude/Llama shortcuts
+	"commands", -- :FloatingTerminal, :RunTest, :RunFile, :Lazygit, :ColorPicker, :Keymaps, :Run
+	"treesitter", -- register parsers + auto-start on FileType
+	"tools/find", -- fuzzy `:find` via fd + matchfuzzy (sets 'findfunc')
+	"tools/textobjects", -- custom text objects: around/inside brackets, pairs, lines
+	"tools/qf", -- :Grep + quickfix window behavior (ag backend)
+	"tools/languages", -- per-filetype settings: lua/go indent, eslint, cmake build, ghostty comments
+	"tools/git", -- git signs in signcolumn + :Gstatus/:Gdiff/:Gblame/:Greview/:Gdiffbranch (LARGEST FILE)
+	"tools/lsp", -- LSP server configs, completion, keymaps (gd/gr/K/<leader>r), progress echo
+	"tools/dap", -- debug adapter (lldb via Xcode) + dap-ui — no-op if deps missing
+	"tools/ai", -- :AI/:AIEdit/:AIExplain/:AIChat — streams `claude -p` output into buffers
 }) do
 	package.loaded[config] = false
 	local config_setup = require(config)

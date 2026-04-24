@@ -1,3 +1,9 @@
+-- Debug adapter (nvim-dap + nvim-dap-ui) for C/C++/ObjC via Xcode's
+-- lldb-dap. Contributes: keymaps (<leader>d{c,n,i,o,b,u,t}).
+-- Returns an empty table (no-op) if nvim-dap/dapui aren't installed or
+-- Xcode's lldb-dap isn't present — safe to leave enabled on any machine.
+-- Disable by commenting out "tools/dap" in init.lua's module list.
+
 local ok_dap, dap = pcall(require, "dap")
 local ok_ui, dapui = pcall(require, "dapui")
 if not ok_dap or not ok_ui then

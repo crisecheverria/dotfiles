@@ -1,3 +1,11 @@
+-- LSP servers + attach-time keymaps + progress display.
+-- Contributes: autocmds (LspAttach, LspProgress).
+-- Servers enabled: gopls, vtsls, rust_analyzer, lua_ls, clangd, harper_ls,
+-- clojure_lsp. Attach keymaps: gd/gr/K/<leader>r/<leader>ca (+ clangd
+-- <leader>h for header-source switch). Progress shows inline via
+-- nvim_echo with 500ms debounce on both show and hide.
+-- Disable to lose all LSP features; completion falls back to 'complete'.
+
 vim.lsp.config("gopls", {
 	cmd = { "gopls" },
 	root_markers = { "go.mod", ".git" },
@@ -74,10 +82,13 @@ vim.diagnostic.config({
 	virtual_text = true,
 })
 
+-- LSP progress: data lives here, rendering lives in statusline.lua.
+-- `active` holds in-flight progress items keyed by client_id:token.
+-- Statusline reads via _G.lsp_progress_text(); we kick a throttled
+-- redrawstatus so rapid producers (lua_ls workspace load = dozens of
+-- events/sec) don't drown Neovim in redraws.
 local active = {}
-local clear_timer = nil ---@type uv.uv_timer_t?
-local show_timer = nil ---@type uv.uv_timer_t?
-local visible = false
+local redraw_scheduled = false
 
 local function format_item(item)
 	local text = "[" .. item.client .. "]"
@@ -93,28 +104,26 @@ local function format_item(item)
 	return text
 end
 
-local function render()
+function _G.lsp_progress_text()
+	if not next(active) then
+		return ""
+	end
 	local parts = {}
 	for _, item in pairs(active) do
 		parts[#parts + 1] = format_item(item)
 	end
-	visible = true
-	vim.api.nvim_echo({ { table.concat(parts, " | "), "Comment" } }, false, {})
+	return table.concat(parts, " | ")
 end
 
-local function clear_progress()
-	if clear_timer then
-		clear_timer:stop()
-		clear_timer = nil
+local function schedule_redraw()
+	if redraw_scheduled then
+		return
 	end
-	if show_timer then
-		show_timer:stop()
-		show_timer = nil
-	end
-	if visible then
-		vim.api.nvim_echo({ { "" } }, false, {})
-		visible = false
-	end
+	redraw_scheduled = true
+	vim.defer_fn(function()
+		redraw_scheduled = false
+		vim.cmd.redrawstatus()
+	end, 100)
 end
 
 return {
@@ -182,11 +191,6 @@ return {
 				local client_name = client and client.name or "lsp"
 				local key = ev.data.client_id .. ":" .. tostring(ev.data.params.token)
 
-				if clear_timer then
-					clear_timer:stop()
-					clear_timer = nil
-				end
-
 				if value.kind == "begin" then
 					active[key] = {
 						client = client_name,
@@ -194,48 +198,16 @@ return {
 						message = value.message,
 						percentage = value.percentage,
 					}
-					if visible then
-						render()
-					elseif not show_timer then
-						show_timer = vim.uv.new_timer()
-						if show_timer then
-							show_timer:start(
-								500,
-								0,
-								vim.schedule_wrap(function()
-									show_timer = nil
-									if next(active) then
-										render()
-									end
-								end)
-							)
-						end
-					end
 				elseif value.kind == "report" then
 					local item = active[key]
 					if item then
 						item.message = value.message or item.message
 						item.percentage = value.percentage or item.percentage
-						if visible then
-							render()
-						end
 					end
 				elseif value.kind == "end" then
 					active[key] = nil
-					if next(active) == nil then
-						if visible then
-							clear_timer = vim.uv.new_timer()
-							if clear_timer then
-								clear_timer:start(500, 0, vim.schedule_wrap(clear_progress))
-							end
-						elseif show_timer then
-							show_timer:stop()
-							show_timer = nil
-						end
-					elseif visible then
-						render()
-					end
 				end
+				schedule_redraw()
 			end,
 		},
 	},

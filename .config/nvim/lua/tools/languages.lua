@@ -1,3 +1,9 @@
+-- Per-filetype configuration (indent, linters, build commands).
+-- Contributes: autocmds (FileType handlers).
+-- Per-filetype: lua/go indent (3/4), js/ts eslint + indent=2, c/cpp cmake
+-- build + <leader>m / <leader>R, ghostty commentstring. Disabling drops
+-- these niceties; LSP and treesitter still work.
+
 local function lua_config()
 	vim.bo.tabstop = 3
 	vim.bo.shiftwidth = 3

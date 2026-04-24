@@ -1,3 +1,11 @@
+-- Claude integration via `claude -p` (non-interactive, streams stdout).
+-- Contributes: usercmds (:AI, :AIEdit, :AIExplain, :AIChat, :AIStop).
+-- :AI appends after cursor/selection, :AIEdit replaces selection,
+-- :AIExplain opens a float, :AIChat opens a >>>user / <<<assistant split.
+-- Signals progress via Ghostty OSC 9;4. Distinct from `claudecode.nvim`
+-- (plugins.lua) which wraps the interactive Claude Code TUI.
+-- Disable if you don't want the `claude` CLI wired into Neovim.
+
 local active_job = nil
 
 local function osc(seq)
