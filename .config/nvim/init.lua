@@ -16,7 +16,7 @@ vim.opt.termguicolors = true
 vim.opt.cursorline = true
 vim.opt.cursorlineopt = "number"
 vim.opt.cmdheight = 1
-vim.opt.scrolloff = 5
+vim.opt.scrolloff = 99
 vim.opt.showcmd = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
@@ -41,6 +41,8 @@ vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
+vim.opt.scrolloffpad = 1
+
 vim.g.mapleader = ";"
 vim.g.maplocalleader = ","
 
