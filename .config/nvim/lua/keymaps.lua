@@ -241,6 +241,47 @@ return {
 		{ { "v" }, "<leader>as", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" } },
 		{ { "n" }, "<leader>ay", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept Claude diff" } },
 		{ { "n" }, "<leader>an", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny Claude diff" } },
+		-- 99
+		{
+			{ "v" },
+			"<leader>9v",
+			function()
+				require("99").visual()
+			end,
+			{ desc = "99 visual (replace selection)" },
+		},
+		{
+			{ "n" },
+			"<leader>9s",
+			function()
+				require("99").search()
+			end,
+			{ desc = "99 search (results in qfix)" },
+		},
+		{
+			{ "n" },
+			"<leader>9x",
+			function()
+				require("99").stop_all_requests()
+			end,
+			{ desc = "99 stop all requests" },
+		},
+		{
+			{ "n" },
+			"<leader>9o",
+			function()
+				require("99").open()
+			end,
+			{ desc = "99 open last interaction" },
+		},
+		{
+			{ "n" },
+			"<leader>9l",
+			function()
+				require("99").view_logs()
+			end,
+			{ desc = "99 view request logs" },
+		},
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },

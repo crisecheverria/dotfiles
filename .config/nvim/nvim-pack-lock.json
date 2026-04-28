@@ -1,8 +1,16 @@
 {
   "plugins": {
+    "99": {
+      "rev": "0172d3caae2d8b967c9d47aa7557295f1481e5df",
+      "src": "https://github.com/ThePrimeagen/99"
+    },
     "claudecode.nvim": {
       "rev": "432121f0f5b9bda041030d1e9e83b7ba3a93dd8f",
       "src": "https://github.com/coder/claudecode.nvim"
+    },
+    "colorful-times-nvim": {
+      "rev": "41907af16389cb5ec7970760f25f7b2e631f2856",
+      "src": "https://github.com/luxus/colorful-times-nvim"
     },
     "conform.nvim": {
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
@@ -31,10 +39,6 @@
     "md-render.nvim": {
       "rev": "75d976d89edc4b9457447ba83201ec5805600f79",
       "src": "https://github.com/delphinus/md-render.nvim"
-    },
-    "milli.nvim": {
-      "rev": "48415bf96bf463c5bb1010e02aa03ffbed0cf1a9",
-      "src": "https://github.com/amansingh-afk/milli.nvim"
     },
     "nui.nvim": {
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
