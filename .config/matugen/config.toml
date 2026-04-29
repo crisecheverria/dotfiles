@@ -1,0 +1,10 @@
+[config]
+
+[templates.nvim]
+input_path = "~/.config/matugen/templates/colors.json"
+output_path = "~/.config/matugen/colors.json"
+
+[templates.kitty]
+input_path = "~/.config/matugen/templates/kitty.conf"
+output_path = "~/.config/kitty/matugen-theme.conf"
+post_hook = "for s in /tmp/kitty-*; do kitty @ --to \"unix:$s\" load-config; done"
