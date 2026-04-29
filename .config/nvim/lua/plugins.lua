@@ -183,3 +183,23 @@ require("conform").setup({
 
 -- Markdown files viewer
 vim.pack.add({ "https://github.com/delphinus/md-render.nvim" })
+
+-- matugen.nvim: Material You colorscheme driven by ~/.config/matugen/colors.json.
+-- Regenerate the JSON with `matugen image <wallpaper>` and the plugin auto-reloads
+-- (150ms debounce). Falls back to the MD3 baseline if the file is missing.
+vim.pack.add({ "https://github.com/daedlock/matugen.nvim" })
+require("matugen").setup({
+	colors_path = "~/.config/matugen/colors.json",
+})
+do
+	-- init.lua loaded the persisted scheme before this plugin existed. If the
+	-- user previously selected matugen (or has no saved scheme yet), apply it now.
+	local f = io.open(vim.fn.stdpath("data") .. "/colorscheme", "r")
+	local saved = f and f:read("*l")
+	if f then
+		f:close()
+	end
+	if not saved or saved == "" or saved == "matugen" then
+		vim.cmd.colorscheme("matugen")
+	end
+end

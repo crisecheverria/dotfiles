@@ -95,7 +95,7 @@ local saved = f and f:read("*l")
 if f then
 	f:close()
 end
-vim.cmd.colorscheme(saved ~= "" and saved or "darkblue")
+pcall(vim.cmd.colorscheme, saved ~= "" and saved or "darkblue")
 
 local utils = require("utils")
 
