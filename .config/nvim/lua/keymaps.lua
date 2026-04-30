@@ -171,6 +171,7 @@ return {
 			"<cmd>RunFile<cr>",
 			{ desc = "build & run current file" },
 		},
+		{ { "n" }, "-", "<cmd>Oil<cr>", { desc = "open parent directory (canola)" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{ { "n" }, "<leader><leader>", function() Snacks.picker.buffers() end, { desc = "list buffers" } },
 		{ { "n" }, "<M-Left>", "<C-w>h", { desc = "move to left window" } },

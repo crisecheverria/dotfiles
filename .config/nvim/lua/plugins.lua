@@ -184,6 +184,10 @@ require("conform").setup({
 -- Markdown files viewer
 vim.pack.add({ "https://github.com/delphinus/md-render.nvim" })
 
+-- canola.nvim: file manager (drop-in oil.nvim fork; module is `oil`)
+vim.pack.add({ "https://github.com/barrettruth/canola.nvim" })
+require("oil").setup({})
+
 -- matugen.nvim: Material You colorscheme driven by ~/.config/matugen/colors.json.
 -- Regenerate the JSON with `matugen image <wallpaper>` and the plugin auto-reloads
 -- (150ms debounce). Falls back to the MD3 baseline if the file is missing.
