@@ -175,6 +175,11 @@ return {
 			{ desc = "build & run current file" },
 		},
 		{ { "n" }, "-", "<cmd>Oil<cr>", { desc = "open parent directory (canola)" } },
+		-- LSP-free navigation: tags (`gd`) and grep-as-references (`gr`).
+		-- `gd` -> g<C-]> uses :tjump so multiple matches show a chooser.
+		-- Generate tags with `ctags -R .` at the project root.
+		{ { "n" }, "gd", "g<C-]>", { desc = "Go to definition (tags)" } },
+		{ { "n" }, "gr", ":Grep <C-r><C-w><cr>", { desc = "Find references (grep cword)" } },
 		{ { "n" }, "<leader>dd", "<cmd>Lazydiff<cr>", { desc = "Toggle lazydiff" } },
 		{ { "n" }, "]h", "<cmd>LazydiffNext<cr>", { desc = "Next lazydiff hunk" } },
 		{ { "n" }, "[h", "<cmd>LazydiffPrev<cr>", { desc = "Prev lazydiff hunk" } },

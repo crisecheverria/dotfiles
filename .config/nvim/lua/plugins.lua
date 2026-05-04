@@ -1,8 +1,8 @@
 -- Third-party plugin installation (vim.pack.add) + per-plugin setup().
 -- Contributes: nothing through the module contract — everything runs as
--- side effects at require-time. This file owns: jump, llama.vim, nvim-java,
+-- side effects at require-time. This file owns: jump, llama.vim, nvim-dap,
 -- fff.nvim, snacks.nvim, claudecode.nvim, conjure + dispatch (clojure),
--- conform.nvim, md-render.nvim, and `present.nvim` (self-authored).
+-- conform.nvim, render-markdown.nvim, and `present.nvim` (self-authored).
 -- Disable: comment out individual `vim.pack.add(...)` blocks below.
 
 -- Installing this plugin because I coded myself, so it doenst count as
@@ -33,20 +33,8 @@ vim.g.llama_config = {
 }
 vim.pack.add({ "https://github.com/ggml-org/llama.vim" })
 
--- Java Setup
-vim.pack.add({
-	{
-		src = "https://github.com/JavaHello/spring-boot.nvim",
-	},
-	"https://github.com/MunifTanjim/nui.nvim",
-	"https://github.com/mfussenegger/nvim-dap",
-
-	"https://github.com/nvim-java/nvim-java",
-})
-
-require("java").setup()
-vim.lsp.enable("jdtls")
--- end Java setup
+-- nvim-dap (used by tools/dap.lua for lldb-based C/C++/ObjC debugging)
+vim.pack.add({ "https://github.com/mfussenegger/nvim-dap" })
 
 -- fff.nvim for file picker and grep?
 vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
@@ -71,13 +59,6 @@ vim.g.fff = {
 		show_scores = true,
 	},
 }
-
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "fff_input",
-	callback = function(args)
-		vim.bo[args.buf].autocomplete = false
-	end,
-})
 
 -- end fff.nvim pluging
 
@@ -168,7 +149,7 @@ vim.pack.add({ "https://github.com/radenling/vim-dispatch-neovim" })
 vim.pack.add({ "https://github.com/clojure-vim/vim-jack-in" })
 
 -- conform.nvim: formatters per filetype, format on save. Filetypes without
--- an explicit formatter fall back to the active LSP formatter.
+-- a declared formatter are skipped (no LSP fallback — LSP is disabled).
 vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
 require("conform").setup({
 	formatters_by_ft = {
@@ -183,8 +164,7 @@ require("conform").setup({
 		clojure = { "cljfmt" },
 		clojurescript = { "cljfmt" },
 	},
-	default_format_opts = { lsp_format = "fallback" },
-	format_on_save = { timeout_ms = 5000, lsp_format = "fallback" },
+	format_on_save = { timeout_ms = 5000 },
 })
 
 -- Markdown files viewer

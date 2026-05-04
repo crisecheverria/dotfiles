@@ -1,7 +1,8 @@
 -- Custom :user commands and general autocmds not tied to a language/tool.
 -- Contributes: autocmds, usercmds.
 -- Commands: :FloatingTerminal, :CloseFloatingTerminal, :RunTest, :RunFile,
--- :Run, :Lazygit, :ColorPicker, :Keymaps, :ConfigReload.
+-- :Run, :Lazygit, :ColorPicker, :Keymaps, :ConfigReload, :UpdateQueries,
+-- :Cht, :Docs.
 -- Autocmds: yank highlight, resize equalize, term-close cleanup, restore
 -- cursor to last position. Disabling loses :RunFile/:RunTest and the
 -- floating terminal/lazygit/colorscheme pickers.
@@ -280,6 +281,146 @@ local function show_keymaps()
 	vim.keymap.set("n", "q", "<cmd>bdelete<cr>", { buffer = 0, silent = true })
 end
 
+-- :Docs [pattern] — browse ~/docs/ scoped to current buffer's filetype.
+-- No args: file picker. With args: live-grep pre-filled with the pattern.
+-- :Docs! (bang) widens scope to every subdir of ~/docs/.
+local docs_by_ft = {
+	javascript      = { "mdn" },
+	javascriptreact = { "mdn", "react" },
+	typescript      = { "ts", "mdn" },
+	typescriptreact = { "ts", "mdn", "react" },
+	cpp             = { "cpp-guidelines" },
+	c               = { "cpp-guidelines" },
+}
+local function docs(opts)
+	local cwd = vim.fn.expand("~/docs")
+	if vim.fn.isdirectory(cwd) == 0 then
+		vim.notify("Docs: ~/docs/ doesn't exist. Run `fetch-docs <lang>` first.", vim.log.levels.WARN)
+		return
+	end
+	local dirs = {}
+	if not opts.bang then
+		for _, sub in ipairs(docs_by_ft[vim.bo.filetype] or {}) do
+			local p = cwd .. "/" .. sub
+			if vim.fn.isdirectory(p) == 1 then
+				dirs[#dirs + 1] = p
+			end
+		end
+	end
+	if #dirs == 0 then
+		dirs = { cwd }
+	end
+	if opts.args == "" then
+		Snacks.picker.files({ dirs = dirs })
+	else
+		Snacks.picker.grep({ dirs = dirs, search = opts.args })
+	end
+end
+
+-- :Cht <topic...> — fetch cheat.sh into a scratch split.
+-- Single arg uses the current buffer's filetype as the language path:
+--   :Cht map               -> cht.sh/typescript/map  (in a .ts buffer)
+-- Multi-arg treats the first as the language, rest as topic words:
+--   :Cht python list comprehension -> cht.sh/python/list+comprehension
+local function cht(opts)
+	local args = opts.fargs
+	if #args == 0 then
+		vim.notify("Cht: provide a topic", vim.log.levels.WARN)
+		return
+	end
+	local ft_alias = {
+		typescriptreact = "typescript",
+		javascriptreact = "javascript",
+		sh = "bash",
+	}
+	local lang, topic
+	if #args == 1 then
+		lang = ft_alias[vim.bo.filetype] or vim.bo.filetype
+		topic = args[1]
+	else
+		lang = args[1]
+		topic = table.concat(vim.list_slice(args, 2), "+")
+	end
+	local url = "https://cht.sh/" .. (lang ~= "" and (lang .. "/") or "") .. topic .. "?T"
+
+	vim.notify("Cht: fetching " .. url)
+	vim.system(
+		{ "curl", "-fsSL", url },
+		{ text = true },
+		vim.schedule_wrap(function(res)
+			if res.code ~= 0 then
+				vim.notify("Cht failed (" .. res.code .. "): " .. (res.stderr or ""), vim.log.levels.ERROR)
+				return
+			end
+			vim.cmd("botright 20split")
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_win_set_buf(0, buf)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(res.stdout, "\n", { plain = true }))
+			vim.bo[buf].modifiable = false
+			vim.bo[buf].buftype = "nofile"
+			vim.bo[buf].bufhidden = "wipe"
+			vim.bo[buf].filetype = lang or ""
+			vim.keymap.set("n", "q", "<cmd>bdelete<cr>", { buffer = buf, silent = true })
+		end)
+	)
+end
+
+-- Refresh treesitter query files from nvim-treesitter master.
+-- No args: refresh every language dir already under queries/.
+-- With args: refresh only the listed languages (e.g. :UpdateQueries rust go).
+-- Uses curl -f so 404s leave no file behind.
+local function update_queries(opts)
+	local queries_dir = vim.fn.stdpath("config") .. "/queries"
+	local langs = opts.fargs
+	if #langs == 0 then
+		for name, t in vim.fs.dir(queries_dir) do
+			if t == "directory" then
+				langs[#langs + 1] = name
+			end
+		end
+	end
+	if #langs == 0 then
+		vim.notify("UpdateQueries: no language dirs found in " .. queries_dir, vim.log.levels.WARN)
+		return
+	end
+
+	local kinds = { "highlights", "injections", "locals", "folds", "indents", "textobjects" }
+	local base = "https://raw.githubusercontent.com/nvim-treesitter/nvim-treesitter/master/queries"
+	local total = #langs * #kinds
+	local pending = total
+	local stats = { ok = 0, missing = 0, error = 0 }
+
+	vim.notify(string.format("UpdateQueries: fetching %d files for %d langs…", total, #langs))
+
+	for _, lang in ipairs(langs) do
+		vim.fn.mkdir(queries_dir .. "/" .. lang, "p")
+		for _, kind in ipairs(kinds) do
+			local url = base .. "/" .. lang .. "/" .. kind .. ".scm"
+			local out = queries_dir .. "/" .. lang .. "/" .. kind .. ".scm"
+			vim.system(
+				{ "curl", "-fsS", "-o", out, url },
+				{ text = true },
+				vim.schedule_wrap(function(res)
+					if res.code == 0 then
+						stats.ok = stats.ok + 1
+					elseif res.code == 22 then
+						stats.missing = stats.missing + 1
+					else
+						stats.error = stats.error + 1
+					end
+					pending = pending - 1
+					if pending == 0 then
+						vim.notify(string.format(
+							"UpdateQueries done: %d updated, %d not in upstream, %d errors",
+							stats.ok, stats.missing, stats.error
+						))
+					end
+				end)
+			)
+		end
+	end
+end
+
 return {
 	autocmds = {
 		{
@@ -315,6 +456,13 @@ return {
 				end
 			end,
 		},
+		{
+			"BufWritePost",
+			function()
+				pcall(vim.cmd.helptags, vim.fn.stdpath("config") .. "/doc")
+			end,
+			{ pattern = vim.fn.stdpath("config") .. "/doc/*.txt" },
+		},
 	},
 	usercmds = {
 		{
@@ -333,5 +481,8 @@ return {
 		{ "RunFile", run_file, {} },
 		{ "Lazygit", lazygit, {} },
 		{ "Run", run_async, { nargs = "+" } },
+		{ "UpdateQueries", update_queries, { nargs = "*", complete = "dir" } },
+		{ "Cht", cht, { nargs = "+" } },
+		{ "Docs", docs, { nargs = "?", bang = true } },
 	},
 }

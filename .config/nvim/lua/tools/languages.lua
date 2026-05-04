@@ -2,7 +2,7 @@
 -- Contributes: autocmds (FileType handlers).
 -- Per-filetype: lua/go indent (3/4), js/ts eslint + indent=2, c/cpp cmake
 -- build + <leader>m / <leader>R, ghostty commentstring. Disabling drops
--- these niceties; LSP and treesitter still work.
+-- these niceties; treesitter still works.
 
 local function lua_config()
 	vim.bo.tabstop = 3
@@ -94,6 +94,22 @@ local function js_ts_config()
 end
 
 local function cpp_config()
+	-- Treat `::` as part of a keyword so K on `std::vector` grabs the full token.
+	vim.opt_local.iskeyword:append(":")
+
+	-- Bypass :Man for K — Neovim nightly's :tag chokes on `std::vector(3)`
+	-- with E1576 ("URL-shaped" tag entry). Run man in a terminal split instead.
+	vim.keymap.set("n", "K", function()
+		local word = vim.fn.expand("<cword>")
+		if word == "" then
+			return
+		end
+		vim.cmd("botright 20split")
+		vim.cmd("terminal man " .. vim.fn.shellescape(word))
+		vim.bo.buflisted = false
+		vim.keymap.set("n", "q", "<cmd>bdelete!<cr>", { buffer = 0, silent = true })
+	end, { buffer = 0, desc = "man <cword>" })
+
 	local cpp = require("tools.cpp")
 	local root = cpp.find_project_root(0)
 	if not root then

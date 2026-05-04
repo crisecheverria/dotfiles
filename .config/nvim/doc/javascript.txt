@@ -1,0 +1,66 @@
+*javascript.txt*  Personal JavaScript / TypeScript / React reference
+
+==============================================================================
+CONTENTS                                                       *javascript-toc*
+
+  1. Array methods .................. |js-array|
+  2. Promises ....................... |js-promise|
+  3. TypeScript utility types ....... |ts-utility|
+  4. React hooks .................... |react-hooks|
+
+==============================================================================
+ARRAY METHODS                                                       *js-array*
+
+                                                                  *Array.map*
+Array.prototype.map(fn) ~
+    Returns a new array with `fn(item, index, array)` applied to each item.
+    Does not mutate the source. See also |Array.filter|, |Array.reduce|.
+
+                                                               *Array.filter*
+Array.prototype.filter(fn) ~
+    Returns a new array of items where `fn(item)` is truthy.
+
+                                                               *Array.reduce*
+Array.prototype.reduce(fn, init) ~
+    Folds the array into a single value. `fn(acc, item, index)`.
+
+==============================================================================
+PROMISES                                                          *js-promise*
+
+                                                              *Promise.all*
+Promise.all(iterable) ~
+    Resolves when all promises resolve. Rejects on the first rejection.
+    Use |Promise.allSettled| if you want every result regardless.
+
+                                                       *Promise.allSettled*
+Promise.allSettled(iterable) ~
+    Resolves once all promises settle, with an array of {status, value|reason}.
+
+==============================================================================
+TYPESCRIPT UTILITY TYPES                                          *ts-utility*
+
+                                                                 *Partial<T>*
+Partial<T>                Make every property optional.
+Required<T>               Make every property required.
+Readonly<T>               Make every property readonly.
+Pick<T, K>                Subset of T with only keys K.
+Omit<T, K>                T without keys K.
+Record<K, V>              Map of K -> V.
+
+==============================================================================
+REACT HOOKS                                                      *react-hooks*
+
+                                                                  *useState*
+useState(initial) -> [value, setValue] ~
+    Component-local state. setValue triggers a re-render.
+
+                                                                 *useEffect*
+useEffect(fn, deps?) ~
+    Side effects after render. Empty deps = run once on mount.
+    No deps = run on every render. Return value is the cleanup fn.
+
+                                                                  *useMemo*
+useMemo(fn, deps) ~
+    Memoize a computed value across renders.
+
+vim:tw=78:ts=8:ft=help:norl:

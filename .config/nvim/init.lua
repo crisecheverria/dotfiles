@@ -8,8 +8,6 @@ vim.opt.autowrite = true
 vim.opt.mouse = ""
 vim.opt.complete = ".,w,b,u,o"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
--- Nvim 0.12: auto-trigger completion as you type (set to false to go back to manual <C-n>)
-vim.opt.autocomplete = true
 vim.opt.wildmode = "noselect:longest"
 vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true
@@ -132,7 +130,7 @@ for _, config in pairs({
 	"tools/qf", -- :Grep + quickfix window behavior (ag backend)
 	"tools/languages", -- per-filetype settings: lua/go indent, eslint, cmake build, ghostty comments
 	"tools/git", -- git signs in signcolumn + :Gstatus/:Gdiff/:Gblame/:Greview/:Gdiffbranch (LARGEST FILE)
-	"tools/lsp", -- LSP server configs, completion, keymaps (gd/gr/K/<leader>r), progress echo
+	"tools/tags", -- async ctags regen on save when a project `tags` file exists
 	"tools/dap", -- debug adapter (lldb via Xcode) + dap-ui — no-op if deps missing
 	"tools/ai", -- :AIChat — streams `claude -p` output into a chat split
 }) do
@@ -178,15 +176,11 @@ end, { desc = "Select next node" })
 vim.keymap.set({ "x", "o" }, "an", function()
 	if vim.treesitter.get_parser(nil, nil, { error = false }) then
 		require("vim.treesitter._select").select_parent(vim.v.count1)
-	else
-		vim.lsp.buf.selection_range(vim.v.count1)
 	end
 end, { desc = "Select parent (outer) node" })
 vim.keymap.set({ "x", "o" }, "in", function()
 	if vim.treesitter.get_parser(nil, nil, { error = false }) then
 		require("vim.treesitter._select").select_child(vim.v.count1)
-	else
-		vim.lsp.buf.selection_range(-vim.v.count1)
 	end
 end, { desc = "Select child (inner) node" })
 local explicit_lhs = {}

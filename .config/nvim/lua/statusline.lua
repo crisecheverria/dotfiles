@@ -1,7 +1,7 @@
 -- Custom statusline builder (no plugin).
 -- Contributes: options (sets `statusline` and `statuscolumn`).
 -- Renders: mode | git branch (cached async) | filename | diagnostics E/W |
--- file status | filetype | LSP client names | line count.
+-- file status | filetype | line count.
 -- Disable to fall back to Neovim's default statusline.
 
 local mode_names = {
@@ -73,30 +73,6 @@ local function diagnostics()
 	return " " .. table.concat(parts, " ") .. "%* |"
 end
 
-local function lsp_status()
-	local clients = vim.lsp.get_clients({ bufnr = 0 })
-	if #clients == 0 then
-		return ""
-	end
-	local names = {}
-	for _, c in ipairs(clients) do
-		table.insert(names, c.name)
-	end
-	return " " .. table.concat(names, ",") .. " |"
-end
-
-local function lsp_progress()
-	local fn = _G.lsp_progress_text
-	if not fn then
-		return ""
-	end
-	local text = fn()
-	if text == "" then
-		return ""
-	end
-	return " " .. text .. " |"
-end
-
 _G.statusline = function()
 	local mode = mode_names[vim.fn.mode()] or vim.fn.mode()
 	return " "
@@ -106,8 +82,6 @@ _G.statusline = function()
 		.. " %t"
 		.. diagnostics()
 		.. " %= %S %= %Y"
-		.. lsp_status()
-		.. lsp_progress()
 		.. " %02l/%02L "
 end
 
