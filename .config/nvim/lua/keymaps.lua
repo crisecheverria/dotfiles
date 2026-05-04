@@ -53,6 +53,9 @@ local function auto_quote(quote)
 end
 
 local function auto_cr()
+	if vim.fn.pumvisible() == 1 and vim.fn.complete_info({ "selected" }).selected ~= -1 then
+		return "<C-y>"
+	end
 	local col = vim.fn.col(".")
 	local line = vim.fn.getline(".")
 	local before = line:sub(col - 1, col - 1)
@@ -172,8 +175,18 @@ return {
 			{ desc = "build & run current file" },
 		},
 		{ { "n" }, "-", "<cmd>Oil<cr>", { desc = "open parent directory (canola)" } },
+		{ { "n" }, "<leader>dd", "<cmd>Lazydiff<cr>", { desc = "Toggle lazydiff" } },
+		{ { "n" }, "]h", "<cmd>LazydiffNext<cr>", { desc = "Next lazydiff hunk" } },
+		{ { "n" }, "[h", "<cmd>LazydiffPrev<cr>", { desc = "Prev lazydiff hunk" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
-		{ { "n" }, "<leader><leader>", function() Snacks.picker.buffers() end, { desc = "list buffers" } },
+		{
+			{ "n" },
+			"<leader><leader>",
+			function()
+				Snacks.picker.buffers()
+			end,
+			{ desc = "list buffers" },
+		},
 		{ { "n" }, "<M-Left>", "<C-w>h", { desc = "move to left window" } },
 		{ { "n" }, "<M-Right>", "<C-w>l", { desc = "move to right window" } },
 		{ { "n" }, "<M-Up>", "<C-w>k", { desc = "move to upper window" } },
@@ -245,7 +258,7 @@ return {
 		-- 99
 		{
 			{ "v" },
-			"<leader>9v",
+			"<leader>aa",
 			function()
 				require("99").visual()
 			end,

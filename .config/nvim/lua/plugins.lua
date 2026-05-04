@@ -86,6 +86,12 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.pack.add({ "https://github.com/folke/snacks.nvim" })
 require("snacks").setup({
 	picker = { enabled = true },
+	notifier = {
+		enabled = true,
+		timeout = 4000,
+		style = "compact",
+		top_down = true,
+	},
 	dashboard = {
 		enabled = true,
 		preset = {
@@ -182,11 +188,21 @@ require("conform").setup({
 })
 
 -- Markdown files viewer
-vim.pack.add({ "https://github.com/delphinus/md-render.nvim" })
+-- render-markdown.nvim: in-buffer markdown rendering (headings, code fences,
+-- bold/italic conceal, etc). Used by the AI chat buffer in lua/tools/ai.lua,
+-- which sets conceallevel=2 window-locally so the renderer can hide markup.
+vim.pack.add({ "https://github.com/MeanderingProgrammer/render-markdown.nvim" })
+require("render-markdown").setup({})
 
 -- canola.nvim: file manager (drop-in oil.nvim fork; module is `oil`)
 vim.pack.add({ "https://github.com/barrettruth/canola.nvim" })
-require("oil").setup({})
+require("oil").setup({
+	view_options = { show_hidden = true },
+})
+
+-- lazydiff.nvim: inline lazygit-style diff overlay against HEAD
+vim.pack.add({ "https://github.com/rashedInt32/lazydiff.nvim" })
+require("lazydiff").setup()
 
 -- matugen.nvim: Material You colorscheme driven by ~/.config/matugen/colors.json.
 -- Regenerate the JSON with `matugen image <wallpaper>` and the plugin auto-reloads

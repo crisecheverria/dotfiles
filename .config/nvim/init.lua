@@ -134,7 +134,7 @@ for _, config in pairs({
 	"tools/git", -- git signs in signcolumn + :Gstatus/:Gdiff/:Gblame/:Greview/:Gdiffbranch (LARGEST FILE)
 	"tools/lsp", -- LSP server configs, completion, keymaps (gd/gr/K/<leader>r), progress echo
 	"tools/dap", -- debug adapter (lldb via Xcode) + dap-ui — no-op if deps missing
-	"tools/ai", -- :AI/:AIEdit/:AIExplain/:AIChat — streams `claude -p` output into buffers
+	"tools/ai", -- :AIChat — streams `claude -p` output into a chat split
 }) do
 	package.loaded[config] = false
 	local config_setup = require(config)
@@ -145,7 +145,7 @@ for _, config in pairs({
 	end
 end
 
-function check_keymap(modes, lhs, rhs)
+local function check_keymap(modes, lhs, rhs)
 	assert(type(modes) == "table", "invalid 'modes' type")
 	for _, mode in pairs(modes) do
 		local previous = vim.fn.maparg(lhs, mode)

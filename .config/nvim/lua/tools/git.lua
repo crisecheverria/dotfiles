@@ -628,7 +628,12 @@ return {
 				local buf = vim.api.nvim_create_buf(false, true)
 				vim.api.nvim_buf_set_lines(buf, 0, -1, false, annotations)
 				vim.bo[buf].modifiable = false
-				vim.api.nvim_buf_set_name(buf, "git:blame")
+				local blame_name = "git:blame:" .. vim.fn.fnamemodify(file, ":t")
+				local existing = vim.fn.bufnr(blame_name)
+				if existing ~= -1 then
+					vim.api.nvim_buf_delete(existing, { force = true })
+				end
+				vim.api.nvim_buf_set_name(buf, blame_name)
 
 				-- Apply highlights per segment: hash, author, date
 				local blame_ns = vim.api.nvim_create_namespace("git_blame")

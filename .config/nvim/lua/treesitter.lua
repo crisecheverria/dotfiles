@@ -10,6 +10,7 @@ local parsers = {
 	"gitcommit",
 	"javascript",
 	"typescript",
+	"markdown",
 	{ lang = "tsx", filetypes = { "typescriptreact" } },
 	"rust",
 	{ lang = "bash", filetypes = { "bash", "sh" } },

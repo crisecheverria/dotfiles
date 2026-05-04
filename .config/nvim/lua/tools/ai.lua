@@ -1,12 +1,14 @@
 -- Claude integration via `claude -p` (non-interactive, streams stdout).
--- Contributes: usercmds (:AI, :AIEdit, :AIExplain, :AIChat, :AIStop).
--- :AI appends after cursor/selection, :AIEdit replaces selection,
--- :AIExplain opens a float, :AIChat opens a >>>user / <<<assistant split.
--- Signals progress via Ghostty OSC 9;4. Distinct from `claudecode.nvim`
+-- Contributes: usercmds (:AIChat, :AIStop).
+-- :AIChat opens a >>>user / <<<assistant split.
+-- Signals progress via Terminal command OSC 9;4. Distinct from `claudecode.nvim`
 -- (plugins.lua) which wraps the interactive Claude Code TUI.
 -- Disable if you don't want the `claude` CLI wired into Neovim.
 
 local active_job = nil
+local active_spinner = nil
+local spinner_ns = vim.api.nvim_create_namespace("ai_spinner")
+local spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
 
 local function osc(seq)
 	io.write(string.format("\x1b]%s\x1b\\", seq))
@@ -20,11 +22,47 @@ local function stop_progress()
 	osc("9;4;0;0")
 end
 
+local function clear_spinner()
+	if not active_spinner then
+		return
+	end
+	if active_spinner.timer then
+		active_spinner.timer:stop()
+		active_spinner.timer:close()
+	end
+	if active_spinner.buf and vim.api.nvim_buf_is_valid(active_spinner.buf) then
+		vim.api.nvim_buf_clear_namespace(active_spinner.buf, spinner_ns, 0, -1)
+	end
+	active_spinner = nil
+end
+
+local function start_spinner(buf, row)
+	clear_spinner()
+	local frame = 1
+	local function tick()
+		if not vim.api.nvim_buf_is_valid(buf) then
+			clear_spinner()
+			return
+		end
+		vim.api.nvim_buf_set_extmark(buf, spinner_ns, row, 0, {
+			id = 1,
+			virt_text = { { spinner_frames[frame] .. " Thinking…", "Comment" } },
+			virt_text_pos = "overlay",
+		})
+		frame = frame % #spinner_frames + 1
+	end
+	tick()
+	local timer = vim.uv.new_timer()
+	timer:start(80, 80, vim.schedule_wrap(tick))
+	active_spinner = { buf = buf, timer = timer }
+end
+
 local function cancel()
 	if active_job then
 		vim.fn.jobstop(active_job)
 		active_job = nil
 	end
+	clear_spinner()
 	stop_progress()
 end
 
@@ -35,6 +73,7 @@ local function stream_to_buf(buf, start_row, prompt, on_done)
 	local got_output = false
 
 	start_progress()
+	start_spinner(buf, start_row)
 
 	active_job = vim.fn.jobstart({ "claude", "-p", prompt }, {
 		on_stdout = function(_, data)
@@ -42,6 +81,7 @@ local function stream_to_buf(buf, start_row, prompt, on_done)
 				if not got_output then
 					got_output = true
 					stop_progress()
+					clear_spinner()
 				end
 				if not vim.api.nvim_buf_is_valid(buf) then
 					return
@@ -61,6 +101,7 @@ local function stream_to_buf(buf, start_row, prompt, on_done)
 		on_exit = function(_, code)
 			vim.schedule(function()
 				stop_progress()
+				clear_spinner()
 				active_job = nil
 				if on_done then
 					on_done(code)
@@ -74,100 +115,11 @@ local function get_selection(opts)
 	if opts.range == 0 then
 		return nil
 	end
-	local ok, lines =
-		pcall(vim.fn.getregion, vim.fn.getpos("'<"), vim.fn.getpos("'>"), { mode = vim.fn.visualmode() })
+	local ok, lines = pcall(vim.fn.getregion, vim.fn.getpos("'<"), vim.fn.getpos("'>"), { mode = vim.fn.visualmode() })
 	if not ok or #lines == 0 then
 		return nil
 	end
 	return table.concat(lines, "\n")
-end
-
--- :AI [prompt] - append AI response after cursor or selection
-local function ai_complete(opts)
-	local selection = get_selection(opts)
-	local instruction = opts.args
-
-	local prompt
-	if selection and instruction ~= "" then
-		prompt = instruction .. "\n\n" .. selection
-	elseif selection then
-		prompt = selection
-	elseif instruction ~= "" then
-		prompt = instruction
-	else
-		vim.notify("Provide a prompt or visual selection", vim.log.levels.WARN)
-		return
-	end
-
-	local buf = vim.api.nvim_get_current_buf()
-	local row = opts.range > 0 and opts.line2 or vim.api.nvim_win_get_cursor(0)[1]
-	vim.api.nvim_buf_set_lines(buf, row, row, false, { "" })
-	stream_to_buf(buf, row, prompt)
-end
-
--- :AIEdit [instruction] - replace selection with AI response
-local function ai_edit(opts)
-	local selection = get_selection(opts)
-	if not selection then
-		vim.notify("AIEdit requires a visual selection", vim.log.levels.WARN)
-		return
-	end
-
-	local instruction = opts.args ~= "" and opts.args or "improve this code"
-	local prompt = instruction
-		.. ". Return ONLY the replacement code, no explanations, no markdown fences.\n\n"
-		.. selection
-
-	local buf = vim.api.nvim_get_current_buf()
-	vim.api.nvim_buf_set_lines(buf, opts.line1 - 1, opts.line2, false, { "" })
-	stream_to_buf(buf, opts.line1 - 1, prompt)
-end
-
--- :AIExplain [prompt] - show AI response in a floating window
-local function ai_explain(opts)
-	local selection = get_selection(opts)
-	local instruction = opts.args
-
-	local prompt
-	if selection and instruction ~= "" then
-		prompt = instruction .. "\n\n" .. selection
-	elseif selection then
-		prompt = "Explain this code:\n\n" .. selection
-	elseif instruction ~= "" then
-		prompt = instruction
-	else
-		vim.notify("Provide a prompt or visual selection", vim.log.levels.WARN)
-		return
-	end
-
-	local buf = vim.api.nvim_create_buf(false, true)
-	vim.bo[buf].filetype = "markdown"
-	vim.bo[buf].bufhidden = "wipe"
-
-	local width = math.floor(vim.o.columns * 0.7)
-	local height = math.floor(vim.o.lines * 0.6)
-	local win = vim.api.nvim_open_win(buf, true, {
-		relative = "editor",
-		row = math.floor((vim.o.lines - height) / 2),
-		col = math.floor((vim.o.columns - width) / 2),
-		width = width,
-		height = height,
-		style = "minimal",
-		border = "rounded",
-		title = " AI ",
-		title_pos = "center",
-	})
-	vim.wo[win].wrap = true
-	vim.wo[win].linebreak = true
-
-	vim.keymap.set("n", "q", function()
-		cancel()
-		if vim.api.nvim_win_is_valid(win) then
-			vim.api.nvim_win_close(win, true)
-		end
-	end, { buffer = buf, desc = "Close AI float" })
-
-	stream_to_buf(buf, 0, prompt)
 end
 
 -- Chat
@@ -267,6 +219,8 @@ local function ensure_chat_win()
 	vim.cmd("botright 20split")
 	chat.win = vim.api.nvim_get_current_win()
 	vim.api.nvim_win_set_buf(chat.win, chat.buf)
+	vim.wo[chat.win].conceallevel = 2
+	vim.wo[chat.win].concealcursor = "nc"
 end
 
 -- :AIChat [prompt] - open chat split, optionally with selection + prompt
@@ -274,12 +228,30 @@ local function ai_chat(opts)
 	local selection = get_selection(opts)
 	local instruction = opts.args
 
+	local src_path, src_range, src_ft
+	if selection then
+		local name = vim.api.nvim_buf_get_name(0)
+		if name ~= "" then
+			src_path = vim.fn.fnamemodify(name, ":.")
+		end
+		src_range = string.format("L%d-%d", opts.line1, opts.line2)
+		src_ft = vim.bo.filetype
+	end
+
 	ensure_chat_buf()
 
 	local lines = { ">>> user", "" }
 	local pos = 2
 	if selection then
-		table.insert(lines, pos, "```")
+		if src_path then
+			table.insert(lines, pos, string.format("File: %s (%s)", src_path, src_range))
+		else
+			table.insert(lines, pos, string.format("Selection: %s", src_range))
+		end
+		pos = pos + 1
+		table.insert(lines, pos, "")
+		pos = pos + 1
+		table.insert(lines, pos, "```" .. (src_ft or ""))
 		pos = pos + 1
 		for _, l in ipairs(vim.split(selection, "\n")) do
 			table.insert(lines, pos, l)
@@ -318,9 +290,6 @@ end
 
 return {
 	usercmds = {
-		{ "AI", ai_complete, { range = true, nargs = "?" } },
-		{ "AIEdit", ai_edit, { range = true, nargs = "?" } },
-		{ "AIExplain", ai_explain, { range = true, nargs = "?" } },
 		{ "AIChat", ai_chat, { range = true, nargs = "?" } },
 		{ "AIStop", cancel, {} },
 	},
