@@ -6,8 +6,8 @@
 
 return {
 	keymaps = {
-		{ { "n" }, "<leader>g", ":Grep<space>", { desc = "Grep prompt" } },
-		{ { "n" }, "<leader>G", ":Grep<space><cword><cr>", { desc = "Grep word under cursor" } },
+		{ { "n" }, "<leader>G", ":Grep<space>", { desc = "Grep prompt" } },
+		{ { "n" }, "<leader>sw", ":Grep<space><cword><cr>", { desc = "Grep word under cursor" } },
 		-- TODO: configure linting using :make or :compiler
 		-- { { "n" }, "<leader>l", ":silent make!<space>" },
 	},

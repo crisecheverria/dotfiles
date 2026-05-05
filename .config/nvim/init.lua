@@ -8,6 +8,7 @@ vim.opt.autowrite = true
 vim.opt.mouse = ""
 vim.opt.complete = ".,w,b,u,o"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
+vim.opt.confirm = true
 vim.opt.wildmode = "noselect:longest"
 vim.opt.wildoptions = "fuzzy,pum"
 vim.opt.termguicolors = true

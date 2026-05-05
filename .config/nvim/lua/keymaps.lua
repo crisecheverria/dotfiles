@@ -143,7 +143,14 @@ return {
 			betterdelete(true),
 			{ expr = true, desc = "delete char (void register)" },
 		},
-		{ { "n" }, "<leader>x", vim.diagnostic.setloclist, { desc = "Open diagnostic list" } },
+		{
+			{ "n" },
+			"<leader>x",
+			function()
+				vim.diagnostic.setqflist({ open = true })
+			end,
+			{ desc = "Diagnostics → quickfix" },
+		},
 		{ { "n" }, "<leader>gg", "<cmd>Lazygit<cr>", { desc = "open lazygit" } },
 		{
 			{ "n" },
@@ -155,11 +162,11 @@ return {
 		},
 		{
 			{ "n" },
-			"<leader>s",
+			"<leader>g",
 			function()
 				require("fff").live_grep()
 			end,
-			{ desc = "Live grep" },
+			{ desc = "Live grep (fff)" },
 		},
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
 		{
@@ -180,6 +187,18 @@ return {
 		-- Generate tags with `ctags -R .` at the project root.
 		{ { "n" }, "gd", "g<C-]>", { desc = "Go to definition (tags)" } },
 		{ { "n" }, "gr", ":Grep <C-r><C-w><cr>", { desc = "Find references (grep cword)" } },
+		{
+			{ "n" },
+			"<leader>rn",
+			[[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]],
+			{ desc = "rename: substitute word under cursor (buffer)" },
+		},
+		{
+			{ "x" },
+			"<leader>rn",
+			[["zy:%s/\V<C-r>z//gI<Left><Left><Left>]],
+			{ desc = "rename: substitute selection (buffer)" },
+		},
 		{ { "n" }, "<leader>dd", "<cmd>Lazydiff<cr>", { desc = "Toggle lazydiff" } },
 		{ { "n" }, "]h", "<cmd>LazydiffNext<cr>", { desc = "Next lazydiff hunk" } },
 		{ { "n" }, "[h", "<cmd>LazydiffPrev<cr>", { desc = "Prev lazydiff hunk" } },
