@@ -368,7 +368,8 @@ end
 -- Refresh treesitter query files from nvim-treesitter master.
 -- No args: refresh every language dir already under queries/.
 -- With args: refresh only the listed languages (e.g. :UpdateQueries rust go).
--- Uses curl -f so 404s leave no file behind.
+-- Uses curl --fail --remove-on-error so 4xx responses leave no file behind
+-- (some kinds like textobjects.scm aren't in upstream for every language).
 local function update_queries(opts)
 	local queries_dir = vim.fn.stdpath("config") .. "/queries"
 	local langs = opts.fargs
@@ -388,7 +389,7 @@ local function update_queries(opts)
 	local base = "https://raw.githubusercontent.com/nvim-treesitter/nvim-treesitter/master/queries"
 	local total = #langs * #kinds
 	local pending = total
-	local stats = { ok = 0, missing = 0, error = 0 }
+	local stats = { ok = 0, failed = 0 }
 
 	vim.notify(string.format("UpdateQueries: fetching %d files for %d langs…", total, #langs))
 
@@ -398,21 +399,19 @@ local function update_queries(opts)
 			local url = base .. "/" .. lang .. "/" .. kind .. ".scm"
 			local out = queries_dir .. "/" .. lang .. "/" .. kind .. ".scm"
 			vim.system(
-				{ "curl", "-fsS", "-o", out, url },
+				{ "curl", "-fsS", "--remove-on-error", "-o", out, url },
 				{ text = true },
 				vim.schedule_wrap(function(res)
 					if res.code == 0 then
 						stats.ok = stats.ok + 1
-					elseif res.code == 22 then
-						stats.missing = stats.missing + 1
 					else
-						stats.error = stats.error + 1
+						stats.failed = stats.failed + 1
 					end
 					pending = pending - 1
 					if pending == 0 then
 						vim.notify(string.format(
-							"UpdateQueries done: %d updated, %d not in upstream, %d errors",
-							stats.ok, stats.missing, stats.error
+							"UpdateQueries done: %d updated, %d not fetched (missing upstream or transfer error)",
+							stats.ok, stats.failed
 						))
 					end
 				end)
