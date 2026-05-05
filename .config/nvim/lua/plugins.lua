@@ -167,6 +167,36 @@ require("conform").setup({
 	format_on_save = { timeout_ms = 5000 },
 })
 
+-- nvim-lint: async linters per filetype. Selene runs on Lua buffers; the
+-- autocmd kicks off `try_lint` after writes/insert-leaves and on buffer load.
+vim.pack.add({ "https://github.com/mfussenegger/nvim-lint" })
+require("lint").linters_by_ft = {
+	lua = { "selene" },
+	javascript = { "oxlint" },
+	javascriptreact = { "oxlint" },
+	typescript = { "oxlint" },
+	typescriptreact = { "oxlint" },
+	cpp = { "clangtidy" },
+	rust = { "clippy" },
+	clojure = { "clj-kondo" },
+}
+
+-- Prefer the project-local oxlint binary when present, fall back to PATH.
+if require("lint").linters.oxlint then
+	require("lint").linters.oxlint.cmd = function()
+		local local_bin = vim.fs.find("node_modules/.bin/oxlint", {
+			upward = true,
+			path = vim.fn.expand("%:p:h"),
+		})[1]
+		return local_bin or "oxlint"
+	end
+end
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
+	callback = function()
+		require("lint").try_lint()
+	end,
+})
+
 -- Markdown files viewer
 -- render-markdown.nvim: in-buffer markdown rendering (headings, code fences,
 -- bold/italic conceal, etc). Used by the AI chat buffer in lua/tools/ai.lua,
