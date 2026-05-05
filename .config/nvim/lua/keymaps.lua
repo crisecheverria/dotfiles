@@ -9,7 +9,7 @@ local utils = require("utils")
 
 local function surround()
 	local ok, left = pcall(vim.fn.getcharstr)
-	if not ok or char == "\27" then
+	if not ok or left == "\27" then
 		return ""
 	end
 	local right = utils.v_pairs[left]

@@ -137,13 +137,18 @@ end
 local function schedule_update(buf)
 	if timers[buf] then
 		timers[buf]:stop()
+		timers[buf]:close()
 	end
-	timers[buf] = vim.uv.new_timer()
-	timers[buf]:start(
+	local t = vim.uv.new_timer()
+	timers[buf] = t
+	t:start(
 		200,
 		0,
 		vim.schedule_wrap(function()
-			timers[buf] = nil
+			if timers[buf] == t then
+				timers[buf] = nil
+			end
+			t:close()
 			update_signs(buf)
 		end)
 	)
@@ -343,6 +348,7 @@ return {
 			function(ev)
 				if timers[ev.buf] then
 					timers[ev.buf]:stop()
+					timers[ev.buf]:close()
 					timers[ev.buf] = nil
 				end
 			end,
