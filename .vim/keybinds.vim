@@ -55,6 +55,7 @@ command! GUI write | execute '!subl --wait ' . shellescape(expand('%:p'))
 " Ale
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j> <Plug>(ale_next_wrap)
+nnoremap <silent> <leader>x :ALEPopulateQuickfix<CR>:copen<CR>
 
 " Easy way to get back to normal mode from home row
 inoremap jj <Esc>

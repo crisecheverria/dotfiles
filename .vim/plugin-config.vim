@@ -20,6 +20,7 @@ endif
 set clipboard=unnamed
 
 " ---- Copilot setup ----
+let g:copilot_enabled = v:false
 " Copilot will prompt you to authenticate on first use
 " Accept suggestions with Tab or Ctrl+]
 
@@ -34,10 +35,27 @@ command! -nargs=+ Grep silent grep! <args> | copen
 
 " ---- Ale setup ----
 let g:ale_fix_on_save = 1
+
+" Lint quietly: only on insert-leave and save, not while typing
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_on_enter = 0
+
+" No inline highlighting — keep a small gutter sign as the only hint
+let g:ale_set_highlights = 0
+let g:ale_set_signs = 1
+let g:ale_sign_error = '●'
+let g:ale_sign_warning = '·'
+
+" Show message in the echo line when cursor is on the error
+let g:ale_echo_cursor = 1
+let g:ale_cursor_detail = 0
+let g:ale_virtualtext_cursor = 0
+
 let g:ale_linters = {
 \   'python': ['ruff'],
-\   'javascript': ['eslint'],
-\   'typescript': ['eslint'],
+\   'javascript': ['eslint', 'oxlint'],
+\   'typescript': ['eslint', 'oxlint'],
 \   'sh': ['shellcheck'],
 \}
 let g:ale_fixers  = {

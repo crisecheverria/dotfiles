@@ -11,7 +11,7 @@ source ~/.vim/plugins.vim
 source ~/.vim/plugin-config.vim
 source ~/.vim/keybinds.vim
 source ~/.vim/navigation.vim
-source ~/.vim/coc.vim
+" source ~/.vim/coc.vim
 source ~/.vim/taskpaper.vim
 source ~/.vim/sidebars.vim
 source ~/.vim/persistence.vim
