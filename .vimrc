@@ -4,7 +4,7 @@
 set nocompatible              " Use Vim defaults (not Vi)
 filetype plugin indent on     " Enable filetype detection + plugins
 syntax on                     " Enable syntax highlighting
-let mapleader="\<Space>"
+let mapleader=";"
 
 source ~/.vim/options.vim
 source ~/.vim/plugins.vim

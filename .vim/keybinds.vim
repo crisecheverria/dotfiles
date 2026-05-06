@@ -2,8 +2,13 @@
 " General Keybindings
 " =============================================================================================
 
+" Space as : for command mode
+nnoremap <Space> :
+vnoremap <Space> :
+
 " File Explorer (netrw)
 nnoremap <leader>e :Ex<CR>
+nnoremap <silent> - :VimExplorer<CR>
 " Tagbar
 nmap <F8> :TagbarToggle<CR>
 
@@ -24,6 +29,12 @@ tnoremap <C-o> <C-\><C-n>
 
 " Fugitive Git Grep for word under cursor
 nnoremap <leader>sw :Grep <C-r><C-w><CR>
+
+" Git review
+nnoremap <leader>gs :Git<CR>
+nnoremap <leader>gb :Git blame<CR>
+nnoremap <leader>gd :Gvdiffsplit<CR>
+nnoremap <leader>gl :0Gclog<CR>
 
 " Copilot Keybindings
 " Accept suggestion: Tab (default)

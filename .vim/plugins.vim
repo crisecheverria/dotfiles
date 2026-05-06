@@ -34,7 +34,7 @@ Plug 'davidoc/taskpaper.vim'
 "AI
 Plug 'github/copilot.vim'
 Plug 'madox2/vim-ai'
-Plug 'crisecheverria/vim-claude-code'
+Plug 'rishi-opensource/vim-claude-code'
 
 "Color Scheme
 Plug 'ap/vim-css-color'

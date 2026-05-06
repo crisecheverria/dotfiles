@@ -82,3 +82,9 @@ let g:claude_code_diff_preview = 1
 
 " ---- vim-ai setup ----
 let g:vim_ai_roles_config_file = expand('~/.config/vim-ai/roles.ini')
+
+" In :AIChat buffers, <CR> in normal mode submits (instead of :AIChat<CR>)
+augroup VimAIChatSubmit
+  autocmd!
+  autocmd FileType aichat nnoremap <buffer> <CR> :AIChat<CR>
+augroup END

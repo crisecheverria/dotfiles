@@ -38,3 +38,7 @@ let &t_EI = "\e[2 q"  " steady block in normal
 " --- Session behavior (workspace resume when no args) ---
 " Tune what sessions store (sane defaults)
 set sessionoptions=blank,buffers,curdir,help,tabpages,winsize,folds,terminal
+
+" Views: persist folds and cursor only — never save buffer-local mappings,
+" otherwise stale leader-prefix mappings haunt buffers across config changes.
+set viewoptions=folds,cursor,curdir
