@@ -29,17 +29,10 @@ endif
 " Disable background-color erase to prevent white gaps on first draw
 set t_ut=
 
-" Cursor shape: thin bar in insert mode, block in normal mode
+" Cursor shape: thin bar in insert mode, block in normal mode.
 let &t_SI = "\e[6 q"  " steady bar in insert
 let &t_SR = "\e[4 q"  " steady underline in replace
 let &t_EI = "\e[2 q"  " steady block in normal
-
-" Force the normal-mode shape on startup. t_EI only fires on mode transitions,
-" so we briefly enter+leave insert to trigger t_SI then t_EI.
-augroup CursorShapeInit
-  autocmd!
-  autocmd VimEnter * silent! startinsert | silent! stopinsert
-augroup END
 
 " Sessions
 " --- Session behavior (workspace resume when no args) ---
