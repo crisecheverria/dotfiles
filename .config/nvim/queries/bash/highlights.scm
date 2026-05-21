@@ -105,6 +105,21 @@
 
 (special_variable_name) @constant
 
+; trap -l
+((word) @constant.builtin
+  (#any-of? @constant.builtin
+    "SIGHUP" "SIGINT" "SIGQUIT" "SIGILL" "SIGTRAP" "SIGABRT" "SIGBUS" "SIGFPE" "SIGKILL" "SIGUSR1"
+    "SIGSEGV" "SIGUSR2" "SIGPIPE" "SIGALRM" "SIGTERM" "SIGSTKFLT" "SIGCHLD" "SIGCONT" "SIGSTOP"
+    "SIGTSTP" "SIGTTIN" "SIGTTOU" "SIGURG" "SIGXCPU" "SIGXFSZ" "SIGVTALRM" "SIGPROF" "SIGWINCH"
+    "SIGIO" "SIGPWR" "SIGSYS" "SIGRTMIN" "SIGRTMIN+1" "SIGRTMIN+2" "SIGRTMIN+3" "SIGRTMIN+4"
+    "SIGRTMIN+5" "SIGRTMIN+6" "SIGRTMIN+7" "SIGRTMIN+8" "SIGRTMIN+9" "SIGRTMIN+10" "SIGRTMIN+11"
+    "SIGRTMIN+12" "SIGRTMIN+13" "SIGRTMIN+14" "SIGRTMIN+15" "SIGRTMAX-14" "SIGRTMAX-13"
+    "SIGRTMAX-12" "SIGRTMAX-11" "SIGRTMAX-10" "SIGRTMAX-9" "SIGRTMAX-8" "SIGRTMAX-7" "SIGRTMAX-6"
+    "SIGRTMAX-5" "SIGRTMAX-4" "SIGRTMAX-3" "SIGRTMAX-2" "SIGRTMAX-1" "SIGRTMAX"))
+
+((word) @boolean
+  (#any-of? @boolean "true" "false"))
+
 (comment) @comment @spell
 
 (test_operator) @operator
@@ -167,30 +182,6 @@
       (word) @variable.parameter)
   ])
 
-; help trap
-(command
-  name: (command_name
-    (word) @_command)
-  argument: (word) @string.special
-  (#eq? @_command "trap")
-  (#any-of? @string.special "EXIT" "DEBUG" "RETURN" "ERR"))
-
-; trap -l
-(command
-  name: (command_name
-    (word) @_command)
-  argument: (word) @string.special
-  (#any-of? @_command "trap" "kill")
-  (#any-of? @string.special
-    "SIGHUP" "SIGINT" "SIGQUIT" "SIGILL" "SIGTRAP" "SIGABRT" "SIGBUS" "SIGFPE" "SIGKILL" "SIGUSR1"
-    "SIGSEGV" "SIGUSR2" "SIGPIPE" "SIGALRM" "SIGTERM" "SIGSTKFLT" "SIGCHLD" "SIGCONT" "SIGSTOP"
-    "SIGTSTP" "SIGTTIN" "SIGTTOU" "SIGURG" "SIGXCPU" "SIGXFSZ" "SIGVTALRM" "SIGPROF" "SIGWINCH"
-    "SIGIO" "SIGPWR" "SIGSYS" "SIGRTMIN" "SIGRTMIN+1" "SIGRTMIN+2" "SIGRTMIN+3" "SIGRTMIN+4"
-    "SIGRTMIN+5" "SIGRTMIN+6" "SIGRTMIN+7" "SIGRTMIN+8" "SIGRTMIN+9" "SIGRTMIN+10" "SIGRTMIN+11"
-    "SIGRTMIN+12" "SIGRTMIN+13" "SIGRTMIN+14" "SIGRTMIN+15" "SIGRTMAX-14" "SIGRTMAX-13"
-    "SIGRTMAX-12" "SIGRTMAX-11" "SIGRTMAX-10" "SIGRTMAX-9" "SIGRTMAX-8" "SIGRTMAX-7" "SIGRTMAX-6"
-    "SIGRTMAX-5" "SIGRTMAX-4" "SIGRTMAX-3" "SIGRTMAX-2" "SIGRTMAX-1" "SIGRTMAX"))
-
 (declaration_command
   (word) @variable.parameter)
 
@@ -198,6 +189,9 @@
   (word) @variable.parameter)
 
 (number) @number
+
+((word) @number
+  (#lua-match? @number "^[0-9]+$"))
 
 (file_redirect
   (word) @string.special.path)
@@ -253,17 +247,6 @@
     "READLINE_ARGUMENT" "READLINE_LINE" "READLINE_MARK" "READLINE_POINT" "REPLY" "SECONDS" "SHELL"
     "SHELLOPTS" "SHLVL" "SRANDOM" "TIMEFORMAT" "TMOUT" "TMPDIR" "UID"))
 
-((command
-  name: (command_name
-    (word) @_printf)
-  .
-  argument: (word) @_v
-  .
-  argument: (word) @variable)
-  (#eq? @_printf "printf")
-  (#eq? @_v "-v")
-  (#lua-match? @variable "^[a-zA-Z_][a-zA-Z0-9_]*$"))
-
 (case_item
   value: (word) @variable.parameter)
 
@@ -275,4 +258,4 @@
 ((program
   .
   (comment) @keyword.directive @nospell)
-  (#lua-match? @keyword.directive "^#![ \t]*/"))
+  (#lua-match? @keyword.directive "^#!/"))

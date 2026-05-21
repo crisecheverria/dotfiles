@@ -726,6 +726,14 @@ return {
 				local state = { files = files, base = base, index = 0, bufs = {} }
 				local root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
 
+				local function set_buf_name(buf, name)
+					local existing = vim.fn.bufnr(name)
+					if existing ~= -1 and existing ~= buf then
+						pcall(vim.api.nvim_buf_delete, existing, { force = true })
+					end
+					pcall(vim.api.nvim_buf_set_name, buf, name)
+				end
+
 				-- Create a dedicated tab so we don't disturb existing layout
 				vim.cmd("tabnew")
 				local tab = vim.api.nvim_get_current_tabpage()
@@ -747,7 +755,7 @@ return {
 				vim.api.nvim_buf_set_lines(panel_buf, 0, -1, false, display)
 				vim.bo[panel_buf].modifiable = false
 				vim.bo[panel_buf].buftype = "nofile"
-				vim.api.nvim_buf_set_name(panel_buf, "review:" .. base)
+				set_buf_name(panel_buf, "review:" .. base)
 				vim.cmd("botright split")
 				local panel_win = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_buf(panel_win, panel_buf)
@@ -817,7 +825,7 @@ return {
 					vim.bo[base_buf].modifiable = false
 					vim.bo[base_buf].buftype = "nofile"
 					vim.bo[base_buf].filetype = ft
-					pcall(vim.api.nvim_buf_set_name, base_buf, base .. ":" .. rel)
+					set_buf_name(base_buf, base .. ":" .. rel)
 					table.insert(state.bufs, base_buf)
 
 					-- Right: current version
@@ -833,7 +841,7 @@ return {
 					vim.bo[head_buf].modifiable = false
 					vim.bo[head_buf].buftype = "nofile"
 					vim.bo[head_buf].filetype = ft
-					pcall(vim.api.nvim_buf_set_name, head_buf, "HEAD:" .. rel)
+					set_buf_name(head_buf, "HEAD:" .. rel)
 					table.insert(state.bufs, head_buf)
 
 					-- Set buffers in diff windows

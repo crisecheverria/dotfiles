@@ -12,6 +12,10 @@
       "rev": "432121f0f5b9bda041030d1e9e83b7ba3a93dd8f",
       "src": "https://github.com/coder/claudecode.nvim"
     },
+    "code-preview.nvim": {
+      "rev": "54ed050ba7409764f2c803838a9cdd129396bed9",
+      "src": "https://github.com/Cannon07/code-preview.nvim"
+    },
     "colorful-times-nvim": {
       "rev": "41907af16389cb5ec7970760f25f7b2e631f2856",
       "src": "https://github.com/luxus/colorful-times-nvim"
@@ -36,6 +40,14 @@
       "rev": "7de55be63d725d94944e5e89206284a67b8baa08",
       "src": "https://github.com/dmtrKovalenko/fff.nvim"
     },
+    "fzf-lua": {
+      "rev": "311a630292310ea3bfe46dd616e17f283e975801",
+      "src": "https://github.com/ibhagwan/fzf-lua"
+    },
+    "jumpy.nvim": {
+      "rev": "48005417fba6faf69fb582c8e3e30879f442e2be",
+      "src": "https://github.com/cachebag/jumpy.nvim"
+    },
     "lazydiff.nvim": {
       "rev": "5104084cb18ed4fc5f9e4a086dfab67e88c4dd47",
       "src": "https://github.com/rashedInt32/lazydiff.nvim"
@@ -56,6 +68,10 @@
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
       "src": "https://github.com/MunifTanjim/nui.nvim"
     },
+    "nvim-autopairs": {
+      "rev": "7b9923abad60b903ece7c52940e1321d39eccc79",
+      "src": "https://github.com/windwp/nvim-autopairs"
+    },
     "nvim-dap": {
       "rev": "45a69eba683a2c448dd9ecfc4de89511f0646b5f",
       "src": "https://github.com/mfussenegger/nvim-dap"
@@ -71,6 +87,10 @@
     "nvim-lint": {
       "rev": "eab58b48eb11d7745c11c505e0f3057165902461",
       "src": "https://github.com/mfussenegger/nvim-lint"
+    },
+    "nvim-lspconfig": {
+      "rev": "75e49cfa588a89ca667d767c0afef3ceac205faa",
+      "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "plenary.nvim": {
       "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",

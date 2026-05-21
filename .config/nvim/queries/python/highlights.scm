@@ -4,7 +4,7 @@
 (identifier) @variable
 
 ; Reset highlighting in f-string interpolations
-(interpolation) @none @nospell
+(interpolation) @none
 
 ; Identifier naming conventions
 ((identifier) @type
@@ -223,6 +223,7 @@
 [
   "try"
   "except"
+  "except*"
   "raise"
   "finally"
 ] @keyword.exception
@@ -246,12 +247,6 @@
 (interpolation
   "{" @punctuation.special
   "}" @punctuation.special)
-
-(format_expression
-  "{" @punctuation.special
-  "}" @punctuation.special)
-
-(line_continuation) @punctuation.special
 
 (type_conversion) @function.macro
 
@@ -417,17 +412,9 @@
   function: (attribute
     object: (identifier) @_re)
   arguments: (argument_list
+    .
     (string
       (string_content) @string.regexp))
-  (#eq? @_re "re"))
-
-(call
-  function: (attribute
-    object: (identifier) @_re)
-  arguments: (argument_list
-    (concatenated_string
-      (string
-        (string_content) @string.regexp)))
   (#eq? @_re "re"))
 
 ; Decorators

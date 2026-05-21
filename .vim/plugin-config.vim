@@ -5,7 +5,7 @@
 " Color Scheme
 let g:tokyonight_style = 'night' " available: night, storm
 let g:tokyonight_enable_italic = 1
-colorscheme matugen
+colorscheme tokyonight
 
 " WSL: use Windows clipboard
 if has('wsl')
@@ -33,6 +33,15 @@ set grepprg=rg\ --vimgrep\ --smart-case
 " Note: Custom :Rg command commented out to use FZF's interactive :Rg instead
 command! -nargs=+ Grep silent grep! <args> | copen
 
+" ---- FZF file listing ----
+" Use fd/rg so .gitignore is honoured (skips node_modules, dist, build, .next…).
+" Falls back to rg --files if fd is missing.
+if executable('fd')
+  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --follow --exclude .git'
+elseif executable('rg')
+  let $FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow --glob "!.git/*"'
+endif
+
 " ---- Ale setup ----
 let g:ale_fix_on_save = 1
 
@@ -57,6 +66,8 @@ let g:ale_linters = {
 \   'javascript': ['eslint', 'oxlint'],
 \   'typescript': ['eslint', 'oxlint'],
 \   'sh': ['shellcheck'],
+\   'cpp': ['clangd'],
+\   'c': ['clangd'],
 \}
 let g:ale_fixers  = {
 \   'python': ['isort', 'black'],

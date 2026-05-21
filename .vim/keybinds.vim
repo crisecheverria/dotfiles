@@ -35,6 +35,7 @@ nnoremap <leader>gs :Git<CR>
 nnoremap <leader>gb :Git blame<CR>
 nnoremap <leader>gd :Gvdiffsplit<CR>
 nnoremap <leader>gl :0Gclog<CR>
+nnoremap <leader>lg :tab terminal ++close lazygit<CR>
 
 " Copilot Keybindings
 " Accept suggestion: Tab (default)
@@ -42,8 +43,9 @@ nnoremap <leader>gl :0Gclog<CR>
 " Next suggestion: Alt+]
 " Previous suggestion: Alt+[
 
-" Copy current buffer path to clipboard
-nnoremap <leader>cp :let @+ = expand('%:p')<CR>:echo 'Copied: ' . expand('%:p')<CR>
+" Copy current buffer path (relative to cwd) to clipboard
+" Note: <leader>cp is taken by vim-claude-code (:Claude pr)
+nnoremap <leader>fp :let @+ = expand('%:.')<CR>:echo 'file: ' . expand('%:.')<CR>
 
 " Diff Navigation
 nnoremap <leader>dn ]c

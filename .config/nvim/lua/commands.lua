@@ -226,7 +226,10 @@ local function colorscheme_picker()
 	local function close(keep)
 		if keep then
 			local f = io.open(colorscheme_file, "w")
-			if f then f:write(vim.g.colors_name or original) f:close() end
+			if f then
+				f:write(vim.g.colors_name or original)
+				f:close()
+			end
 		else
 			pcall(vim.cmd.colorscheme, original)
 		end
@@ -240,9 +243,15 @@ local function colorscheme_picker()
 	})
 
 	local opts = { buffer = buf, nowait = true, silent = true }
-	vim.keymap.set("n", "<cr>", function() close(true) end, opts)
-	vim.keymap.set("n", "q", function() close(false) end, opts)
-	vim.keymap.set("n", "<esc>", function() close(false) end, opts)
+	vim.keymap.set("n", "<cr>", function()
+		close(true)
+	end, opts)
+	vim.keymap.set("n", "q", function()
+		close(false)
+	end, opts)
+	vim.keymap.set("n", "<esc>", function()
+		close(false)
+	end, opts)
 end
 
 local function lazygit()
@@ -285,14 +294,35 @@ end
 -- No args: file picker. With args: live-grep pre-filled with the pattern.
 -- :Docs! (bang) widens scope to every subdir of ~/docs/.
 local docs_by_ft = {
-	javascript      = { "mdn" },
+	javascript = { "mdn" },
 	javascriptreact = { "mdn", "react" },
-	typescript      = { "ts", "mdn" },
+	typescript = { "ts", "mdn" },
 	typescriptreact = { "ts", "mdn", "react" },
-	cpp             = { "cpp-guidelines" },
-	c               = { "cpp-guidelines" },
+	rust = { "rust" },
 }
 local function docs(opts)
+	-- c/cpp: route to cppman (cppreference/cplusplus.com man pages) in a
+	-- terminal split. less is the configured pager; q quits, buffer wipes.
+	if (vim.bo.filetype == "cpp" or vim.bo.filetype == "c") and not opts.bang and opts.args ~= "" then
+		vim.cmd("botright 20split")
+		local buf = vim.api.nvim_get_current_buf()
+		vim.bo[buf].bufhidden = "wipe"
+		vim.cmd("terminal cppman " .. vim.fn.shellescape(opts.args))
+		vim.api.nvim_create_autocmd("TermClose", {
+			buffer = buf,
+			once = true,
+			callback = function()
+				vim.schedule(function()
+					if vim.api.nvim_buf_is_valid(buf) then
+						vim.api.nvim_buf_delete(buf, { force = true })
+					end
+				end)
+			end,
+		})
+		vim.cmd("startinsert")
+		return
+	end
+
 	local cwd = vim.fn.expand("~/docs")
 	if vim.fn.isdirectory(cwd) == 0 then
 		vim.notify("Docs: ~/docs/ doesn't exist. Run `fetch-docs <lang>` first.", vim.log.levels.WARN)
@@ -409,10 +439,13 @@ local function update_queries(opts)
 					end
 					pending = pending - 1
 					if pending == 0 then
-						vim.notify(string.format(
-							"UpdateQueries done: %d updated, %d not fetched (missing upstream or transfer error)",
-							stats.ok, stats.failed
-						))
+						vim.notify(
+							string.format(
+								"UpdateQueries done: %d updated, %d not fetched (missing upstream or transfer error)",
+								stats.ok,
+								stats.failed
+							)
+						)
 					end
 				end)
 			)
@@ -424,11 +457,15 @@ return {
 	autocmds = {
 		{
 			"TextYankPost",
-			function() vim.highlight.on_yank() end,
+			function()
+				vim.highlight.on_yank()
+			end,
 		},
 		{
 			"VimResized",
-			function() vim.cmd("tabdo wincmd =") end,
+			function()
+				vim.cmd("tabdo wincmd =")
+			end,
 		},
 		{
 			"TermClose",
@@ -448,9 +485,12 @@ return {
 				local lcount = vim.api.nvim_buf_line_count(0)
 				local line = mark[1]
 				local ft = vim.bo.filetype
-				if line > 0 and line <= lcount
+				if
+					line > 0
+					and line <= lcount
 					and vim.fn.index({ "commit", "gitrebase", "xxd" }, ft) == -1
-					and not vim.o.diff then
+					and not vim.o.diff
+				then
 					pcall(vim.api.nvim_win_set_cursor, 0, mark)
 				end
 			end,

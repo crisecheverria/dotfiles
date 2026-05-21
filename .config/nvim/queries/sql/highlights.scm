@@ -10,15 +10,10 @@
   (keyword_gin)
   (keyword_brin)
   (keyword_array)
-  (keyword_object_id)
 ] @function.call
 
-((object_reference
-  name: (identifier) @type) @_obj_ref
-  (#not-has-parent? @_obj_ref invocation))
-
-(cte
-  (identifier) @type)
+(object_reference
+  name: (identifier) @type)
 
 (relation
   alias: (identifier) @variable)
@@ -47,7 +42,7 @@
   (#lua-match? @number "^%d+$"))
 
 ((literal) @number.float
-  (#lua-match? @number.float "^[-]?%d*%.%d*$"))
+  (#lua-match? @number.float "^[-]?%d*\.%d*$"))
 
 (parameter) @variable.parameter
 
@@ -120,8 +115,6 @@
   (keyword_primary)
   (keyword_delete)
   (keyword_create)
-  (keyword_show)
-  (keyword_unload)
   (keyword_insert)
   (keyword_merge)
   (keyword_distinct)
@@ -156,7 +149,6 @@
   (keyword_constraint)
   (keyword_force)
   (keyword_use)
-  (keyword_include)
   (keyword_for)
   (keyword_if)
   (keyword_exists)
@@ -268,8 +260,6 @@
   (keyword_start)
   (keyword_restart)
   (keyword_tablespace)
-  (keyword_split)
-  (keyword_tablets)
   (keyword_until)
   (keyword_user)
   (keyword_valid)
@@ -282,7 +272,6 @@
   (keyword_out)
   (keyword_inout)
   (keyword_variadic)
-  (keyword_ordinality)
   (keyword_session)
   (keyword_isolation)
   (keyword_level)
@@ -313,28 +302,7 @@
   (keyword_statement)
   (keyword_execute)
   (keyword_procedure)
-  (keyword_copy)
-  (keyword_delimiter)
-  (keyword_encoding)
-  (keyword_escape)
-  (keyword_force_not_null)
-  (keyword_force_null)
-  (keyword_force_quote)
-  (keyword_freeze)
-  (keyword_header)
-  (keyword_match)
-  (keyword_program)
-  (keyword_quote)
-  (keyword_stdin)
-  (keyword_extended)
-  (keyword_main)
-  (keyword_plain)
-  (keyword_storage)
-  (keyword_compression)
-  (keyword_duplicate)
 ] @keyword
-
-(keyword_while) @keyword.repeat
 
 [
   (keyword_restrict)

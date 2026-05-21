@@ -1,18 +1,12 @@
 -- :Grep command + quickfix window ergonomics.
--- Contributes: keymaps (<leader>g, <leader>G), options (grepprg=ag),
--- usercmds (:Grep), autocmds (auto-open qf, qf buffer keymaps).
+-- Contributes: options (grepprg=ag), usercmds (:Grep),
+-- autocmds (auto-open qf, qf buffer keymaps).
 -- In the qf window: `o` opens+centers+returns, `<Esc>` closes it.
 -- Disable to lose :Grep; use :grep directly with default grepprg.
 
 return {
-	keymaps = {
-		{ { "n" }, "<leader>G", ":Grep<space>", { desc = "Grep prompt" } },
-		{ { "n" }, "<leader>sw", ":Grep<space><cword><cr>", { desc = "Grep word under cursor" } },
-		-- TODO: configure linting using :make or :compiler
-		-- { { "n" }, "<leader>l", ":silent make!<space>" },
-	},
 	options = {
-		grepprg = "ag --vimgrep --ignore '*mock*'",
+		grepprg = "ag --vimgrep --ignore '*mock*' --ignore tags",
 		grepformat = "%f:%l:%c:%m",
 	},
 	autocmds = {

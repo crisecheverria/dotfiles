@@ -5,7 +5,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.autoread = true
 vim.opt.autowrite = true
-vim.opt.mouse = ""
+vim.opt.mouse = "a"
 vim.opt.complete = ".,w,b,u,o"
 vim.opt.completeopt = "fuzzy,noselect,menuone,popup,nearest"
 vim.opt.confirm = true
@@ -133,6 +133,7 @@ for _, config in pairs({
 	"tools/git", -- git signs in signcolumn + :Gstatus/:Gdiff/:Gblame/:Greview/:Gdiffbranch (LARGEST FILE)
 	"tools/tags", -- async ctags regen on save when a project `tags` file exists
 	"tools/dap", -- debug adapter (lldb via Xcode) + dap-ui — no-op if deps missing
+	"tools/lsp", -- native vim.lsp via nvim-lspconfig: lua_ls, gopls, ts_ls, clangd, pyright, rust_analyzer, clojure_lsp
 	"tools/ai", -- :AIChat — streams `claude -p` output into a chat split
 }) do
 	package.loaded[config] = false

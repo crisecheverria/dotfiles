@@ -36,6 +36,11 @@ vim.pack.add({ "https://github.com/ggml-org/llama.vim" })
 -- nvim-dap (used by tools/dap.lua for lldb-based C/C++/ObjC debugging)
 vim.pack.add({ "https://github.com/mfussenegger/nvim-dap" })
 
+-- nvim-lspconfig: ships per-server configs as lsp/<server>.lua files that the
+-- 0.11+ native LSP picks up via vim.lsp.config / vim.lsp.enable. Servers are
+-- enabled in lua/tools/lsp.lua.
+vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
+
 -- fff.nvim for file picker and grep?
 vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
 
@@ -62,11 +67,53 @@ vim.g.fff = {
 
 -- end fff.nvim pluging
 
+-- Add fzf-lua pluging for api discovery
+vim.pack.add({ "https://github.com/ibhagwan/fzf-lua" })
+require("fzf-lua").setup({
+	defaults = {
+		header = false,
+	},
+	winopts = {
+		backdrop = 100,
+		fullscreen = true,
+		preview = { layout = "vertical", vertical = "down:50%" },
+	},
+	hls = { normal = "NormalFloat", border = "FloatBorder" },
+	keymap = {
+		builtin = {
+			["<S-Up>"] = "",
+			["<S-down>"] = "",
+		},
+		fzf = {
+			["ctrl-h"] = "backward-kill-word",
+			["shift-down"] = "half-page-down",
+			["shift-up"] = "half-page-up",
+			["home"] = "first",
+			["end"] = "last",
+			["ctrl-q"] = "select-all+accept",
+		},
+	},
+	actions = {
+		files = {
+			true,
+			["enter"] = nil,
+			["ctrl-s"] = nil,
+			["ctrl-v"] = nil,
+			["ctrl-t"] = nil,
+			["alt-q"] = nil,
+			["alt-Q"] = nil,
+			["alt-h"] = nil,
+			["alt-f"] = nil,
+		},
+	},
+})
+
 -- snacks.nvim: floating terminal (used by claudecode), global picker, and
 -- startup dashboard with a small keys menu.
 vim.pack.add({ "https://github.com/folke/snacks.nvim" })
 require("snacks").setup({
 	picker = { enabled = true },
+	explorer = { enabled = true },
 	notifier = {
 		enabled = true,
 		timeout = 4000,
@@ -125,22 +172,25 @@ require("claudecode").setup({
 	},
 })
 
--- 99: agentic AI workflow, using claudecode CLI as the provider.
-vim.pack.add({ "https://github.com/ThePrimeagen/99" })
-local _99 = require("99")
-_99.setup({
-	provider = _99.Providers.ClaudeCodeProvider,
-	tmp_dir = "./tmp",
-	logger = {
-		level = _99.DEBUG,
-		path = "/tmp/" .. vim.fs.basename(vim.uv.cwd()) .. ".99.debug",
-		print_on_error = true,
-	},
-	md_files = { "CLAUDE.md" },
+-- Another AI plugin tests :D
+vim.pack.add({ "https://github.com/cachebag/jumpy.nvim" })
+require("jumpy").setup({
+	provider = "anthropic", -- or "openai", "openrouter"
 })
 
--- conjure for clojure
+-- conjure for clojure. Restrict to clojure filetypes so it doesn't attach
+-- (and pop its REPL HUD) on JS/TS/Python buffers.
+vim.g["conjure#filetypes"] = { "clojure", "clojurescript", "fennel" }
 vim.pack.add({ "https://github.com/Olical/conjure" })
+
+-- nvim-autopairs: insert/skip pairs, <BS> deletes both halves, <CR> expands
+-- {|} into a multi-line block. Treesitter-aware (no autopair inside strings/
+-- comments where it would be wrong, e.g. apostrophe in "don't").
+vim.pack.add({ "https://github.com/windwp/nvim-autopairs" })
+require("nvim-autopairs").setup({
+	check_ts = true,
+	fast_wrap = {},
+})
 -- be able to run :Lein or Clojure CLI commands inside neovim
 -- added dependency of dispatch.vim
 -- added dependency of vim-dispatch-neovim
@@ -148,10 +198,32 @@ vim.pack.add({ "https://github.com/tpope/vim-dispatch" })
 vim.pack.add({ "https://github.com/radenling/vim-dispatch-neovim" })
 vim.pack.add({ "https://github.com/clojure-vim/vim-jack-in" })
 
--- conform.nvim: formatters per filetype, format on save. Filetypes without
--- a declared formatter are skipped (no LSP fallback — LSP is disabled).
+-- conform.nvim: formatters per filetype, format on save. Filetypes without a
+-- declared formatter are skipped — no LSP fallback (conform's default is to
+-- not call vim.lsp.buf.format() unless told to).
 vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
 require("conform").setup({
+	formatters = {
+		["clang-format"] = { command = "/opt/homebrew/opt/llvm/bin/clang-format" },
+		-- eslint_d errors out (and crashes JSON parsing) when a project has no
+		-- eslint config. Only run it when one is found upward from the file.
+		eslint_d = {
+			condition = function(_, ctx)
+				return vim.fs.find({
+					".eslintrc",
+					".eslintrc.json",
+					".eslintrc.js",
+					".eslintrc.cjs",
+					".eslintrc.yaml",
+					".eslintrc.yml",
+					"eslint.config.js",
+					"eslint.config.mjs",
+					"eslint.config.cjs",
+					"eslint.config.ts",
+				}, { upward = true, path = ctx.dirname })[1] ~= nil
+			end,
+		},
+	},
 	formatters_by_ft = {
 		lua = { "stylua" },
 		go = { "goimports", "gofmt" },
@@ -163,6 +235,8 @@ require("conform").setup({
 		cpp = { "clang-format" },
 		clojure = { "cljfmt" },
 		clojurescript = { "cljfmt" },
+		rust = { "rustfmt" },
+		toml = { "taplo" },
 	},
 	format_on_save = { timeout_ms = 5000 },
 })
@@ -176,9 +250,8 @@ require("lint").linters_by_ft = {
 	javascriptreact = { "oxlint" },
 	typescript = { "oxlint" },
 	typescriptreact = { "oxlint" },
-	cpp = { "clangtidy" },
-	rust = { "clippy" },
-	clojure = { "clj-kondo" },
+	-- cpp/clojure intentionally absent: clangd's --clang-tidy,
+	-- and clojure-lsp's embedded clj-kondo already provide those diagnostics via LSP.
 }
 
 -- Prefer the project-local oxlint binary when present, fall back to PATH.
@@ -189,6 +262,16 @@ if require("lint").linters.oxlint then
 			path = vim.fn.expand("%:p:h"),
 		})[1]
 		return local_bin or "oxlint"
+	end
+end
+
+-- Selene reads stdin, so it can't infer the file's location and falls back to
+-- nvim's cwd when walking up for selene.toml. Anchor it to the buffer's dir
+-- so nvim/selene.toml (and its `vim` std) is found regardless of where nvim
+-- was launched.
+if require("lint").linters.selene then
+	require("lint").linters.selene.cwd = function()
+		return vim.fn.expand("%:p:h")
 	end
 end
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
@@ -233,3 +316,8 @@ do
 		vim.cmd.colorscheme("matugen")
 	end
 end
+
+-- code-preview.nvim to use when using claude code in another terminal tab/tmux
+-- with docker sandbox sbx.
+vim.pack.add({ "https://github.com/Cannon07/code-preview.nvim" })
+require("code-preview").setup()

@@ -1,11 +1,13 @@
--- Global keymaps (all modes) + auto-pairs helpers.
+-- Global keymaps (all modes).
 -- Contributes: keymaps, unbinds.
--- Includes: jj-escape, auto-close brackets/quotes, leader bindings for
--- find/grep/buffer/test/run/lazygit/colorscheme, Claude Code and Llama
--- shortcuts, window navigation (<C-hjkl> and <M-arrows>), line-move (<a-j/k>).
+-- Includes: jj-escape, leader bindings for find/grep/buffer/test/run/
+-- lazygit/colorscheme, Claude Code and Llama shortcuts, window navigation
+-- (<C-hjkl> and <M-arrows>), line-move (<a-j/k>), visual `s` surround.
+-- Bracket/quote autopairs live in nvim-autopairs (lua/plugins.lua).
 -- Disabling this module leaves you with only Neovim defaults.
 
 local utils = require("utils")
+local discovery = require("tools/api-discovery")
 
 local function surround()
 	local ok, left = pcall(vim.fn.getcharstr)
@@ -28,96 +30,11 @@ local function betterdelete(should_void_register)
 	end
 end
 
-local function char_after_cursor()
-	local col = vim.fn.col(".")
-	local line = vim.fn.getline(".")
-	return line:sub(col, col)
-end
-
-local function auto_close(close)
-	return function()
-		if char_after_cursor() == close then
-			return "<Right>"
-		end
-		return close
-	end
-end
-
-local function auto_quote(quote)
-	return function()
-		if char_after_cursor() == quote then
-			return "<Right>"
-		end
-		return quote .. quote .. "<Left>"
-	end
-end
-
-local function auto_cr()
-	if vim.fn.pumvisible() == 1 and vim.fn.complete_info({ "selected" }).selected ~= -1 then
-		return "<C-y>"
-	end
-	local col = vim.fn.col(".")
-	local line = vim.fn.getline(".")
-	local before = line:sub(col - 1, col - 1)
-	local after = line:sub(col, col)
-	if utils.v_pairs[before] == after then
-		return "<CR><Esc>==O"
-	end
-	return "<CR>"
-end
-
-local expr_rk = { expr = true, replace_keycodes = true }
-
 return {
 	keymaps = {
 		-- Insert mode
 		{ { "i" }, "jj", "<esc>", { desc = "Exit insert mode" } },
-		-- Auto-close pairs
-		{ { "i" }, "(", "()<Left>", { desc = "auto close ()" } },
-		{ { "i" }, "[", "[]<Left>", { desc = "auto close []" } },
-		{ { "i" }, "{", "{}<Left>", { desc = "auto close {}" } },
-		{
-			{ "i" },
-			")",
-			auto_close(")"),
-			vim.tbl_extend("force", expr_rk, { desc = "skip over )" }),
-		},
-		{
-			{ "i" },
-			"]",
-			auto_close("]"),
-			vim.tbl_extend("force", expr_rk, { desc = "skip over ]" }),
-		},
-		{
-			{ "i" },
-			"}",
-			auto_close("}"),
-			vim.tbl_extend("force", expr_rk, { desc = "skip over }" }),
-		},
-		{
-			{ "i" },
-			'"',
-			auto_quote('"'),
-			vim.tbl_extend("force", expr_rk, { desc = 'auto close "' }),
-		},
-		{
-			{ "i" },
-			"'",
-			auto_quote("'"),
-			vim.tbl_extend("force", expr_rk, { desc = "auto close '" }),
-		},
-		{
-			{ "i" },
-			"`",
-			auto_quote("`"),
-			vim.tbl_extend("force", expr_rk, { desc = "auto close `" }),
-		},
-		{
-			{ "i" },
-			"<CR>",
-			auto_cr,
-			vim.tbl_extend("force", expr_rk, { desc = "expand pair on enter" }),
-		},
+		-- Bracket/quote autopairs and <CR>-expansion handled by nvim-autopairs.
 		-- normal mode
 		{
 			{ "n" },
@@ -182,6 +99,14 @@ return {
 			{ desc = "build & run current file" },
 		},
 		{ { "n" }, "-", "<cmd>Oil<cr>", { desc = "open parent directory (canola)" } },
+		{
+			{ "n" },
+			"<leader>e",
+			function()
+				Snacks.explorer()
+			end,
+			{ desc = "Toggle file explorer" },
+		},
 		-- LSP-free navigation: tags (`gd`) and grep-as-references (`gr`).
 		-- `gd` -> g<C-]> uses :tjump so multiple matches show a chooser.
 		-- Generate tags with `ctags -R .` at the project root.
@@ -228,6 +153,12 @@ return {
 				print("file:", path)
 			end,
 			{ desc = "Copy file path to clipboard" },
+		},
+		{
+			{ "n" },
+			"<leader>s",
+			discovery.module_api_search,
+			{ noremap = true, silent = true, desc = "API Discovery" },
 		},
 		-- visual mode
 		{
@@ -279,47 +210,15 @@ return {
 		{ { "v" }, "<leader>as", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" } },
 		{ { "n" }, "<leader>ay", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept Claude diff" } },
 		{ { "n" }, "<leader>an", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny Claude diff" } },
-		-- 99
-		{
-			{ "v" },
-			"<leader>aa",
-			function()
-				require("99").visual()
-			end,
-			{ desc = "99 visual (replace selection)" },
-		},
-		{
-			{ "n" },
-			"<leader>9s",
-			function()
-				require("99").search()
-			end,
-			{ desc = "99 search (results in qfix)" },
-		},
-		{
-			{ "n" },
-			"<leader>9x",
-			function()
-				require("99").stop_all_requests()
-			end,
-			{ desc = "99 stop all requests" },
-		},
-		{
-			{ "n" },
-			"<leader>9o",
-			function()
-				require("99").open()
-			end,
-			{ desc = "99 open last interaction" },
-		},
-		{
-			{ "n" },
-			"<leader>9l",
-			function()
-				require("99").view_logs()
-			end,
-			{ desc = "99 view request logs" },
-		},
+		-- jumpy.nvim
+		{ { "n" }, "<leader>jj", function() require("jumpy.prompt").open() end, { desc = "Jumpy: open prompt" } },
+		{ { "n" }, "]J", function() require("jumpy.navigate").next_hunk() end, { desc = "Jumpy: next hunk" } },
+		{ { "n" }, "[J", function() require("jumpy.navigate").prev_hunk() end, { desc = "Jumpy: prev hunk" } },
+		{ { "n" }, "<leader>ja", function() require("jumpy.navigate").accept() end, { desc = "Jumpy: accept hunk" } },
+		{ { "n" }, "<leader>jx", function() require("jumpy.navigate").reject() end, { desc = "Jumpy: reject hunk" } },
+		{ { "n" }, "<leader>jA", function() require("jumpy.navigate").accept_all() end, { desc = "Jumpy: accept all" } },
+		{ { "n" }, "<leader>jX", function() require("jumpy.navigate").reject_all() end, { desc = "Jumpy: reject all" } },
+		{ { "n" }, "<leader>jr", function() require("jumpy.prompt").reprompt() end, { desc = "Jumpy: reprompt hunk" } },
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },

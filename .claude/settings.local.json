@@ -13,5 +13,32 @@
       "Bash(nvim:*)"
     ],
     "deny": []
-  }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/criech/dotfiles/.vim/plugged/vim-claude-code/bin/vim-close-diff.py"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/criech/dotfiles/.vim/plugged/vim-claude-code/bin/vim-preview-diff.py"
+          }
+        ]
+      }
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "spyc"
+  ]
 }
