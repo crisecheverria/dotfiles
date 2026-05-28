@@ -1,24 +1,8 @@
 {
   "plugins": {
-    "99": {
-      "rev": "0172d3caae2d8b967c9d47aa7557295f1481e5df",
-      "src": "https://github.com/ThePrimeagen/99"
-    },
     "canola.nvim": {
       "rev": "b904468fc8d4f79fe4b4dbbdcccb0e4f44e64857",
       "src": "https://github.com/barrettruth/canola.nvim"
-    },
-    "claudecode.nvim": {
-      "rev": "432121f0f5b9bda041030d1e9e83b7ba3a93dd8f",
-      "src": "https://github.com/coder/claudecode.nvim"
-    },
-    "code-preview.nvim": {
-      "rev": "54ed050ba7409764f2c803838a9cdd129396bed9",
-      "src": "https://github.com/Cannon07/code-preview.nvim"
-    },
-    "colorful-times-nvim": {
-      "rev": "41907af16389cb5ec7970760f25f7b2e631f2856",
-      "src": "https://github.com/luxus/colorful-times-nvim"
     },
     "conform.nvim": {
       "rev": "086a40dc7ed8242c03be9f47fbcee68699cc2395",
@@ -27,14 +11,6 @@
     "conjure": {
       "rev": "f66b3e7f45d325bd556cd785502761e583971920",
       "src": "https://github.com/Olical/conjure"
-    },
-    "dressing.nvim": {
-      "rev": "2d7c2db2507fa3c4956142ee607431ddb2828639",
-      "src": "https://github.com/stevearc/dressing.nvim"
-    },
-    "emoji.nvim": {
-      "rev": "34ccd330be21d0ba5050f9c4ced3fbc80d137347",
-      "src": "https://github.com/Allaman/emoji.nvim"
     },
     "fff.nvim": {
       "rev": "7de55be63d725d94944e5e89206284a67b8baa08",
@@ -56,18 +32,6 @@
       "rev": "cfb472aa94e08e982e0ae395bbf01f2cc8a3c6b7",
       "src": "https://github.com/ggml-org/llama.vim"
     },
-    "matugen.nvim": {
-      "rev": "835a2f4c7b32e5e0fa57f3595a04a638ff74d8bc",
-      "src": "https://github.com/daedlock/matugen.nvim"
-    },
-    "md-render.nvim": {
-      "rev": "75d976d89edc4b9457447ba83201ec5805600f79",
-      "src": "https://github.com/delphinus/md-render.nvim"
-    },
-    "nui.nvim": {
-      "rev": "de740991c12411b663994b2860f1a4fd0937c130",
-      "src": "https://github.com/MunifTanjim/nui.nvim"
-    },
     "nvim-autopairs": {
       "rev": "7b9923abad60b903ece7c52940e1321d39eccc79",
       "src": "https://github.com/windwp/nvim-autopairs"
@@ -75,10 +39,6 @@
     "nvim-dap": {
       "rev": "45a69eba683a2c448dd9ecfc4de89511f0646b5f",
       "src": "https://github.com/mfussenegger/nvim-dap"
-    },
-    "nvim-java": {
-      "rev": "602a5f7fa92f9c1d425a2159133ff9de86842f0a",
-      "src": "https://github.com/nvim-java/nvim-java"
     },
     "nvim-jump": {
       "rev": "79c91e5860b856c66187107d8d3c8d0950261f2c",
@@ -92,10 +52,6 @@
       "rev": "75e49cfa588a89ca667d767c0afef3ceac205faa",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
-    "plenary.nvim": {
-      "rev": "b9fd5226c2f76c951fc8ed5923d85e4de065e509",
-      "src": "https://github.com/nvim-lua/plenary.nvim"
-    },
     "present.nvim": {
       "rev": "f3568b604b3b1c91b736acac838bb3f6a68f4144",
       "src": "https://github.com/crisecheverria/present.nvim"
@@ -108,16 +64,12 @@
       "rev": "ad9ede6a9cddf16cedbd31b8932d6dcdee9b716e",
       "src": "https://github.com/folke/snacks.nvim"
     },
-    "spring-boot.nvim": {
-      "rev": "98c6ff1dcdda943d341bba3c00ae9d190a2e5f7d",
-      "src": "https://github.com/JavaHello/spring-boot.nvim"
-    },
     "vim-dispatch": {
       "rev": "a2ff28abdb2d89725192db5b8562977d392a4d3f",
       "src": "https://github.com/tpope/vim-dispatch"
     },
     "vim-dispatch-neovim": {
-      "rev": "c8c4e21a95c25032a041002f9bf6e45a75a73021",
+      "rev": "c8c4e21a95c25032a41002f9bf6e45a75a73021",
       "src": "https://github.com/radenling/vim-dispatch-neovim"
     },
     "vim-jack-in": {
