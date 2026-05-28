@@ -17,6 +17,7 @@ local parsers = {
 	{ lang = "c", filetypes = { "c", "h" } },
 	{ lang = "cpp", filetypes = { "cpp", "hpp" } },
 	"java",
+	"lua",
 }
 
 for _, parser in pairs(parsers) do
