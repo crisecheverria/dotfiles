@@ -40,7 +40,7 @@ vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
-vim.opt.scrolloffpad = 1
+if vim.fn.has("nvim-0.13") == 1 then vim.opt.scrolloffpad = 1 end
 
 vim.g.mapleader = ";"
 vim.g.maplocalleader = ","
