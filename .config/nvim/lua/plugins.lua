@@ -41,6 +41,10 @@ vim.pack.add({ "https://github.com/mfussenegger/nvim-dap" })
 -- enabled in lua/tools/lsp.lua.
 vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
 
+-- ziglang/zig.vim: Zig syntax highlighting, filetype detection, and integrations.
+vim.g.zig_fmt_autosave = 0 -- disable format-on-save from zig.vim, conform handles it
+vim.pack.add({ "https://codeberg.org/ziglang/zig.vim" })
+
 -- fff.nvim for file picker and grep?
 vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
 
@@ -112,7 +116,12 @@ require("fzf-lua").setup({
 -- startup dashboard with a small keys menu.
 vim.pack.add({ "https://github.com/folke/snacks.nvim" })
 require("snacks").setup({
-	picker = { enabled = true },
+	picker = {
+		enabled = true,
+		sources = {
+			explorer = { hidden = true }, -- show dotfiles in the tree
+		},
+	},
 	explorer = { enabled = true },
 	notifier = {
 		enabled = true,
@@ -154,20 +163,6 @@ require("snacks").setup({
 		sections = {
 			{ section = "header" },
 			{ section = "keys", gap = 1, padding = 1 },
-		},
-	},
-})
-
--- claudecode.nvim
-vim.pack.add({ "https://github.com/coder/claudecode.nvim" })
-require("claudecode").setup({
-	terminal = {
-		provider = "snacks",
-		snacks_win_opts = {
-			position = "right",
-			width = 0.4,
-			height = 0.95,
-			border = "rounded",
 		},
 	},
 })
@@ -237,6 +232,7 @@ require("conform").setup({
 		clojurescript = { "cljfmt" },
 		rust = { "rustfmt" },
 		toml = { "taplo" },
+		zig = { "zigfmt" },
 	},
 	format_on_save = { timeout_ms = 5000 },
 })
@@ -316,8 +312,3 @@ do
 		vim.cmd.colorscheme("matugen")
 	end
 end
-
--- code-preview.nvim to use when using claude code in another terminal tab/tmux
--- with docker sandbox sbx.
-vim.pack.add({ "https://github.com/Cannon07/code-preview.nvim" })
-require("code-preview").setup()

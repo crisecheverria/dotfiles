@@ -11,6 +11,7 @@ local servers = {
 	"pyright",
 	"rust_analyzer",
 	"clojure_lsp",
+	"zls",
 }
 
 -- Teach lua_ls about Neovim's runtime when there's no project-local .luarc.json.

@@ -200,25 +200,71 @@ return {
 		{ { "n" }, "<leader>lt", "<cmd>LlamaToggle<cr>", { desc = "Llama toggle on/off" } },
 		{ { "n" }, "<leader>lf", "<cmd>LlamaToggleAutoFim<cr>", { desc = "Llama toggle auto-FIM" } },
 		{ { "n" }, "<leader>ld", "<cmd>LlamaDebugToggle<cr>", { desc = "Llama toggle debug" } },
-		-- claudecode.nvim
-		{ { "n", "i", "t" }, "<C-;>", "<cmd>ClaudeCode<cr>", { desc = "Toggle Claude" } },
-		{ { "n" }, "<leader>af", "<cmd>ClaudeCodeFocus<cr>", { desc = "Focus Claude" } },
-		{ { "n" }, "<leader>ar", "<cmd>ClaudeCode --resume<cr>", { desc = "Resume Claude" } },
-		{ { "n" }, "<leader>aC", "<cmd>ClaudeCode --continue<cr>", { desc = "Continue Claude" } },
-		{ { "n" }, "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", { desc = "Select Claude model" } },
-		{ { "n" }, "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", { desc = "Add current buffer to Claude" } },
-		{ { "v" }, "<leader>as", "<cmd>ClaudeCodeSend<cr>", { desc = "Send selection to Claude" } },
-		{ { "n" }, "<leader>ay", "<cmd>ClaudeCodeDiffAccept<cr>", { desc = "Accept Claude diff" } },
-		{ { "n" }, "<leader>an", "<cmd>ClaudeCodeDiffDeny<cr>", { desc = "Deny Claude diff" } },
 		-- jumpy.nvim
-		{ { "n" }, "<leader>jj", function() require("jumpy.prompt").open() end, { desc = "Jumpy: open prompt" } },
-		{ { "n" }, "]J", function() require("jumpy.navigate").next_hunk() end, { desc = "Jumpy: next hunk" } },
-		{ { "n" }, "[J", function() require("jumpy.navigate").prev_hunk() end, { desc = "Jumpy: prev hunk" } },
-		{ { "n" }, "<leader>ja", function() require("jumpy.navigate").accept() end, { desc = "Jumpy: accept hunk" } },
-		{ { "n" }, "<leader>jx", function() require("jumpy.navigate").reject() end, { desc = "Jumpy: reject hunk" } },
-		{ { "n" }, "<leader>jA", function() require("jumpy.navigate").accept_all() end, { desc = "Jumpy: accept all" } },
-		{ { "n" }, "<leader>jX", function() require("jumpy.navigate").reject_all() end, { desc = "Jumpy: reject all" } },
-		{ { "n" }, "<leader>jr", function() require("jumpy.prompt").reprompt() end, { desc = "Jumpy: reprompt hunk" } },
+		{
+			{ "n" },
+			"<leader>jj",
+			function()
+				require("jumpy.prompt").open()
+			end,
+			{ desc = "Jumpy: open prompt" },
+		},
+		{
+			{ "n" },
+			"]J",
+			function()
+				require("jumpy.navigate").next_hunk()
+			end,
+			{ desc = "Jumpy: next hunk" },
+		},
+		{
+			{ "n" },
+			"[J",
+			function()
+				require("jumpy.navigate").prev_hunk()
+			end,
+			{ desc = "Jumpy: prev hunk" },
+		},
+		{
+			{ "n" },
+			"<leader>ja",
+			function()
+				require("jumpy.navigate").accept()
+			end,
+			{ desc = "Jumpy: accept hunk" },
+		},
+		{
+			{ "n" },
+			"<leader>jx",
+			function()
+				require("jumpy.navigate").reject()
+			end,
+			{ desc = "Jumpy: reject hunk" },
+		},
+		{
+			{ "n" },
+			"<leader>jA",
+			function()
+				require("jumpy.navigate").accept_all()
+			end,
+			{ desc = "Jumpy: accept all" },
+		},
+		{
+			{ "n" },
+			"<leader>jX",
+			function()
+				require("jumpy.navigate").reject_all()
+			end,
+			{ desc = "Jumpy: reject all" },
+		},
+		{
+			{ "n" },
+			"<leader>jr",
+			function()
+				require("jumpy.prompt").reprompt()
+			end,
+			{ desc = "Jumpy: reprompt hunk" },
+		},
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },
