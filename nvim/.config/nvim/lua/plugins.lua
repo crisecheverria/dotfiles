@@ -199,7 +199,11 @@ vim.pack.add({ "https://github.com/clojure-vim/vim-jack-in" })
 vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
 require("conform").setup({
 	formatters = {
-		["clang-format"] = { command = "/opt/homebrew/opt/llvm/bin/clang-format" },
+		["clang-format"] = {
+			command = vim.fn.executable("/opt/homebrew/opt/llvm/bin/clang-format") == 1
+				and "/opt/homebrew/opt/llvm/bin/clang-format"
+				or "clang-format",
+		},
 		-- eslint_d errors out (and crashes JSON parsing) when a project has no
 		-- eslint config. Only run it when one is found upward from the file.
 		eslint_d = {
