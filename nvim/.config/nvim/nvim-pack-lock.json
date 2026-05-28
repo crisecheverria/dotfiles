@@ -123,6 +123,10 @@
     "vim-jack-in": {
       "rev": "45e5293cff0802a51dbed31a9b0141b0f80e2952",
       "src": "https://github.com/clojure-vim/vim-jack-in"
+    },
+    "zig.vim": {
+      "rev": "29f7a9b8a4e33f936b803de0b713683ad687a6c3",
+      "src": "https://codeberg.org/ziglang/zig.vim"
     }
   }
 }
