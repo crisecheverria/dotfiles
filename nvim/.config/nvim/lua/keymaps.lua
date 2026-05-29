@@ -73,7 +73,7 @@ return {
 			{ "n" },
 			"<leader>f",
 			function()
-				require("fff").find_files()
+				require("fzf-lua").files()
 			end,
 			{ desc = "Find files" },
 		},
@@ -81,9 +81,9 @@ return {
 			{ "n" },
 			"<leader>g",
 			function()
-				require("fff").live_grep()
+				require("fzf-lua").live_grep()
 			end,
-			{ desc = "Live grep (fff)" },
+			{ desc = "Live grep" },
 		},
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
 		{

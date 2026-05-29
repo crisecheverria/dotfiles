@@ -1,7 +1,7 @@
 -- Third-party plugin installation (vim.pack.add) + per-plugin setup().
 -- Contributes: nothing through the module contract — everything runs as
 -- side effects at require-time. This file owns: jump, llama.vim, nvim-dap,
--- fff.nvim, snacks.nvim, claudecode.nvim, conjure + dispatch (clojure),
+-- snacks.nvim, claudecode.nvim, conjure + dispatch (clojure),
 -- conform.nvim, render-markdown.nvim, and `present.nvim` (self-authored).
 -- Disable: comment out individual `vim.pack.add(...)` blocks below.
 
@@ -45,33 +45,7 @@ vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
 vim.g.zig_fmt_autosave = 0 -- disable format-on-save from zig.vim, conform handles it
 vim.pack.add({ "https://codeberg.org/ziglang/zig.vim" })
 
--- fff.nvim for file picker and grep?
-vim.pack.add({ "https://github.com/dmtrKovalenko/fff.nvim" })
-
-vim.api.nvim_create_autocmd("PackChanged", {
-	callback = function(ev)
-		local name, kind = ev.data.spec.name, ev.data.kind
-		if name == "fff.nvim" and (kind == "install" or kind == "update") then
-			if not ev.data.active then
-				vim.cmd.packadd("fff.nvim")
-			end
-			require("fff.download").download_or_build_binary()
-		end
-	end,
-})
-
--- the plugin will automatically lazy load
-vim.g.fff = {
-	lazy_sync = true, -- start syncing only when the picker is open
-	debug = {
-		enabled = true,
-		show_scores = true,
-	},
-}
-
--- end fff.nvim pluging
-
--- Add fzf-lua pluging for api discovery
+-- fzf-lua: file picker, live grep, and api discovery
 vim.pack.add({ "https://github.com/ibhagwan/fzf-lua" })
 require("fzf-lua").setup({
 	defaults = {
@@ -138,7 +112,7 @@ require("snacks").setup({
 					key = "f",
 					desc = "Find file",
 					action = function()
-						require("fff").find_files()
+						require("fzf-lua").files()
 					end,
 				},
 				{
@@ -146,7 +120,7 @@ require("snacks").setup({
 					key = "g",
 					desc = "Live grep",
 					action = function()
-						require("fff").live_grep()
+						require("fzf-lua").live_grep()
 					end,
 				},
 				{ icon = " ", key = "r", desc = "Recent files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
