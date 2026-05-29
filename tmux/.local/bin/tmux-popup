@@ -1,0 +1,17 @@
+#!/bin/bash
+# tmux-popup <prefix> <cmd> <session-name> <cwd>
+# Toggle a persistent per-cwd tmux popup session.
+# Press the bound key to open; press again from inside to dismiss.
+PREFIX="$1"
+CMD="$2"
+SESSION_NAME="$3"
+CWD="$4"
+
+if [[ "$SESSION_NAME" == ${PREFIX}-* ]]; then
+    tmux detach-client
+else
+    SESSION="${PREFIX}-$(echo "$CWD" | md5sum | cut -c1-8)"
+    tmux has-session -t "$SESSION" 2>/dev/null || \
+        tmux new-session -d -s "$SESSION" -c "$CWD" bash -lc "$CMD"
+    tmux display-popup -w80% -h80% -E "tmux attach-session -t $SESSION"
+fi
