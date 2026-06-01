@@ -229,6 +229,7 @@ require("lint").linters_by_ft = {
 }
 
 -- Prefer the project-local oxlint binary when present, fall back to PATH.
+-- Only run if the binary is actually available to avoid errors in projects not using oxlint.
 if require("lint").linters.oxlint then
 	require("lint").linters.oxlint.cmd = function()
 		local local_bin = vim.fs.find("node_modules/.bin/oxlint", {
@@ -236,6 +237,13 @@ if require("lint").linters.oxlint then
 			path = vim.fn.expand("%:p:h"),
 		})[1]
 		return local_bin or "oxlint"
+	end
+	require("lint").linters.oxlint.condition = function()
+		local local_bin = vim.fs.find("node_modules/.bin/oxlint", {
+			upward = true,
+			path = vim.fn.expand("%:p:h"),
+		})[1]
+		return local_bin ~= nil or vim.fn.executable("oxlint") == 1
 	end
 end
 
