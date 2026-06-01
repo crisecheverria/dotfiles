@@ -175,7 +175,7 @@ require("conform").setup({
 	formatters = {
 		["clang-format"] = {
 			command = vim.fn.executable("/opt/homebrew/opt/llvm/bin/clang-format") == 1
-				and "/opt/homebrew/opt/llvm/bin/clang-format"
+					and "/opt/homebrew/opt/llvm/bin/clang-format"
 				or "clang-format",
 		},
 		-- eslint_d errors out (and crashes JSON parsing) when a project has no
@@ -262,13 +262,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
 	end,
 })
 
--- Markdown files viewer
--- render-markdown.nvim: in-buffer markdown rendering (headings, code fences,
--- bold/italic conceal, etc). Used by the AI chat buffer in lua/tools/ai.lua,
--- which sets conceallevel=2 window-locally so the renderer can hide markup.
-vim.pack.add({ "https://github.com/MeanderingProgrammer/render-markdown.nvim" })
-require("render-markdown").setup({})
-
 -- canola.nvim: file manager (drop-in oil.nvim fork; module is `oil`)
 vim.pack.add({ "https://github.com/barrettruth/canola.nvim" })
 require("oil").setup({
@@ -283,24 +276,23 @@ require("lazydiff").setup()
 -- ~/.config/omarchy/hooks/theme-set hook works with this config.
 -- Omarchy is Linux-only, so skip on macOS.
 if vim.uv.os_uname().sysname == "Linux" then
-	vim.pack.add({ "https://github.com/catppuccin/nvim" })          -- catppuccin, catppuccin-latte
-	vim.pack.add({ "https://github.com/bjarneo/ethereal.nvim" })    -- ethereal
-	vim.pack.add({ "https://github.com/neanias/everforest-nvim" })  -- everforest
-	vim.pack.add({ "https://github.com/kepano/flexoki-neovim" })    -- flexoki-light
+	vim.pack.add({ "https://github.com/catppuccin/nvim" }) -- catppuccin, catppuccin-latte
+	vim.pack.add({ "https://github.com/bjarneo/ethereal.nvim" }) -- ethereal
+	vim.pack.add({ "https://github.com/neanias/everforest-nvim" }) -- everforest
+	vim.pack.add({ "https://github.com/kepano/flexoki-neovim" }) -- flexoki-light
 	vim.pack.add({ "https://github.com/ellisonleao/gruvbox.nvim" }) -- gruvbox
-	vim.pack.add({ "https://github.com/bjarneo/aether.nvim" })      -- hackerman dependency
-	vim.pack.add({ "https://github.com/bjarneo/hackerman.nvim" })   -- hackerman
-	vim.pack.add({ "https://github.com/rebelot/kanagawa.nvim" })    -- kanagawa
-	vim.pack.add({ "https://github.com/omacom-io/lumon.nvim" })     -- lumon
-	vim.pack.add({ "https://github.com/tahayvr/matteblack.nvim" })  -- matte-black
-	vim.pack.add({ "https://github.com/OldJobobo/miasma.nvim" })    -- miasma
-	vim.pack.add({ "https://github.com/EdenEast/nightfox.nvim" })   -- nord (nordfox colorscheme)
-	vim.pack.add({ "https://github.com/ribru17/bamboo.nvim" })      -- osaka-jade (bamboo colorscheme)
-	vim.pack.add({ "https://github.com/OldJobobo/retro-82.nvim" })  -- retro-82
+	vim.pack.add({ "https://github.com/bjarneo/aether.nvim" }) -- hackerman dependency
+	vim.pack.add({ "https://github.com/bjarneo/hackerman.nvim" }) -- hackerman
+	vim.pack.add({ "https://github.com/rebelot/kanagawa.nvim" }) -- kanagawa
+	vim.pack.add({ "https://github.com/omacom-io/lumon.nvim" }) -- lumon
+	vim.pack.add({ "https://github.com/tahayvr/matteblack.nvim" }) -- matte-black
+	vim.pack.add({ "https://github.com/OldJobobo/miasma.nvim" }) -- miasma
+	vim.pack.add({ "https://github.com/EdenEast/nightfox.nvim" }) -- nord (nordfox colorscheme)
+	vim.pack.add({ "https://github.com/ribru17/bamboo.nvim" }) -- osaka-jade (bamboo colorscheme)
+	vim.pack.add({ "https://github.com/OldJobobo/retro-82.nvim" }) -- retro-82
 	vim.pack.add({ "https://github.com/gthelding/monokai-pro.nvim" }) -- ristretto (monokai-pro)
-	vim.pack.add({ "https://github.com/rose-pine/neovim" })         -- rose-pine (rose-pine-dawn colorscheme)
-	vim.pack.add({ "https://github.com/folke/tokyonight.nvim" })    -- tokyo-night (tokyonight-night colorscheme)
-	vim.pack.add({ "https://github.com/bjarneo/vantablack.nvim" })  -- vantablack
-	vim.pack.add({ "https://github.com/bjarneo/white.nvim" })       -- white
+	vim.pack.add({ "https://github.com/rose-pine/neovim" }) -- rose-pine (rose-pine-dawn colorscheme)
+	vim.pack.add({ "https://github.com/folke/tokyonight.nvim" }) -- tokyo-night (tokyonight-night colorscheme)
+	vim.pack.add({ "https://github.com/bjarneo/vantablack.nvim" }) -- vantablack
+	vim.pack.add({ "https://github.com/bjarneo/white.nvim" }) -- white
 end
-

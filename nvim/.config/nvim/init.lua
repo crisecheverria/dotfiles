@@ -96,34 +96,44 @@ if f then
 end
 pcall(vim.cmd.colorscheme, saved ~= "" and saved or "darkblue")
 
--- Watch for omarchy theme changes while Neovim is running.
--- The ~/.config/omarchy/hooks/theme-set hook writes the new colorscheme name
--- to this file; fs_poll detects the change within ~500ms regardless of
--- inotify quirks. FocusGained also catches it when switching back to Neovim.
-local function _apply_omarchy_colorscheme()
-	local fh = io.open(colorscheme_file, "r")
-	local cs = fh and vim.trim(fh:read("*l") or "")
-	if fh then fh:close() end
-	if cs and cs ~= "" and cs ~= vim.g.colors_name then
-		local ok, err = pcall(vim.cmd.colorscheme, cs)
-		if not ok then
-			vim.notify("omarchy theme: colorscheme '" .. cs .. "' failed: " .. tostring(err), vim.log.levels.WARN)
+-- Omarchy theme sync: Linux-only (omarchy doesn't exist on macOS).
+if vim.uv.os_uname().sysname == "Linux" then
+	-- The ~/.config/omarchy/hooks/theme-set hook writes the new colorscheme name
+	-- to this file; fs_poll detects the change within ~500ms regardless of
+	-- inotify quirks. FocusGained and VimEnter also catch it.
+	local function _apply_omarchy_colorscheme()
+		local fh = io.open(colorscheme_file, "r")
+		local cs = fh and vim.trim(fh:read("*l") or "")
+		if fh then fh:close() end
+		if cs and cs ~= "" and cs ~= vim.g.colors_name then
+			local ok, err = pcall(vim.cmd.colorscheme, cs)
+			if not ok then
+				vim.notify("omarchy theme: colorscheme '" .. cs .. "' failed: " .. tostring(err), vim.log.levels.WARN)
+			end
 		end
 	end
-end
 
-local _cs_poll = vim.uv.new_fs_poll()
-if _cs_poll then
-	_cs_poll:start(colorscheme_file, 500, function(err)
-		if not err then
-			vim.schedule(_apply_omarchy_colorscheme)
-		end
-	end)
-end
+	local _cs_poll = vim.uv.new_fs_poll()
+	if _cs_poll then
+		_cs_poll:start(colorscheme_file, 500, function(err)
+			if not err then
+				vim.schedule(_apply_omarchy_colorscheme)
+			end
+		end)
+	end
 
-vim.api.nvim_create_autocmd("FocusGained", {
-	callback = _apply_omarchy_colorscheme,
-})
+	vim.api.nvim_create_autocmd("FocusGained", {
+		callback = _apply_omarchy_colorscheme,
+	})
+
+	-- Re-apply after all plugins are loaded. The early pcall above runs before
+	-- vim.pack.add in plugins.lua, so the colorscheme plugin isn't on the
+	-- runtimepath yet. VimEnter fires after startup completes and fixes that.
+	vim.api.nvim_create_autocmd("VimEnter", {
+		once = true,
+		callback = _apply_omarchy_colorscheme,
+	})
+end
 
 local utils = require("utils")
 
