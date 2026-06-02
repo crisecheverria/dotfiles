@@ -30,6 +30,15 @@ vim.opt.smartindent = true
 vim.opt.wrap = true
 vim.opt.virtualedit = "block"
 vim.opt.clipboard = "unnamedplus"
+-- OSC52: tunnel clipboard through terminal escape codes instead of wl-copy/pbcopy.
+-- Works inside tmux (allow-passthrough is on) and across SSH without needing
+-- WAYLAND_DISPLAY or DISPLAY in the environment.
+local _osc52 = require("vim.ui.clipboard.osc52")
+vim.g.clipboard = {
+	name = "OSC 52",
+	copy = { ["+"] = _osc52.copy("+"), ["*"] = _osc52.copy("*") },
+	paste = { ["+"] = _osc52.paste("+"), ["*"] = _osc52.paste("*") },
+}
 vim.opt.textwidth = 80
 vim.opt.formatoptions = "crl1"
 vim.opt.pumheight = 20
