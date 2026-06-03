@@ -81,9 +81,21 @@ return {
 			{ "n" },
 			"<leader>g",
 			function()
-				require("fzf-lua").live_grep()
+				require("fzf-lua").live_grep({ prompt = "Grep> " })
 			end,
 			{ desc = "Live grep" },
+		},
+		{
+			{ "n" },
+			"<leader>G",
+			function()
+				require("fzf-lua").live_grep({
+					prompt = "Grep (all)> ",
+					no_ignore = true,
+					follow = true,
+				})
+			end,
+			{ desc = "Live grep (include node_modules)" },
 		},
 		{ { "n" }, "<leader>cs", "<cmd>ColorPicker<cr>", { desc = "colorscheme picker" } },
 		{

@@ -6,7 +6,7 @@
 
 return {
 	options = {
-		grepprg = "ag --vimgrep --ignore '*mock*' --ignore tags",
+		grepprg = "rg --vimgrep --smart-case --glob '!*mock*' --glob '!tags'",
 		grepformat = "%f:%l:%c:%m",
 	},
 	autocmds = {
