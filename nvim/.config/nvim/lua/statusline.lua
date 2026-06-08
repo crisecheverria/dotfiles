@@ -73,13 +73,23 @@ local function diagnostics()
 	return " " .. table.concat(parts, " ") .. "%* |"
 end
 
+local function short_path()
+	local buf = vim.api.nvim_buf_get_name(0)
+	if buf == "" then return "[No Name]" end
+	local parent = vim.fn.fnamemodify(buf, ":p:h:t")
+	local fname = vim.fn.fnamemodify(buf, ":t")
+	if parent == "" or parent == "." then return fname end
+	return parent .. "/" .. fname
+end
+
 _G.statusline = function()
 	local mode = mode_names[vim.fn.mode()] or vim.fn.mode()
 	return " "
 		.. mode
 		.. " |"
 		.. git_branch()
-		.. " %t"
+		.. " "
+		.. short_path()
 		.. diagnostics()
 		.. " %= %S %= %Y"
 		.. " %02l/%02L "
