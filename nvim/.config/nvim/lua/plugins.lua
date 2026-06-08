@@ -45,6 +45,9 @@ vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
 vim.g.zig_fmt_autosave = 0 -- disable format-on-save from zig.vim, conform handles it
 vim.pack.add({ "https://codeberg.org/ziglang/zig.vim" })
 
+-- nvim-treesitter: parser installer only (highlighting handled by treesitter.lua)
+vim.pack.add({ "https://github.com/nvim-treesitter/nvim-treesitter" })
+
 -- fzf-lua: file picker, live grep, and api discovery
 vim.pack.add({ "https://github.com/ibhagwan/fzf-lua" })
 require("fzf-lua").setup({
