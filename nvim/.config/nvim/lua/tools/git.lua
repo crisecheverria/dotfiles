@@ -904,9 +904,18 @@ return {
 						end
 						local abs = root .. "/" .. state.files[state.index]
 						local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-						close_review()
-						vim.cmd("edit " .. vim.fn.fnameescape(abs))
+						local review_tab = tab
+						vim.cmd("tabedit " .. vim.fn.fnameescape(abs))
 						pcall(vim.api.nvim_win_set_cursor, 0, { cursor_line, 0 })
+						local buf = vim.api.nvim_get_current_buf()
+						vim.keymap.set("n", "<C-o>", function()
+							if vim.api.nvim_tabpage_is_valid(review_tab) then
+								vim.api.nvim_set_current_tabpage(review_tab)
+							else
+								vim.keymap.del("n", "<C-o>", { buffer = buf })
+								vim.cmd("normal! \x0f")
+							end
+						end, { buffer = buf, silent = true })
 					end, opts)
 				end
 
