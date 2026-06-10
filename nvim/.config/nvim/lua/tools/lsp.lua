@@ -76,6 +76,7 @@ return {
 			"LspAttach",
 			function(args)
 				local bufnr = args.buf
+				vim.lsp.completion.enable(true, args.data.client_id, bufnr, { autotrigger = true })
 				local map = function(lhs, rhs, desc)
 					vim.keymap.set("n", lhs, rhs, { buffer = bufnr, desc = desc })
 				end

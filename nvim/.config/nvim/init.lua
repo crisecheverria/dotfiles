@@ -60,6 +60,7 @@ vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.writebackup = false
+vim.opt.diffopt:append("inline:word") -- 0.12: merge adjacent inline diff blocks
 if vim.fn.has("nvim-0.13") == 1 then vim.opt.scrolloffpad = 1 end
 
 vim.g.mapleader = ";"
@@ -106,6 +107,8 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 
 -- Load Cfilter optional package
 vim.cmd.packadd("cfilter")
+vim.cmd.packadd("nvim.undotree")
+vim.cmd.packadd("nvim.difftool")
 
 -- Load persisted colorscheme or fall back to darkblue
 local colorscheme_file = vim.fn.stdpath("data") .. "/colorscheme"

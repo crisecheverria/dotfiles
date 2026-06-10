@@ -69,6 +69,8 @@ return {
 			{ desc = "Diagnostics → quickfix" },
 		},
 		{ { "n" }, "<leader>gg", "<cmd>Lazygit<cr>", { desc = "open lazygit" } },
+		{ { "n" }, "<leader>u", "<cmd>Undotree<cr>", { desc = "Toggle undo tree" } },
+		{ { "n" }, "<leader>df", ":DiffTool ", { desc = "DiffTool <left> <right>" } },
 		{
 			{ "n" },
 			"<leader>f",
