@@ -1,8 +1,7 @@
 -- Third-party plugin installation (vim.pack.add) + per-plugin setup().
 -- Contributes: nothing through the module contract — everything runs as
--- side effects at require-time. This file owns: jump, llama.vim, nvim-dap,
--- snacks.nvim, claudecode.nvim, conjure + dispatch (clojure),
--- conform.nvim, render-markdown.nvim, and `present.nvim` (self-authored).
+-- side effects at require-time. This file owns: jump, nvim-dap, snacks.nvim,
+-- nvim-autopairs, conform.nvim, nvim-lint, and `present.nvim` (self-authored).
 -- Disable: comment out individual `vim.pack.add(...)` blocks below.
 
 -- Installing this plugin because I coded myself, so it doenst count as
@@ -15,23 +14,6 @@ vim.pack.add({ "https://github.com/yorickpeterse/nvim-jump" })
 require("jump").setup({
 	labels = "abcdef",
 })
-
--- llama.vim (FIM code completion via local llama.cpp server)
-vim.g.llama_config = {
-	endpoint_fim = "http://127.0.0.1:8012/infill",
-	endpoint_inst = "http://127.0.0.1:8012/v1/chat/completions",
-	n_prefix = 512,
-	n_suffix = 128,
-	n_predict = 128,
-	auto_fim = false,
-	show_info = 2,
-	ring_n_chunks = 32,
-	ring_chunk_size = 64,
-	ring_scope = 1024,
-	-- Don't steal <Esc> from the global noh mapping (keymaps.lua).
-	keymap_inst_cancel = "",
-}
-vim.pack.add({ "https://github.com/ggml-org/llama.vim" })
 
 -- nvim-dap (used by tools/dap.lua for lldb-based C/C++/ObjC debugging)
 vim.pack.add({ "https://github.com/mfussenegger/nvim-dap" })
@@ -144,17 +126,6 @@ require("snacks").setup({
 	},
 })
 
--- Another AI plugin tests :D
-vim.pack.add({ "https://github.com/cachebag/jumpy.nvim" })
-require("jumpy").setup({
-	provider = "anthropic", -- or "openai", "openrouter"
-})
-
--- conjure for clojure. Restrict to clojure filetypes so it doesn't attach
--- (and pop its REPL HUD) on JS/TS/Python buffers.
-vim.g["conjure#filetypes"] = { "clojure", "clojurescript", "fennel" }
-vim.pack.add({ "https://github.com/Olical/conjure" })
-
 -- nvim-autopairs: insert/skip pairs, <BS> deletes both halves, <CR> expands
 -- {|} into a multi-line block. Treesitter-aware (no autopair inside strings/
 -- comments where it would be wrong, e.g. apostrophe in "don't").
@@ -163,12 +134,6 @@ require("nvim-autopairs").setup({
 	check_ts = true,
 	fast_wrap = {},
 })
--- be able to run :Lein or Clojure CLI commands inside neovim
--- added dependency of dispatch.vim
--- added dependency of vim-dispatch-neovim
-vim.pack.add({ "https://github.com/tpope/vim-dispatch" })
-vim.pack.add({ "https://github.com/radenling/vim-dispatch-neovim" })
-vim.pack.add({ "https://github.com/clojure-vim/vim-jack-in" })
 
 -- conform.nvim: formatters per filetype, format on save. Filetypes without a
 -- declared formatter are skipped — no LSP fallback (conform's default is to
@@ -209,8 +174,6 @@ require("conform").setup({
 		typescriptreact = { "eslint_d", "prettier" },
 		c = { "clang-format" },
 		cpp = { "clang-format" },
-		clojure = { "cljfmt" },
-		clojurescript = { "cljfmt" },
 		rust = { "rustfmt" },
 		toml = { "taplo" },
 		zig = { "zigfmt" },
@@ -261,16 +224,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "InsertLeave" }, {
 		})
 	end,
 })
-
--- canola.nvim: file manager (drop-in oil.nvim fork; module is `oil`)
-vim.pack.add({ "https://github.com/barrettruth/canola.nvim" })
-require("oil").setup({
-	view_options = { show_hidden = true },
-})
-
--- lazydiff.nvim: inline lazygit-style diff overlay against HEAD
-vim.pack.add({ "https://github.com/rashedInt32/lazydiff.nvim" })
-require("lazydiff").setup()
 
 -- Omarchy theme plugins. Installed so that theme switching via the
 -- ~/.config/omarchy/hooks/theme-set hook works with this config.

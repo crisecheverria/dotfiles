@@ -1,7 +1,7 @@
 -- Global keymaps (all modes).
 -- Contributes: keymaps, unbinds.
 -- Includes: jj-escape, leader bindings for find/grep/buffer/test/run/
--- lazygit/colorscheme, Claude Code and Llama shortcuts, window navigation
+-- lazygit/colorscheme, window navigation
 -- (<C-hjkl> and <M-arrows>), line-move (<a-j/k>), visual `s` surround.
 -- Bracket/quote autopairs live in nvim-autopairs (lua/plugins.lua).
 -- Disabling this module leaves you with only Neovim defaults.
@@ -110,7 +110,7 @@ return {
 			"<cmd>RunFile<cr>",
 			{ desc = "build & run current file" },
 		},
-		{ { "n" }, "-", "<cmd>Oil<cr>", { desc = "open parent directory (canola)" } },
+
 		{
 			{ "n" },
 			"<leader>e",
@@ -136,9 +136,6 @@ return {
 			[["zy:%s/\V<C-r>z//gI<Left><Left><Left>]],
 			{ desc = "rename: substitute selection (buffer)" },
 		},
-		{ { "n" }, "<leader>dd", "<cmd>Lazydiff<cr>", { desc = "Toggle lazydiff" } },
-		{ { "n" }, "]h", "<cmd>LazydiffNext<cr>", { desc = "Next lazydiff hunk" } },
-		{ { "n" }, "[h", "<cmd>LazydiffPrev<cr>", { desc = "Prev lazydiff hunk" } },
 		{ { "n" }, "<leader>b", ":buffer<space>", { desc = "switch buffer" } },
 		{
 			{ "n" },
@@ -201,82 +198,6 @@ return {
 		{ { "n", "v" }, "m", "%", { desc = "jump to matching bracket" } },
 		{ { "n", "v" }, "<Space>", ":", { desc = "command-line mode" } },
 		{ { "n", "v" }, ":", ",", { desc = "reverse f/t" } },
-		-- llama.vim
-		{
-			{ "v" },
-			"<leader>li",
-			":LlamaInstruct<cr>",
-			{ desc = "Llama instruct (ask about selection)" },
-		},
-		{ { "n" }, "<leader>lr", ":LlamaInstruct<cr>", { desc = "Llama rerun instruction" } },
-		{ { "n" }, "<leader>lt", "<cmd>LlamaToggle<cr>", { desc = "Llama toggle on/off" } },
-		{ { "n" }, "<leader>lf", "<cmd>LlamaToggleAutoFim<cr>", { desc = "Llama toggle auto-FIM" } },
-		{ { "n" }, "<leader>ld", "<cmd>LlamaDebugToggle<cr>", { desc = "Llama toggle debug" } },
-		-- jumpy.nvim
-		{
-			{ "n" },
-			"<leader>jj",
-			function()
-				require("jumpy.prompt").open()
-			end,
-			{ desc = "Jumpy: open prompt" },
-		},
-		{
-			{ "n" },
-			"]J",
-			function()
-				require("jumpy.navigate").next_hunk()
-			end,
-			{ desc = "Jumpy: next hunk" },
-		},
-		{
-			{ "n" },
-			"[J",
-			function()
-				require("jumpy.navigate").prev_hunk()
-			end,
-			{ desc = "Jumpy: prev hunk" },
-		},
-		{
-			{ "n" },
-			"<leader>ja",
-			function()
-				require("jumpy.navigate").accept()
-			end,
-			{ desc = "Jumpy: accept hunk" },
-		},
-		{
-			{ "n" },
-			"<leader>jx",
-			function()
-				require("jumpy.navigate").reject()
-			end,
-			{ desc = "Jumpy: reject hunk" },
-		},
-		{
-			{ "n" },
-			"<leader>jA",
-			function()
-				require("jumpy.navigate").accept_all()
-			end,
-			{ desc = "Jumpy: accept all" },
-		},
-		{
-			{ "n" },
-			"<leader>jX",
-			function()
-				require("jumpy.navigate").reject_all()
-			end,
-			{ desc = "Jumpy: reject all" },
-		},
-		{
-			{ "n" },
-			"<leader>jr",
-			function()
-				require("jumpy.prompt").reprompt()
-			end,
-			{ desc = "Jumpy: reprompt hunk" },
-		},
 	},
 	unbinds = {
 		{ { "n", "v" }, "g0" },

@@ -180,7 +180,7 @@ local utils = require("utils")
 
 local configurations = {}
 for _, config in pairs({
-	"plugins", -- third-party plugins (pack.add + setup): jump, llama, snacks, claudecode, conjure, conform, fff, ...
+	"plugins", -- third-party plugins (pack.add + setup): jump, snacks, conform, nvim-lint, nvim-autopairs, ...
 	"statusline", -- custom statusline: mode, git branch, diagnostics, LSP clients, line count
 	"keymaps", -- global keymaps: leader bindings, window nav, auto-pairs, Claude/Llama shortcuts
 	"commands", -- :FloatingTerminal, :RunTest, :RunFile, :Lazygit, :ColorPicker, :Keymaps, :Run
