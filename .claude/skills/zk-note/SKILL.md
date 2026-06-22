@@ -1,6 +1,10 @@
 ---
 name: zk-note
-description: Save or retrieve notes from the user's ~/zk-notes vault. Folders: etg (work findings), ideas, journal. Use when the user wants to save a note, log a finding, capture an idea, write a journal entry, search notes, find a note by keyword or tag, or says "add to zk-notes" / "save this note" / "find notes about X" / "search my notes".
+description: >
+  Save or retrieve notes from the user's ~/zk-notes vault across three folders —
+  etg (work findings), ideas, and journal. Use when the user wants to save a note,
+  log a finding, capture an idea, write a journal entry, search notes, find a note
+  by keyword or tag, or says "add to zk-notes" / "save this note" / "find notes about X".
 ---
 
 # ZK Note
