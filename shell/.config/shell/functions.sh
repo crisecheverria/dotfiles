@@ -25,7 +25,7 @@ q() {
   ) &
 
   # Remove sentinel (stopping spinner) on first line of output
-  pi -p --model claude-haiku-4-5 "$*" | while IFS= read -r line; do
+  claude -p "$*" | while IFS= read -r line; do
     rm -f "$sentinel"
     printf '%s\n' "$line"
   done
