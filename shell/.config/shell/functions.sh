@@ -9,26 +9,33 @@ q() {
     return 1
   fi
 
-  local sentinel frames i
-  sentinel=$(mktemp)
+  local frames spinner_pid cleared
   frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  cleared=0
 
-  # Spinner runs until sentinel file is removed
+  # zsh: LOCAL_OPTIONS scopes the change to this function; NO_MONITOR suppresses "[N] pid/done"
+  # bash: set +m disables monitor mode (job notifications)
+  [ -n "$ZSH_VERSION" ] && setopt LOCAL_OPTIONS NO_MONITOR || set +m
+
   (
     i=0
-    while [ -f "$sentinel" ]; do
-      printf "\r\033[36m%s\033[0m thinking…" "${frames:$((i % 10)):1}" >&2
+    while true; do
+      printf "\r\033[36m%s\033[0m thinking…" "${frames:$((i % 10)):1}" >/dev/tty
       i=$(( i + 1 ))
       sleep 0.08
     done
-    printf "\r\033[K" >&2
   ) &
+  spinner_pid=$!
 
-  # Remove sentinel (stopping spinner) on first line of output
-  claude -p "$*" | while IFS= read -r line; do
-    rm -f "$sentinel"
+  while IFS= read -r line; do
+    if [ "$cleared" = "0" ]; then
+      cleared=1
+      kill "$spinner_pid" 2>/dev/null
+      printf "\r\033[K" >/dev/tty
+    fi
     printf '%s\n' "$line"
-  done
+  done < <(claude -p "$*")
 
-  rm -f "$sentinel"
+  kill "$spinner_pid" 2>/dev/null
+  printf "\r\033[K" >/dev/tty
 }
