@@ -30,8 +30,11 @@
 .config/zed
 .config/gh
 
-# Claude and AI tokens
-**/.claude/
+# Claude — exclude sensitive files but keep skills
+**/.claude/settings*.json
+**/.claude/tmp/
+**/.claude/*.jsonl
+**/.claude/todos/
 .config/claude-code/
 openrouter.token
 anthropic.token
