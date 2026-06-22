@@ -382,6 +382,33 @@ return {
 					return vim.notify(result.stderr, vim.log.levels.ERROR)
 				end
 				local files = vim.split(result.stdout, "\n", { trimempty = true })
+
+				-- When called with no args, also include staged-only files and untracked files
+				if #extra_args == 0 then
+					local seen = {}
+					for _, f in ipairs(files) do
+						seen[f] = true
+					end
+					local r2 = vim.system({ "git", "diff", "--name-only", "--cached" }, { text = true }):wait()
+					if r2.code == 0 then
+						for _, f in ipairs(vim.split(r2.stdout, "\n", { trimempty = true })) do
+							if not seen[f] then
+								seen[f] = true
+								table.insert(files, f)
+							end
+						end
+					end
+					local r3 = vim.system({ "git", "ls-files", "--others", "--exclude-standard" }, { text = true }):wait()
+					if r3.code == 0 then
+						for _, f in ipairs(vim.split(r3.stdout, "\n", { trimempty = true })) do
+							if not seen[f] then
+								seen[f] = true
+								table.insert(files, f)
+							end
+						end
+					end
+				end
+
 				if #files == 0 then
 					return vim.notify("No changes", vim.log.levels.INFO)
 				end
