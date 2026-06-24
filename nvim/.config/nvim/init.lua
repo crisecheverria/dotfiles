@@ -67,8 +67,8 @@ vim.g.mapleader = ";"
 vim.g.maplocalleader = ","
 
 vim.g.loaded_matchit = 1
-vim.g.netrw_banner = 0
-vim.g.netrw_liststyle = 0
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 vim.g.loaded_remote_plugins = 1
 vim.g.loaded_shada_plugin = 1
 vim.g.loaded_python3_provider = 0

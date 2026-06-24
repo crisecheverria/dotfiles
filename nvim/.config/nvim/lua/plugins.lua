@@ -81,7 +81,7 @@ require("snacks").setup({
 			explorer = { hidden = true }, -- show dotfiles in the tree
 		},
 	},
-	explorer = { enabled = true },
+	explorer = { enabled = true, replace_netrw = false },
 	notifier = {
 		enabled = true,
 		timeout = 4000,
